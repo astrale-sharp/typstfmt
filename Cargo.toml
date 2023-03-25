@@ -14,5 +14,4 @@ categories = ["command-line-utilities", "development-tools"]
 [dependencies]
 regex = "1.7.3"
 toml = "0.7.3"
-#typst = { git = "https://github.com/typst/typst.git" }
-typst = "0.1.0"
+typst = { git = "https://github.com/typst/typst.git" }
