@@ -59,7 +59,7 @@ impl Rule for OneSpace {
     }
 
     fn eat(&self, text: String, context: Context) -> String {
-        let rg = Regex::new("\\s+").unwrap();
+        let rg = Regex::new(r"\s+").unwrap();
         rg.replace_all(&text, " ").to_string()
     }
 }
@@ -71,7 +71,7 @@ impl Rule for NoSpaceAtEndLine {
     }
 
     fn eat(&self, text: String, context: Context) -> String {
-        let rg = Regex::new("(\\s+)\\n").unwrap();
+        let rg = Regex::new(r"(\s)+\n").unwrap();
         rg.replace_all(&text, "\n").to_string()
     }
 }
@@ -79,7 +79,12 @@ impl Rule for NoSpaceAtEndLine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(test)]
+
+    #[test]
+    fn more_than_one_rule() {
+        similar_asserts::assert_eq!(format_with_rules("#{  }  \n", &[OneSpace.as_dyn(),NoSpaceAtEndLine.as_dyn()]),"#{ }\n");
+
+    }    #[cfg(test)]
     mod one_space {
         use super::*;
 
@@ -94,11 +99,19 @@ mod tests {
             similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
             similar_asserts::assert_eq!(format_with_rules("m  m", &[OneSpace.as_dyn()]), "m m");
         }
+
+        #[test]
+        fn dont_insert_weird_space() {
+        similar_asserts::assert_eq!(format_with_rules("#{  }\n", &[OneSpace.as_dyn()]),"#{ }\n");
+        }
     }
     #[cfg(test)]
     mod no_space_when_line_ends {
         use super::*;
-
+        #[test]
+        fn dont_insert_weird_space() {
+            similar_asserts::assert_eq!(format_with_rules("#{  }  \n", &[NoSpaceAtEndLine.as_dyn()]), "#{  }\n");
+        }
         #[test]
         fn removes_trailing_space() {
             similar_asserts::assert_eq!(
