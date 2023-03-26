@@ -45,9 +45,16 @@ impl Rule for NoSpaceAtEndLine {
 mod tests {
     use super::*;
 
+    fn init() {
+        let _ =
+            env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
+                .is_test(true)
+                .try_init();
+    }
 
     #[test]
     fn more_than_one_rule() {
+        init();
         similar_asserts::assert_eq!(
             format_with_rules("#{  }  \n", &[OneSpace.as_dyn(), NoSpaceAtEndLine.as_dyn()]),
             "#{ }\n"
@@ -59,12 +66,14 @@ mod tests {
 
         #[test]
         fn one_space_is_unchanged() {
+            init();
 
             similar_asserts::assert_eq!(format_with_rules("#{ }", &[OneSpace.as_dyn()]), "#{ }");
         }
 
         #[test]
         fn more_than_on_becomes_one() {
+            init();
 
             similar_asserts::assert_eq!(format_with_rules("#{  }", &[OneSpace.as_dyn()]), "#{ }");
             //  similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
@@ -73,6 +82,7 @@ mod tests {
 
         #[test]
         fn dont_insert_weird_space() {
+            init();
 
             similar_asserts::assert_eq!(
                 format_with_rules("#{  }\n", &[OneSpace.as_dyn()]),
@@ -85,6 +95,7 @@ mod tests {
         use super::*;
         #[test]
         fn dont_insert_weird_space() {
+            init();
 
             similar_asserts::assert_eq!(
                 format_with_rules("#{  }  \n", &[NoSpaceAtEndLine.as_dyn()]),
@@ -93,6 +104,7 @@ mod tests {
         }
         #[test]
         fn removes_trailing_space() {
+            init();
 
             similar_asserts::assert_eq!(
                 format_with_rules(
@@ -108,6 +120,7 @@ mod tests {
 
     #[test]
     fn complex() {
+        init();
 
         let expected = r##"#import "template.typ": *
 #show: letter.with(
