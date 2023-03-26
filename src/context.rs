@@ -166,12 +166,12 @@ impl Context {
     /// ctx.push(")")
     /// assert_eq!(ctx.buffer(), "f(\n    a, b\n)");
     /// ```
-    pub fn with_indent<F>(ctx: &mut Self, f: F)
+    pub fn with_indent<F>(&mut self, f: F)
     where
         F: FnOnce(&mut Self) -> ()    
     {
-        ctx.inc_indent();
-        f(ctx);
-        ctx.dec_indent();
+        self.inc_indent();
+        f(self);
+        self.dec_indent();
     }
 }
