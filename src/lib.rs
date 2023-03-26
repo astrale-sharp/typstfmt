@@ -1,4 +1,5 @@
 use ast::Expr::*;
+use itertools;
 use regex::Regex;
 use typst::syntax::parse;
 use typst::syntax::{ast, SyntaxNode};
@@ -6,47 +7,42 @@ use typst::syntax::{ast, SyntaxNode};
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
 pub fn typst_format(s: &str) -> String {
-    format_with_rules(s, &[OneSpace.as_dyn()])
+    format_with_rules(s, &[NoSpaceAtEndLine.as_dyn(), OneSpace.as_dyn()])
 }
 
 fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
-    let syntax_node = parse(s);
-    format_recursive(&syntax_node, 0, (), rules)
+    let init = parse(s);
+    let mut parents = vec![&init];
+    let mut result = String::new();
+    let mut deep = 0;
+    while !parents.is_empty() {
+        let this_parent = parents.pop().unwrap();
+        let children = this_parent.children();
+        for this_child in children.clone() {
+            let mut to_append = this_child.text().to_string();
+            for rule in rules.iter() {
+                if rule.accept(this_child, Context) {
+                    to_append = rule.eat(to_append, Context);
+                }
+            }
+            result.push_str(&to_append)
+        }
+        parents.append(&mut children.collect());
+        deep += 1;
+    }
+    //format_recursive(&syntax_node, 0, (), rules)
+    String::from(result)
 }
 
-// Optimize: consider returning &str instead and other optimisations
-//
-fn format_recursive(
-    syntax_node: &SyntaxNode,
-    recurse: usize,
-    // feel free to include what your rule needs to know here
-    // and change the definition of the function if you need to
-    // for instance this could contain the parent if any
-    context: (),
-    rules: &[Box<dyn Rule>],
-) -> String {
-    // rules either leave the result unchanged or format it
-    // apply rules, append to result, do some for children
-    let mut result;
-    // currently only the first rule that matches is selected (this behavior could be changed)
-    // the most specific rules should come first.
-    if let Some(rule) = rules.iter().find(|&rule| rule.accept(syntax_node, context)) {
-        result = rule.eat(syntax_node);
-    } else {
-        // test this returns what I think
-        result = String::from(syntax_node.text())
-    }
-
-    for child in syntax_node.children() {
-        result.push_str(&format_recursive(child, recurse + 1, (), rules))
-    }
-    result
-}
+/// The context needed by a rule to accept the node && produce it's resulting text
+// How deep we are in the tree, who's the parent,
+// next childen of same level etc can easily be accessed right now
+struct Context;
 
 trait Rule {
-    fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool;
+    fn accept(&self, syntax_node: &SyntaxNode, context: Context) -> bool;
 
-    fn eat(&self, syntax_node: &SyntaxNode) -> String;
+    fn eat(&self, text: String, context: Context) -> String;
 
     fn as_dyn(self: Self) -> Box<dyn Rule>
     where
@@ -58,26 +54,25 @@ trait Rule {
 
 struct OneSpace;
 impl Rule for OneSpace {
-    fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool {
+    fn accept(&self, syntax_node: &SyntaxNode, context: Context) -> bool {
         syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
-    fn eat(&self, syntax_node: &SyntaxNode) -> String {
+    fn eat(&self, text: String, context: Context) -> String {
         let rg = Regex::new("\\s+").unwrap();
-        rg.replace_all(syntax_node.text().as_str(), " ").to_string()
+        rg.replace_all(&text, " ").to_string()
     }
 }
 
 struct NoSpaceAtEndLine;
 impl Rule for NoSpaceAtEndLine {
-    fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool {
+    fn accept(&self, syntax_node: &SyntaxNode, context: Context) -> bool {
         syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
-    fn eat(&self, syntax_node: &SyntaxNode) -> String {
+    fn eat(&self, text: String, context: Context) -> String {
         let rg = Regex::new("(\\s+)\\n").unwrap();
-        rg.replace_all(syntax_node.text().as_str(), "\n")
-            .to_string()
+        rg.replace_all(&text, "\n").to_string()
     }
 }
 
