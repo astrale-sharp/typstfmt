@@ -6,7 +6,7 @@ use typst::syntax::{ast, SyntaxNode};
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
 pub fn typst_format(s: &str) -> String {
-    format_with_rules(s, &[SpaceRule.as_dyn()])
+    format_with_rules(s, &[OneSpace.as_dyn()])
 }
 
 fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
@@ -56,39 +56,71 @@ trait Rule {
     }
 }
 
-struct SpaceRule;
-impl Rule for SpaceRule {
+struct OneSpace;
+impl Rule for OneSpace {
     fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool {
-        syntax_node.is::<ast::Space>()
+        syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
     fn eat(&self, syntax_node: &SyntaxNode) -> String {
-        //let x = syntax_node.cast::<ast::Space>().unwrap();
-        assert!(syntax_node.text() != "");
-        let t = syntax_node.text().as_str();
         let rg = Regex::new("\\s+").unwrap();
-        rg.replace_all(t, " ").to_string()
+        rg.replace_all(syntax_node.text().as_str(), " ").to_string()
+    }
+}
+
+struct NoSpaceAtEndLine;
+impl Rule for NoSpaceAtEndLine {
+    fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool {
+        syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
+    }
+
+    fn eat(&self, syntax_node: &SyntaxNode) -> String {
+        let rg = Regex::new("(\\s+)\\n").unwrap();
+        rg.replace_all(syntax_node.text().as_str(), "\n")
+            .to_string()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(test)]
+    mod one_space {
+        use super::*;
 
-    #[test]
-    fn test_name() {
-        similar_asserts::assert_eq!(format_with_rules("#{ }", &[SpaceRule.as_dyn()]), "#{ }");
+        #[test]
+        fn one_space_is_unchanged() {
+            similar_asserts::assert_eq!(format_with_rules("#{ }", &[OneSpace.as_dyn()]), "#{ }");
+        }
+
+        #[test]
+        fn more_than_on_becomes_one() {
+            similar_asserts::assert_eq!(format_with_rules("#{  }", &[OneSpace.as_dyn()]), "#{ }");
+            similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
+            similar_asserts::assert_eq!(format_with_rules("m  m", &[OneSpace.as_dyn()]), "m m");
+        }
     }
+    #[cfg(test)]
+    mod no_space_when_line_ends {
+        use super::*;
 
-    #[test]
-    fn two_spaces_become_one() {
-        similar_asserts::assert_eq!(format_with_rules("#{  }", &[SpaceRule.as_dyn()]), "#{ }");
+        #[test]
+        fn removes_trailing_space() {
+            similar_asserts::assert_eq!(
+                format_with_rules(
+                    r#"Some markup  
+                And then some"#,
+                    &[NoSpaceAtEndLine.as_dyn()]
+                ),
+                r#"Some markup
+                And then some"#
+            );
+        }
     }
 
     #[test]
     fn complex() {
-        let expected = 
-r##"#import "template.typ": *
+        let expected = r##"#import "template.typ": *
 #show: letter.with(
     sender: [
         Jane Smith, 
@@ -121,8 +153,7 @@ Dear Joe,
 #lorem(99)
 
 Best,"##;
-    let input = 
-r##"#import "template.typ": *
+        let input = r##"#import "template.typ": *
 #show: letter.with(sender:[Jane Smith, Universal Exports, 1 Heavy Plaza, Morristown, NJ 07964,],recipient: [Mr. John Doe \ Acme Corp. \ 123 Glennwood Ave \ Quarto Creek, VA 22438],date: [Morristown, June 9th, 2023,],subject: [test],name: [Jane Smith \Regional Director],)
 
 Dear Joe,
@@ -131,30 +162,10 @@ Dear Joe,
 
 Best,
 "##;
-    similar_asserts::assert_eq!(typst_format(input), expected);
-
+        similar_asserts::assert_eq!(typst_format(input), expected);
     }
 }
 
-
-/// rules :
-/// ModuleImport, space after colon
-/// ImportItems : trailing comma
-
-#[test]
-fn feature() {
-    for a in [
-        "",
-        " ",
-        r##"#import "template.typ":*"##,
-        r##"#import "template.typ": *"##,
-        r##"#import "template.typ": func1, func2,"##,
-    ] {
-        println! {"parsing: {:?}",a};
-
-        let syntax_node = parse(a);
-        dbg!(syntax_node.erroneous());
-        println!("parse:\n{:?}", &syntax_node);
-        println!("--------------");
-    }
-}
+// rules :
+// ModuleImport, space after colon
+// ImportItems : trailing comma
