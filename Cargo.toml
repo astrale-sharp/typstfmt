@@ -12,7 +12,9 @@ categories = ["command-line-utilities", "development-tools"]
 
 
 [dependencies]
+env_logger = "0.10.0"
 itertools = "0.10.5"
+log = "0.4.17"
 regex = "1.7.3"
 similar-asserts = "1.4.2"
 toml = "0.7.3"
