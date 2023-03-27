@@ -22,7 +22,7 @@ impl Rule for OneSpace {
     }
 
     fn eat(&self, text: String, context: Context) -> String {
-        let rg = Regex::new(r"\s+").unwrap();
+        let rg = Regex::new(r"( )+").unwrap();
         rg.replace_all(&text, " ").to_string()
     }
 }
@@ -36,7 +36,7 @@ impl Rule for NoSpaceAtEndLine {
     }
 
     fn eat(&self, text: String, context: Context) -> String {
-        let rg = Regex::new(r"(\s)+\n").unwrap();
+        let rg = Regex::new(r"( )+\n").unwrap();
         rg.replace_all(&text, "\n").to_string()
     }
 }
