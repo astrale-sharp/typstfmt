@@ -154,6 +154,19 @@ mod tests {
         }
     }
 
+    #[cfg(test)]
+    mod func {
+        use super::*;
+
+        #[test]
+        fn test_name() {
+            init();
+            let x = parse("#{ f1(1,2,3) }");
+            println!("{x:?}");
+            similar_asserts::assert_eq!(typst_format("#{f1(1,2,3)}"), "#{f1(\n1,\n2,\n3,\n)}");
+        }
+    }
+
     #[test]
     fn complex() {
         init();
