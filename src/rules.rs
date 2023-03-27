@@ -3,7 +3,7 @@ use super::*;
 pub(crate) trait Rule: std::fmt::Debug {
     fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool;
 
-    fn eat(&self, text: String, context: &Context) -> String;
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer);
 
     fn as_dyn(self: Self) -> Box<dyn Rule>
     where
@@ -21,9 +21,9 @@ impl Rule for OneSpace {
         syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
-    fn eat(&self, text: String, context: &Context) -> String {
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
         let rg = Regex::new(r"( )+").unwrap();
-        rg.replace_all(&text, " ").to_string()
+        writer.push(rg.replace_all(&text, " ").to_string().as_str());
     }
 }
 
@@ -35,9 +35,9 @@ impl Rule for NoSpaceAtEndLine {
         syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
-    fn eat(&self, text: String, context: &Context) -> String {
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
         let rg = Regex::new(r"( )+\n").unwrap();
-        rg.replace_all(&text, "\n").to_string()
+        writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
 }
 

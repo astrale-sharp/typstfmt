@@ -1,5 +1,7 @@
-use std::iter::zip;
+pub mod writer;
+pub mod rules;
 
+use std::iter::zip;
 use env_logger;
 use itertools::Itertools;
 use log::{debug, info, log_enabled, Level};
@@ -7,8 +9,8 @@ use regex::Regex;
 use typst::syntax::parse;
 use typst::syntax::{ast, SyntaxNode};
 
-mod rules;
 use rules::*;
+use writer::Writer;
 
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
@@ -20,12 +22,13 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
     info!("formats text : {s:?}\nwith rules {:?}", rules);
     let init = parse(s);
     let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::default())];
-    let mut result = String::new();
+    let mut writer = Writer::default();
     let mut deep = 0;
 
     debug!(
-        "Starting with parent {} and result at {result:?}",
-        init.text()
+        "Starting with parent {} and result at {:?}",
+        init.text(),
+        writer.result()
     );
 
     while !parents.is_empty() {
@@ -49,27 +52,33 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
         parents.append(&mut children);
         debug!("iter on {this_node:?} with context : {context:?}");
 
+        
         let mut to_append = this_node.text().to_string();
         for rule in rules.iter() {
             if rule.accept(this_node, &context) {
-                if log_enabled!(Level::Debug) {
-                    let to_append = to_append.as_str();
-                    let result = rule.eat(to_append.clone().to_owned(), &context);
-                    let diff = similar_asserts::SimpleDiff::from_str(
-                        to_append, &result, "before", "after",
-                    );
-                    debug!("MATCHED RULE: {rule:?} \ntransforms {to_append:?} in {result:?}\nwith diff:\n {diff}");
-                }
-                to_append = rule.eat(to_append, &context);
+                // we use the writer in buffered mode since there may be multiple rules that match
+                writer.buffered(false, |w| {
+                    rule.eat(to_append.clone(), &context, w);
+                    let result = w.result();
+                    if log_enabled!(Level::Debug) {
+                        let diff = similar_asserts::SimpleDiff::from_str(
+                            to_append.as_str(), result, "before", "after",
+                        );
+                        debug!("MATCHED RULE: {rule:?} \ntransforms {to_append:?} in {result:?}\nwith diff:\n {diff}");
+                    }
+                    // we update the string representing this with the formatted string applied by the current rule
+                    to_append = result.clone();
+                });
             }
         }
-        result.push_str(&to_append);
-        debug!("result at `{result}`");
+        // since all rules have been applied to this rule, we now may push the final result to the writer
+        writer.push(&to_append);
+        debug!("result at `{}`", writer.result());
 
         deep += 1;
     }
     //format_recursive(&syntax_node, 0, (), rules)
-    String::from(result)
+    String::from(writer.result())
 }
 
 /// The context needed by a rule to accept the node && produce it's resulting text
