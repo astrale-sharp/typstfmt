@@ -16,7 +16,8 @@ impl Default for Style {
 impl Default for Writer {
     fn default() -> Self {
         Writer { 
-            buffer: String::with_capacity(1024),
+            result: String::with_capacity(1024),
+            buffer: None,
             style: Style::default(),
             indent_level: 0
         }
@@ -26,18 +27,25 @@ impl Default for Writer {
 /// A context object used to store state while formatting.
 #[derive(Clone)]
 pub struct Writer {
-    /// The buffer used to store the formatted text.
-    buffer: String,
+    /// The final result of the Writer.
+    result: String,
+    /// The buffer used to store Strings which are to be appended to the result.
+    buffer: Option<String>,
     /// The style to use for formatting the text.
-    style: Style,
+    pub style: Style,
     /// The current indentation level, in spaces.
     indent_level: usize
 }
 
 impl Writer {
 
-    pub fn new(buffer: String, style: Style, indent_level: usize) -> Self {
-        Self { buffer, style, indent_level }
+    pub fn new(init: String, style: Style, indent_level: usize) -> Self {
+        Self { 
+            result: init,
+            buffer: None,
+            style,
+            indent_level
+        }
     }
 
     pub fn with_style(mut self, style: Style) -> Self {
@@ -50,17 +58,126 @@ impl Writer {
         self
     }
 
-    pub fn with_buffer(mut self, buffer: &str) -> Self {
-        self.buffer = buffer.to_string();
+    pub fn with_init(mut self, init: String) -> Self {
+        self.result = init;
         self
     }
 
-    pub fn buffer(&self) -> &str {
+    #[must_use]
+    /// Access the writer's result.
+    pub fn result(&self) -> &String {
+        &self.result
+    }
+
+    #[must_use]
+    /// Access the writer's buffer.
+    pub fn buffer(&self) -> &Option<String> {
         &self.buffer
     }
 
+    #[must_use]
     pub fn indent_level(&self) -> usize {
         self.indent_level
+    }
+
+    /// Empties the current buffer, if there is any.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// let mut writer = Writer::default();
+    /// writer.buffered(false, |w| { 
+    ///     w.push("hello");
+    /// });
+    /// assert_eq!(writer.buffer(), Some("hello"));
+    /// writer.empty_buffer();
+    /// assert_eq!(writer.buffer(), None);
+    /// ```
+    pub fn empty_buffer(&mut self) -> &mut Self {
+        self.buffer = None;
+        self
+    }
+
+    /// Flushes the buffer by emptying it and push the content onto the
+    /// `Writer`'s result.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// let mut writer = Writer::default().with_init("hello, ");
+    /// writer.buffered(false, |w| {
+    ///     w.push("world");
+    /// });
+    /// assert_eq!(writer.buffer(), Some("world"));
+    /// assert_eq!(writer.result(), "hello, ");
+    /// writer.flush();
+    /// assert_eq!(writer.buffer(), None);
+    /// assert_eq!(writer.result(),"hello, world");
+    /// ```
+    pub fn flush(&mut self) {
+        if self.buffer.is_some() {
+            // we may safely unwrap here, because we mande sure the buffer is not `None`.
+            self.result.push_str(self.buffer.take().unwrap().as_str());
+        }
+    }
+
+    /// Apply a function to the current buffer before flushing it.
+    pub fn flush_buffer_with<F>(&mut self, with_fn: F)
+    where
+        F: FnOnce(&String) -> String
+    {
+        self.buffer.as_ref().map(with_fn);
+        self.flush();
+    }
+
+    /// Operate the `Writer` in buffered mode. 
+    /// 
+    /// Every operation in `f` will be compute in a seperate writer with,
+    /// however, the same style and indent level. Finally, this seperate writer's
+    /// result will be saved in the current writer's buffer or, if the `flush` flag
+    /// is set, result will be saved in the current writer's buffer.
+    /// 
+    /// # Example
+    /// 
+    /// ```
+    /// let mut writer = Writer::default();
+    /// assert_eq!(writer.result(), "");
+    /// assert_eq!(writer.buffer(), None);
+    /// writer.buffered(false, |w| {
+    ///     w.push("hello,")
+    ///         .newline()
+    ///         .push("world");
+    /// });
+    /// assert_eq!(writer.result(), "");
+    /// assert_eq!(writer.buffer(), "hello,\nworld");
+    /// ```
+    pub fn buffered<F>(&mut self, flush: bool, f: F) -> &mut Self
+    where
+        F: FnOnce(&mut Self)
+    {
+        let mut w = self.clone();
+        w.buffer = None;
+        w.result = String::new();
+        f(&mut w);
+        let buffer = w.result.clone();
+        if flush { 
+            self.result = buffer;
+        } else {
+            self.buffer = Some(buffer);
+        }
+        self
+    }
+
+    /// All operations in `f` will not be persistent, that is, any changes in 
+    /// the state of the writer will not be saved in the current writer. However,
+    /// the writer available in `f` will be identical to the current writer.
+    pub fn non_persistent<F>(&self, f: F) -> String
+    where
+        F: FnOnce(&mut Writer)
+    {
+        let mut w = self.clone();
+        f(&mut w);
+        w.result
     }
 
     /// Appends the amount of spaces defined by the style.
@@ -75,7 +192,7 @@ impl Writer {
     /// assert_eq!(ctx.buffer(), "    ");
     /// ````
     pub fn indent(&mut self) -> &mut Self {
-        self.buffer.push_str(&" ".repeat(self.style.indent));
+        self.result.push_str(&" ".repeat(self.style.indent));
         self
     }
 
@@ -93,7 +210,7 @@ impl Writer {
     /// assert_eq!(ctx.buffer, "Hello, world!");
     /// ```
     pub fn push(&mut self, s: &str) -> &mut Self {
-        self.buffer.push_str(s);
+        self.result.push_str(&s);
         self
     }
 
@@ -178,7 +295,7 @@ impl Writer {
     /// ctx.push(")")
     /// assert_eq!(ctx.buffer(), "f(\n    a, b\n)");
     /// ```
-    pub fn do_indented<F>(&mut self, f: F) -> &mut Self
+    pub fn indented<F>(&mut self, f: F) -> &mut Self
     where
         F: FnOnce(&mut Self) -> ()    
     {
@@ -199,7 +316,7 @@ mod tests {
             Style { indent: 2 },
             4
         );
-        assert_eq!(writer.buffer(), "Hello");
+        assert_eq!(writer.result(), "Hello");
         assert_eq!(writer.indent_level, 4);
         assert_eq!(writer.style.indent, 2);
     }
@@ -209,7 +326,7 @@ mod tests {
         let mut writer = Writer::default();
         let indent = writer.style.indent;
         writer.push("f(")
-            .do_indented(|w| {
+            .indented(|w| {
                 w.newline_with_indent()
                     .push("a,")
                     .newline_with_indent()
@@ -217,7 +334,7 @@ mod tests {
             })
             .newline_with_indent()
             .push(")");
-        assert_eq!(writer.buffer, format!("f(\n{}a,\n{}b\n)", " ".repeat(indent), " ".repeat(indent)));
+        assert_eq!(writer.result, format!("f(\n{}a,\n{}b\n)", " ".repeat(indent), " ".repeat(indent)));
     }
 
     #[test]
@@ -235,5 +352,21 @@ mod tests {
         assert_eq!(writer.indent_level, 0);
         writer.dec_indent();
         assert_eq!(writer.indent_level, 0);
+    }
+
+    #[test]
+    fn test_buffered() {
+        let mut writer = Writer::default();
+        let indent = writer.style.indent;
+        writer.push("let add(x, y) =");
+        writer.buffered(false, |w| {
+            w.inc_indent()
+                .newline_with_indent()
+                .push("x + y");
+        });
+        assert_eq!(writer.buffer, Some(format!("\n{}x + y", " ".repeat(indent))));
+        assert_eq!(writer.result, "let add(x, y) =");
+        writer.flush();
+        assert_eq!(writer.result, format!("let add(x, y) =\n{}x + y", " ".repeat(indent)));
     }
 }
