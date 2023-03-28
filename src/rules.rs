@@ -18,7 +18,9 @@ pub(crate) struct OneSpace;
 
 impl Rule for OneSpace {
     fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
-        syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
+        syntax_node.is::<ast::Space>()
+            || syntax_node.is::<ast::Markup>()
+            || syntax_node.is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
@@ -32,7 +34,9 @@ pub(crate) struct NoSpaceAtEndLine;
 
 impl Rule for NoSpaceAtEndLine {
     fn accept(&self, syntax_node: &SyntaxNode, _context: &Context) -> bool {
-        syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
+        syntax_node.is::<ast::Space>()
+            || syntax_node.is::<ast::Markup>()
+            || syntax_node.is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
@@ -112,15 +116,42 @@ mod tests {
             init();
 
             similar_asserts::assert_eq!(format_with_rules("#{ }", &[OneSpace.as_dyn()]), "#{ }");
+            similar_asserts::assert_eq!(
+                format_with_rules("some\n\nsome", &[OneSpace.as_dyn()]),
+                "some\n\nsome"
+            );
+            similar_asserts::assert_eq!(
+                format_with_rules("some \n \n some", &[OneSpace.as_dyn()]),
+                "some \n \n some"
+            );
         }
 
         #[test]
         fn more_than_on_becomes_one() {
-            init();
-
             similar_asserts::assert_eq!(format_with_rules("#{  }", &[OneSpace.as_dyn()]), "#{ }");
-            //  similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
-            //  similar_asserts::assert_eq!(format_with_rules("m  m", &[OneSpace.as_dyn()]), "m m");
+            init();
+            similar_asserts::assert_eq!(
+                format_with_rules("some \n  \n some", &[OneSpace.as_dyn()]),
+                "some \n \n some"
+            );
+            similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
+            similar_asserts::assert_eq!(format_with_rules("m  m", &[OneSpace.as_dyn()]), "m m");
+            similar_asserts::assert_eq!(
+                format_with_rules("some \n \n  some", &[OneSpace.as_dyn()]),
+                "some \n \n some"
+            );
+            similar_asserts::assert_eq!(
+                format_with_rules("some  \n \n some", &[OneSpace.as_dyn()]),
+                "some \n \n some"
+            );
+            similar_asserts::assert_eq!(
+                format_with_rules("some  \n  \n some", &[OneSpace.as_dyn()]),
+                "some \n \n some"
+            );
+            similar_asserts::assert_eq!(
+                format_with_rules("some  \n  \n some  ", &[OneSpace.as_dyn()]),
+                "some \n \n some "
+            );
         }
 
         #[test]
@@ -145,6 +176,7 @@ mod tests {
                 "#{  }\n"
             );
         }
+
         #[test]
         fn removes_trailing_space() {
             init();
@@ -157,6 +189,14 @@ mod tests {
                 ),
                 r#"Some markup
                 And then some"#
+            );
+        }
+
+        #[test]
+        fn dont_eat_too_much() {
+            similar_asserts::assert_eq!(
+                format_with_rules("some \n \n  some", &[NoSpaceAtEndLine.as_dyn()]),
+                "some\n\n  some"
             );
         }
     }
