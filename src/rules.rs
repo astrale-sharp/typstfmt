@@ -66,7 +66,7 @@ impl Rule for IdentItemFunc {
                 // is grouping nested closing
                 writer.push(&text);
                 writer.dec_indent();
-//                writer.newline_with_indent();
+            //                writer.newline_with_indent();
             } else {
                 // is grouping closing
                 writer.push(&text);
