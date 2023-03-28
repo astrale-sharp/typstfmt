@@ -20,14 +20,16 @@ pub fn typst_format(s: &str) -> String {
 fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
     info!("formats text : {s:?}\nwith rules {:?}", rules);
     let init = parse(s);
+    let mut result = String::with_capacity(1024);
+
     let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::default())];
     let mut writer = Writer::default();
-    let mut deep = 0;
+    //let mut deep = 0;
 
     debug!(
         "Starting with parent {} and result at {:?}",
         init.text(),
-        writer.result()
+        writer.value()
     );
 
     while !parents.is_empty() {
@@ -51,32 +53,14 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
         parents.append(&mut children);
         debug!("iter on {this_node:?} with context : {context:?}");
 
-        let mut to_append = this_node.text().to_string();
-        for rule in rules.iter() {
-            if rule.accept(this_node, &context) {
-                // we use the writer in buffered mode since there may be multiple rules that match
-                writer.buffered(false, |w| {
-                    rule.eat(to_append.clone(), &context, w);
-                    let result = w.result();
-                    if log_enabled!(Level::Debug) {
-                        let diff = similar_asserts::SimpleDiff::from_str(
-                            to_append.as_str(), result, "before", "after",
-                        );
-                        debug!("MATCHED RULE: {rule:?} \ntransforms {to_append:?} in {result:?}\nwith diff:\n {diff}");
-                    }
-                    // we update the string representing this with the formatted string applied by the current rule
-                    to_append = result.clone();
-                });
-            }
+        writer = writer.with_value(this_node.text().to_string());
+        for rule in rules.iter().filter(|&r| r.accept(this_node, &context)) {
+            rule.eat(writer.take(), &context, &mut writer);
         }
-        // since all rules have been applied to this rule, we now may push the final result to the writer
-        writer.push(&to_append);
-        debug!("result at `{}`", writer.result());
-
-        deep += 1;
+        result.push_str(writer.value());
+        debug!("result at `{result}`");
     }
-    //format_recursive(&syntax_node, 0, (), rules)
-    String::from(writer.result())
+    result
 }
 
 /// The context needed by a rule to accept the node && produce it's resulting text
