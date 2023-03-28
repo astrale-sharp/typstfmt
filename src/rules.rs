@@ -31,11 +31,11 @@ impl Rule for OneSpace {
 pub(crate) struct NoSpaceAtEndLine;
 
 impl Rule for NoSpaceAtEndLine {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+    fn accept(&self, syntax_node: &SyntaxNode, _context: &Context) -> bool {
         syntax_node.is::<ast::Space>() || syntax_node.is::<ast::Markup>()
     }
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
         let rg = Regex::new(r"( )+\n").unwrap();
         writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
