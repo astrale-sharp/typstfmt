@@ -1,5 +1,5 @@
 use super::*;
-
+use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
     fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool;
 
@@ -38,6 +38,49 @@ impl Rule for NoSpaceAtEndLine {
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
         let rg = Regex::new(r"( )+\n").unwrap();
         writer.push(rg.replace_all(&text, "\n").to_string().as_str());
+    }
+}
+
+pub(crate) struct TrailingComma;
+
+pub(crate) struct JumpTwoLineMax;
+
+#[derive(Debug)]
+pub(crate) struct IdentItemFunc;
+
+impl Rule for IdentItemFunc {
+    fn accept(&self, _syntax_node: &SyntaxNode, context: &Context) -> bool {
+        let Some(parent) = context.parent else {return false};
+        parent.is::<ast::Args>()
+    }
+
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+        // todo with last child, if not comma, if last elem, add a comma
+        if context.child.kind().is_grouping() {
+            // is grouping opening
+            if context.next_child.is_some() {
+                writer.push(&text);
+                writer.inc_indent();
+                writer.newline_with_indent();
+            } else if context.next_child.is_none() && context.parent.unwrap().is::<ast::Args>() {
+                // is grouping nested closing
+                writer.push(&text);
+                writer.dec_indent();
+//                writer.newline_with_indent();
+            } else {
+                // is grouping closing
+                writer.push(&text);
+                writer.dec_indent();
+                writer.newline_with_indent();
+            }
+        } else if context.child.kind() == SyntaxKind::Comma {
+            debug!("comma: {text:?}");
+            writer.push(&text);
+            writer.newline_with_indent();
+        } else {
+            debug!("else : {text:?}");
+            writer.push(&text);
+        }
     }
 }
 
@@ -114,6 +157,29 @@ mod tests {
                 ),
                 r#"Some markup
                 And then some"#
+            );
+        }
+    }
+
+    #[cfg(test)]
+    mod func {
+        use super::*;
+
+        #[test]
+        fn basic_func() {
+            init();
+            similar_asserts::assert_eq!(
+                format_with_rules("#{f1(1,2,3,)}", &[IdentItemFunc.as_dyn()]),
+                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n{0})}}", " ".repeat(4))
+            );
+        }
+
+        #[test]
+        fn nested_func() {
+            init();
+            similar_asserts::assert_eq!(
+                format_with_rules("#{f1(1,2,f(a,b,c,),)}", &[IdentItemFunc.as_dyn()]),
+                "#{f1(\n    1,\n    2,\n    f(\n        a,\n        b,\n        c,\n        ),\n    )}"
             );
         }
     }

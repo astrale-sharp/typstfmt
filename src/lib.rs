@@ -22,7 +22,7 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
     let init = parse(s);
     let mut result = String::with_capacity(1024);
 
-    let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::default())];
+    let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::new(&init))];
     let mut writer = Writer::default();
     //let mut deep = 0;
 
@@ -45,6 +45,7 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
                 Context {
                     parent: Some(this_node),
                     next_child: next,
+                    child: now,
                 },
             )
         })
@@ -67,10 +68,21 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
 // How deep we are in the tree, who's the parent,
 // next childen of same level etc can easily be accessed right now.
 // todo test if the (parent, next_child) provided are the right one.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct Context<'a> {
+    child: &'a SyntaxNode,
     parent: Option<&'a SyntaxNode>,
     next_child: Option<&'a SyntaxNode>,
+}
+
+impl<'a> Context<'a> {
+    fn new(child: &'a SyntaxNode) -> Self {
+        Self {
+            child,
+            parent: None,
+            next_child: None,
+        }
+    }
 }
 
 pub(crate) fn init_log() {
