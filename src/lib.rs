@@ -1,15 +1,14 @@
-pub mod writer;
-pub mod rules;
-
-use std::iter::zip;
 use env_logger;
 use itertools::Itertools;
 use log::{debug, info, log_enabled, Level};
 use regex::Regex;
+use std::iter::zip;
 use typst::syntax::parse;
 use typst::syntax::{ast, SyntaxNode};
 
+mod rules;
 use rules::*;
+mod writer;
 use writer::Writer;
 
 // Optimize: could return Text edit that should be applied one after the other
@@ -52,7 +51,6 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
         parents.append(&mut children);
         debug!("iter on {this_node:?} with context : {context:?}");
 
-        
         let mut to_append = this_node.text().to_string();
         for rule in rules.iter() {
             if rule.accept(this_node, &context) {
