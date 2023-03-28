@@ -22,7 +22,7 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
     let init = parse(s);
     let mut result = String::with_capacity(1024);
 
-    let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::default())];
+    let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::new(&init))];
     let mut writer = Writer::default();
     //let mut deep = 0;
 

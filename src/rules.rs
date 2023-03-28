@@ -1,5 +1,5 @@
 use super::*;
-
+use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
     fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool;
 
@@ -56,19 +56,26 @@ impl Rule for IdentItemFunc {
 
     fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
         // todo with last child, if not comma, if last elem, add a comma
-        if context.child.kind().is_grouping() && context.next_child.is_some() {
-            debug!("1st groupoing :{text:?}");
-            writer.push(&text);
-            writer.inc_indent();
-            writer.newline_with_indent();
-        } else if context.child.kind().is_grouping() && context.next_child.is_none() {
-            debug!("last grouping : {text:?}");
-            writer.push(&text);
-            writer.newline_with_indent();
+        if context.child.kind().is_grouping() {
+            // is grouping opening
+            if context.next_child.is_some() {
+                writer.push(&text);
+                writer.inc_indent();
+                writer.newline_with_indent();
+            } else if context.next_child.is_none() && context.parent.unwrap().is::<ast::Args>() {
+                // is grouping nested closing
+                writer.push(&text);
+                writer.dec_indent();
+//                writer.newline_with_indent();
+            } else {
+                // is grouping closing
+                writer.push(&text);
+                writer.dec_indent();
+                writer.newline_with_indent();
+            }
         } else if context.child.kind() == SyntaxKind::Comma {
             debug!("comma: {text:?}");
             writer.push(&text);
-            writer.inc_indent();
             writer.newline_with_indent();
         } else {
             debug!("else : {text:?}");
@@ -159,11 +166,21 @@ mod tests {
         use super::*;
 
         #[test]
-        fn test_name() {
+        fn basic_func() {
             init();
-            let x = parse("#{ f1(1,2,3) }");
-            println!("{x:?}");
-            similar_asserts::assert_eq!(typst_format("#{f1(1,2,3)}"), "#{f1(\n1,\n2,\n3,\n)}");
+            similar_asserts::assert_eq!(
+                format_with_rules("#{f1(1,2,3,)}", &[IdentItemFunc.as_dyn()]),
+                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n{0})}}", " ".repeat(4))
+            );
+        }
+
+        #[test]
+        fn nested_func() {
+            init();
+            similar_asserts::assert_eq!(
+                format_with_rules("#{f1(1,2,f(a,b,c,),)}", &[IdentItemFunc.as_dyn()]),
+                "#{f1(\n    1,\n    2,\n    f(\n        a,\n        b,\n        c,\n        ),\n    )}"
+            );
         }
     }
 
