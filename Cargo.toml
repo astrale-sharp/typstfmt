@@ -11,6 +11,10 @@ license = "MIT OR Apache-2.0"
 categories = ["command-line-utilities", "development-tools"]
 
 
+[[bin]]
+name = "typst-fmt"
+path = "src/main.rs"
+
 [dependencies]
 env_logger = "0.10.0"
 itertools = "0.10.5"
