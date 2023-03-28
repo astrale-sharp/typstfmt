@@ -41,6 +41,42 @@ impl Rule for NoSpaceAtEndLine {
     }
 }
 
+pub(crate) struct TrailingComma;
+
+pub(crate) struct JumpTwoLineMax;
+
+#[derive(Debug)]
+pub(crate) struct IdentItemFunc;
+
+impl Rule for IdentItemFunc {
+    fn accept(&self, _syntax_node: &SyntaxNode, context: &Context) -> bool {
+        let Some(parent) = context.parent else {return false};
+        parent.is::<ast::Args>()
+    }
+
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+        // todo with last child, if not comma, if last elem, add a comma
+        if context.child.kind().is_grouping() && context.next_child.is_some() {
+            debug!("1st groupoing :{text:?}");
+            writer.push(&text);
+            writer.inc_indent();
+            writer.newline_with_indent();
+        } else if context.child.kind().is_grouping() && context.next_child.is_none() {
+            debug!("last grouping : {text:?}");
+            writer.push(&text);
+            writer.newline_with_indent();
+        } else if context.child.kind() == SyntaxKind::Comma {
+            debug!("comma: {text:?}");
+            writer.push(&text);
+            writer.inc_indent();
+            writer.newline_with_indent();
+        } else {
+            debug!("else : {text:?}");
+            writer.push(&text);
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
