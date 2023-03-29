@@ -18,19 +18,14 @@ pub fn typst_format(s: &str) -> String {
 }
 
 fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
-    info!("formats text : {s:?}\nwith rules {:?}", rules);
     let init = parse(s);
+    info!("formats text : {s:?}; with rules {:?}", rules);
+    info!("parsed : \n{init:?}\n");
     let mut result = String::with_capacity(1024);
 
     let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::new(&init))];
     let mut writer = Writer::default();
     //let mut deep = 0;
-
-    debug!(
-        "Starting with parent {} and result at {:?}",
-        init.text(),
-        writer.value()
-    );
 
     while !parents.is_empty() {
         let (this_node, context) = parents.pop().unwrap();
@@ -52,14 +47,15 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
         .collect_vec();
         children.reverse();
         parents.append(&mut children);
-        debug!("iter on {this_node:?} with context : {context:?}");
 
         writer = writer.with_value(this_node.text().to_string());
         for rule in rules.iter().filter(|&r| r.accept(this_node, &context)) {
+            debug!("MATCHED RULE {rule:?}");
+            debug!("RULE FROM `{:?}`", writer.value());
             rule.eat(writer.take(), &context, &mut writer);
+            debug!("RULE TO `{:?}`", writer.value());
         }
         result.push_str(writer.value());
-        debug!("result at `{result}`");
     }
     result
 }
