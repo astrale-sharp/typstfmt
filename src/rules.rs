@@ -101,7 +101,7 @@ pub(crate) struct IdentItemFunc;
 impl Rule for IdentItemFunc {
     fn accept(&self, _syntax_node: &SyntaxNode, context: &Context) -> bool {
         let Some(parent) = context.parent else {return false};
-        parent.is::<ast::Args>()
+        parent.is::<ast::Args>() || parent.is::<ast::FuncCall>()
     }
 
     fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
@@ -109,26 +109,32 @@ impl Rule for IdentItemFunc {
         if context.child.kind().is_grouping() {
             // is grouping opening
             if context.next_child.is_some() {
-                writer.push(&text);
-                writer.inc_indent();
-                writer.newline_with_indent();
+                writer.push(&text).inc_indent().newline_with_indent();
             } else if context.next_child.is_none() && context.parent.unwrap().is::<ast::Args>() {
                 // is grouping nested closing
-                writer.push(&text);
-                writer.dec_indent();
+                debug!("GROUPING NESTED CLOSING");
+                writer.newline_with_indent().push(&text).dec_indent();
             //                writer.newline_with_indent();
             } else {
+                debug!("GROUPING CLOSING GOOD");
                 // is grouping closing
-                writer.push(&text);
-                writer.dec_indent();
-                writer.newline_with_indent();
+
+                writer
+                    .newline_with_indent()
+                    .push(&text)
+                    .dec_indent()
+                    .newline_with_indent();
             }
         } else if context.child.kind() == SyntaxKind::Comma {
-            debug!("comma: {text:?}");
-            writer.push(&text);
-            writer.newline_with_indent();
+            //todo, ignore if is space and look at the next after the space
+            if context.next_child.is_some() && context.next_child.unwrap().kind().is_grouping() {
+                writer.push(&text);
+            } else {
+                writer.push(&text).newline_with_indent();
+            }
+        } else if context.child.is::<ast::Space>() {
+            // do nothing
         } else {
-            debug!("else : {text:?}");
             writer.push(&text);
         }
     }
