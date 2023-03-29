@@ -294,43 +294,35 @@ mod tests {
                 "#{f1(\n    1,\n    2,\n    f(\n        a,\n        b,\n        c,\n        ),\n    )}"
             );
         }
+        #[test]
+        fn spacing_without_comma() {
+            init();
+
+            similar_asserts::assert_eq!(
+                format_with_rules("#lorem(9)", &[IdentItemFunc.as_dyn()]),
+                "#lorem(\n    9\n    )"
+            );
+        }
     }
 
     #[test]
     fn complex() {
-        init();
+         init();
 
         let expected = r##"#import "template.typ": *
 #show: letter.with(
-    sender: [
-        Jane Smith, 
-        Universal Exports, 
-        1 Heavy Plaza, 
-        Morristown, 
-        NJ 07964,
-    ],
-    recipient: [
-        Mr. John Doe \
-        Acme Corp. \
-        123 Glennwood Ave \
-        Quarto Creek, VA 22438
-    ],
-    date: [
-        Morristown, 
-        June 9th, 2023,
-        ],
-    subject: [
-        test
-        ],
-    name: [
-        Jane Smith \
-        Regional Director
-        ],
-)
+    sender: [Jane Smith, Universal Exports, 1 Heavy Plaza, Morristown, NJ 07964,],
+    recipient: [Mr. John Doe \ Acme Corp. \ 123 Glennwood Ave \ Quarto Creek, VA 22438],
+    date: [Morristown, June 9th, 2023,],
+    subject: [test],
+    name: [Jane Smith \Regional Director],
+    )
 
 Dear Joe,
 
-#lorem(99)
+#lorem(
+    9,
+    )
 
 Best,"##;
         let input = r##"#import "template.typ": *
@@ -338,10 +330,9 @@ Best,"##;
 
 Dear Joe,
 
-#lorem(99)
+#lorem(9)
 
-Best,
-"##;
+Best,"##;
         similar_asserts::assert_eq!(typst_format(input), expected);
     }
 }
