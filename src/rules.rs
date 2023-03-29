@@ -44,10 +44,56 @@ impl Rule for NoSpaceAtEndLine {
         writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
 }
-
+#[derive(Debug)]
 pub(crate) struct TrailingComma;
+impl Rule for TrailingComma {
+    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+        let Some(parent) = context.parent else {return false};
+        let Some(next_child) = context.next_child else {return false};
 
+        parent.is::<ast::Args>()
+            && !(syntax_node.kind() == SyntaxKind::Comma)
+            && next_child.kind().is_grouping()
+    }
+
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+        writer.push(&text).push(",");
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct SpaceAfterColon;
+impl Rule for SpaceAfterColon {
+    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+        let Some(next) = context.next_child else {return false};
+        syntax_node.kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
+    }
+
+    fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
+        writer.push(&text).push(" ");
+    }
+}
+
+#[derive(Debug)]
 pub(crate) struct JumpTwoLineMax;
+impl Rule for JumpTwoLineMax {
+    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+        syntax_node.is::<ast::Text>()
+            || syntax_node.is::<ast::Markup>()
+            || syntax_node.is::<ast::Parbreak>()
+    }
+
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+        let rg_one_line = Regex::new(r"(\s)*\n(\s)*").unwrap();
+        let rg_two_line = Regex::new(r"(\s)*\n(\s)*\n(\s)*").unwrap();
+        let to_add = if rg_two_line.is_match(&text) {
+            rg_two_line.replace_all(&text, "\n\n").to_string()
+        } else {
+            rg_one_line.replace_all(&text, "\n").to_string()
+        };
+        writer.push(&to_add);
+    }
+}
 
 #[derive(Debug)]
 pub(crate) struct IdentItemFunc;
