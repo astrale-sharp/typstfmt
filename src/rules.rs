@@ -13,6 +13,17 @@ pub(crate) trait Rule: std::fmt::Debug {
     }
 }
 
+pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
+    vec![
+        SpaceAfterColon.as_dyn(),
+        TrailingComma.as_dyn(),
+        IdentItemFunc.as_dyn(),
+        JumpTwoLineMax.as_dyn(),
+        OneSpace.as_dyn(),
+        NoSpaceAtEndLine.as_dyn(),
+    ]
+}
+
 #[derive(Debug)]
 pub(crate) struct OneSpace;
 

@@ -14,7 +14,7 @@ use writer::Writer;
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
 pub fn typst_format(s: &str) -> String {
-    format_with_rules(s, &[NoSpaceAtEndLine.as_dyn(), OneSpace.as_dyn()])
+    format_with_rules(s, rules().as_slice())
 }
 
 fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
