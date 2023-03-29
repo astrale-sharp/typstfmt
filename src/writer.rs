@@ -67,17 +67,23 @@ impl Writer {
     }
 
     /// Appends the given text to the buffer.
+    /// # Arguments
+    ///
+    /// * `s` - The text to append to the buffer with.
     pub fn push(&mut self, s: &str) -> &mut Self {
         self.value.push_str(&s);
         self
     }
 
+    /// Appends a newline character to the buffer, followed by 
+    /// the current indentation level in spaces.
     pub fn newline_with_indent(&mut self) -> &mut Self {
         self.newline();
         self.push(" ".repeat(self.indent_level).as_str());
         self
     }
 
+    /// Appends a newline character to the buffer.
     pub fn newline(&mut self) -> &mut Self {
         self.push("\n");
         self
@@ -89,6 +95,7 @@ impl Writer {
         self
     }
 
+    /// Updates the indentation level.
     pub fn update_indent<F>(&mut self, update_fn: F) -> &mut Self
     where
         F: FnOnce(usize) -> usize,
@@ -111,7 +118,6 @@ impl Writer {
 
     /// Executes the given function with an increased indentation level and decreases
     /// the indentation level after that the by the same amount.
-    ///
     pub fn indented<F>(&mut self, f: F) -> &mut Self
     where
         F: FnOnce(&mut Self) -> (),
@@ -122,10 +128,12 @@ impl Writer {
         self
     }
 
+    /// The current value holded by the writer
     pub fn value(&self) -> &String {
         &self.value
     }
 
+    /// empties the writer and takes it's value but preserve it's state.
     pub fn take(&mut self) -> String {
         let result = self.value.clone();
         self.value = String::new();
