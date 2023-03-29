@@ -16,7 +16,9 @@ name = "typst-fmt"
 path = "src/main.rs"
 
 [dependencies]
+clap = { version = "4.2.0", features = ["derive"] }
 env_logger = "0.10.0"
+globmatch = "0.2.3"
 itertools = "0.10.5"
 log = "0.4.17"
 regex = "1.7.3"
