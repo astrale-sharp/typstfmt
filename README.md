@@ -1,20 +1,30 @@
-*PUBLISHING WITH EMPTY TYPST*
+*The crate is published with empty Typst*
 
-Howdy, this *will be* a formatter for the typst language.
+Howdy! This is a formatter for the Typst language!
 
-Currently on a very early state, Pull Requests are more than welcome
+# Features
 
-To contribute the main thing you should help with is making new rules, choosing the order in which they are selected, write test, get familiar with typst AST etc.
+Basic non configurable formatting.
 
-When we have a working formatter it will be time to think about optimisations although all ideas are welcomed now as well!
+# Contributing
+
+## Contributing via feature request and issue 
+To push this formatter further, I need to know what you don't like.
+
+You can :
+- request features (something you'd like configurable)
+- show a problematic snippet of code.
+
+## Contributing to the Code Base
+
+The formatting is done using Rules: 
 
 ```rust
 
+pub(crate) trait Rule: std::fmt::Debug {
+    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool;
 
-trait Rule {
-    fn accept(&self, syntax_node: &SyntaxNode, context: ()) -> bool;
-
-    fn eat(&self, syntax_node: &SyntaxNode) -> String;
+    fn eat(&self, text: String, context: &Context, writer: &mut Writer);
 
     fn as_dyn(self: Self) -> Box<dyn Rule>
     where
@@ -23,5 +33,10 @@ trait Rule {
         Box::new(self)
     }
 }
-
 ```
+
+To contribute you could help making new rules, choosing the order in which they are selected, write test, get familiar with typst AST etc or take a look at the issue on this repo!
+
+Another possible axe of contribution is  optimisation, which I have given 0 thoughts about so far.
+
+If there is no issue open, discussion before pull requests is appreciated.
