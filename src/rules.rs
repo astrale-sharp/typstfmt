@@ -307,7 +307,7 @@ mod tests {
 
     #[test]
     fn complex() {
-         init();
+        init();
 
         let expected = r##"#import "template.typ": *
 #show: letter.with(

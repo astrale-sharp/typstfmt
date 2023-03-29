@@ -75,7 +75,7 @@ impl Writer {
         self
     }
 
-    /// Appends a newline character to the buffer, followed by 
+    /// Appends a newline character to the buffer, followed by
     /// the current indentation level in spaces.
     pub fn newline_with_indent(&mut self) -> &mut Self {
         self.newline();
