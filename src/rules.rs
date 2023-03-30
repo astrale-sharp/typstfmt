@@ -28,13 +28,13 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
 pub(crate) struct OneSpace;
 
 impl Rule for OneSpace {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+    fn accept(&self, syntax_node: &SyntaxNode, _: &Context) -> bool {
         syntax_node.is::<ast::Space>()
             || syntax_node.is::<ast::Markup>()
             || syntax_node.is::<ast::Parbreak>()
     }
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
         let rg = Regex::new(r"( )+").unwrap();
         writer.push(rg.replace_all(&text, " ").to_string().as_str());
     }
@@ -67,7 +67,7 @@ impl Rule for TrailingComma {
             && next_child.kind().is_grouping()
     }
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
         writer.push(&text).push(",");
     }
 }
@@ -88,13 +88,13 @@ impl Rule for SpaceAfterColon {
 #[derive(Debug)]
 pub(crate) struct JumpTwoLineMax;
 impl Rule for JumpTwoLineMax {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+    fn accept(&self, syntax_node: &SyntaxNode, _: &Context) -> bool {
         syntax_node.is::<ast::Text>()
             || syntax_node.is::<ast::Markup>()
             || syntax_node.is::<ast::Parbreak>()
     }
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
         let rg_one_line = Regex::new(r"(\s)*\n(\s)*").unwrap();
         let rg_two_line = Regex::new(r"(\s)*\n(\s)*\n(\s)*").unwrap();
         let to_add = if rg_two_line.is_match(&text) {

@@ -1,6 +1,5 @@
-use env_logger;
 use itertools::Itertools;
-use log::{debug, info, log_enabled, Level};
+use log::{debug, info};
 use regex::Regex;
 use std::iter::zip;
 use typst::syntax::parse;
@@ -79,10 +78,6 @@ impl<'a> Context<'a> {
             next_child: None,
         }
     }
-}
-
-pub(crate) fn init_log() {
-    env_logger::init();
 }
 
 // rules :

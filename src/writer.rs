@@ -32,6 +32,7 @@ pub struct Writer {
 }
 
 impl Writer {
+    #[allow(dead_code)]
     pub fn new(init: String, style: Style, indent_level: usize) -> Self {
         Self {
             style,
@@ -40,11 +41,12 @@ impl Writer {
         }
     }
 
-    pub fn with_style(mut self, style: Style) -> Self {
-        self.style = style;
-        self
-    }
+    // pub fn with_style(mut self, style: Style) -> Self {
+    //     self.style = style;
+    //     self
+    // }
 
+    #[allow(dead_code)]
     pub fn with_indent_level(mut self, indent: usize) -> Self {
         self.indent_level = indent;
         self
@@ -55,16 +57,16 @@ impl Writer {
         self
     }
 
-    #[must_use]
-    pub fn indent_level(&self) -> usize {
-        self.indent_level
-    }
+    // #[must_use]
+    // pub fn indent_level(&self) -> usize {
+    //     self.indent_level
+    // }
 
     /// Appends the amount of spaces defined by the style.
-    pub fn indent(&mut self) -> &mut Self {
-        self.value.push_str(&" ".repeat(self.style.indent));
-        self
-    }
+    // pub fn indent(&mut self) -> &mut Self {
+    //     self.value.push_str(&" ".repeat(self.style.indent));
+    //     self
+    // }
 
     /// Appends the given text to the buffer.
     /// # Arguments
@@ -90,12 +92,13 @@ impl Writer {
     }
 
     /// Appends a space to the buffer.
-    pub fn space(&mut self, count: Option<usize>) -> &mut Self {
-        self.push(" ".repeat(count.unwrap_or(1)).as_str());
-        self
-    }
+    // pub fn space(&mut self, count: Option<usize>) -> &mut Self {
+    //     self.push(" ".repeat(count.unwrap_or(1)).as_str());
+    //     self
+    // }
 
     /// Updates the indentation level.
+    #[allow(dead_code)]
     pub fn update_indent<F>(&mut self, update_fn: F) -> &mut Self
     where
         F: FnOnce(usize) -> usize,
@@ -118,6 +121,7 @@ impl Writer {
 
     /// Executes the given function with an increased indentation level and decreases
     /// the indentation level after that the by the same amount.
+    #[allow(dead_code)]
     pub fn indented<F>(&mut self, f: F) -> &mut Self
     where
         F: FnOnce(&mut Self) -> (),
