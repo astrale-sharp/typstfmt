@@ -124,7 +124,7 @@ impl Rule for IdentItemFunc {
             } else if context.next_child.is_none() && context.parent.unwrap().is::<ast::Args>() {
                 // is grouping nested closing
                 debug!("GROUPING NESTED CLOSING");
-                writer.newline_with_indent().push(&text).dec_indent();
+                writer.dec_indent().newline_with_indent().push(&text);
             //                writer.newline_with_indent();
             } else {
                 debug!("GROUPING CLOSING GOOD");
@@ -273,7 +273,7 @@ mod tests {
             init();
             similar_asserts::assert_eq!(
                 format_with_rules("#{f1(1,2,3,)}", &[IdentItemFunc.as_dyn()]),
-                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n{0})}}", " ".repeat(4))
+                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n)}}", " ".repeat(4))
             );
         }
 
@@ -291,7 +291,7 @@ mod tests {
             init();
             similar_asserts::assert_eq!(
                 format_with_rules("#{f1(1,2,f(a,b,c,),)}", &[IdentItemFunc.as_dyn()]),
-                "#{f1(\n    1,\n    2,\n    f(\n        a,\n        b,\n        c,\n        ),\n    )}"
+                "#{f1(\n    1,\n    2,\n    f(\n        a,\n        b,\n        c,\n    ),\n)}"
             );
         }
         #[test]
@@ -300,7 +300,7 @@ mod tests {
 
             similar_asserts::assert_eq!(
                 format_with_rules("#lorem(9)", &[IdentItemFunc.as_dyn()]),
-                "#lorem(\n    9\n    )"
+                "#lorem(\n    9\n)"
             );
         }
     }
@@ -316,13 +316,13 @@ mod tests {
     date: [Morristown, June 9th, 2023,],
     subject: [test],
     name: [Jane Smith \Regional Director],
-    )
+)
 
 Dear Joe,
 
 #lorem(
     9,
-    )
+)
 
 Best,"##;
         let input = r##"#import "template.typ": *
