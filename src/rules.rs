@@ -52,8 +52,8 @@ impl Rule for NoSpaceAtEndLine {
     }
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
-        let rg = Regex::new(r"( )+(?:(\n|\z)+)").unwrap();
-        writer.push(rg.replace_all(&text, "").to_string().as_str());
+        let rg = Regex::new(r"( )+\n").unwrap();
+        writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
 }
 #[derive(Debug)]
@@ -165,16 +165,20 @@ impl Rule for IdentItemFunc {
     }
 }
 
+//#[derive(Debug)]
+//pub(crate) struct NoSpaceAtEOF;
+//impl Rule for NoSpaceAtEOF {}
+
+
+#[cfg(test)]
+fn init() {
+    let _ = env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
+        .is_test(true)
+        .try_init();
+}
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn init() {
-        let _ =
-            env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
-                .is_test(true)
-                .try_init();
-    }
 
     #[test]
     fn more_than_one_rule() {
@@ -356,11 +360,19 @@ mod tests_typst_format {
     use super::*;
 
     #[test]
-    fn test_name() {
+    fn test_eof() {
         similar_asserts::assert_eq!(typst_format(r"#{} \n"), r"#{}");
         similar_asserts::assert_eq!(typst_format(r"#{} \n "), r"#{}");
         //pass
+        // todo new rules, No /n before end of file.
         similar_asserts::assert_eq!(typst_format(r"#{}"), r"#{}");
         similar_asserts::assert_eq!(typst_format(r"#{} "), r"#{}");
+    }
+
+    #[test]
+    fn test_let() {
+        init();
+
+        similar_asserts::assert_eq!(typst_format(r"#let x = 4"), r"#let x = 4");
     }
 }
