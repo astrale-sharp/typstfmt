@@ -15,6 +15,7 @@ pub(crate) trait Rule: std::fmt::Debug {
 
 pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
     vec![
+        NoSpaceBeforeColon.as_dyn(),
         SpaceAfterColon.as_dyn(),
         TrailingComma.as_dyn(),
         IdentItemFunc.as_dyn(),
@@ -82,6 +83,19 @@ impl Rule for SpaceAfterColon {
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
         writer.push(&text).push(" ");
+    }
+}
+
+#[derive(Debug)]
+pub(crate) struct NoSpaceBeforeColon;
+impl Rule for NoSpaceBeforeColon {
+    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
+        let Some(next) = context.next_child else {return false};
+        next.kind() == SyntaxKind::Colon && syntax_node.is::<ast::Space>()
+    }
+
+    fn eat(&self, _: String, _context: &Context, _: &mut Writer) {
+        // don't put the space.
     }
 }
 
