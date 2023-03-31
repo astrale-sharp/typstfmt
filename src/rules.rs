@@ -52,8 +52,8 @@ impl Rule for NoSpaceAtEndLine {
     }
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
-        let rg = Regex::new(r"( )+\n").unwrap();
-        writer.push(rg.replace_all(&text, "\n").to_string().as_str());
+        let rg = Regex::new(r"( )+(?:(\n|\z)+)").unwrap();
+        writer.push(rg.replace_all(&text, "").to_string().as_str());
     }
 }
 #[derive(Debug)]
@@ -348,5 +348,19 @@ Dear Joe,
 
 Best,"##;
         similar_asserts::assert_eq!(typst_format(input), expected);
+    }
+}
+
+#[cfg(test)]
+mod tests_typst_format {
+    use super::*;
+
+    #[test]
+    fn test_name() {
+        similar_asserts::assert_eq!(typst_format(r"#{} \n"), r"#{}");
+        similar_asserts::assert_eq!(typst_format(r"#{} \n "), r"#{}");
+        //pass
+        similar_asserts::assert_eq!(typst_format(r"#{}"), r"#{}");
+        similar_asserts::assert_eq!(typst_format(r"#{} "), r"#{}");
     }
 }
