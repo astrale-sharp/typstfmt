@@ -1,0 +1,12 @@
+name: Run cargo test
+
+on: [push]
+
+jobs:
+  run_test_cases:
+    name: Run all test cases
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cargo Test
+        uses: Kristories/cargo-test@v1.0.0
