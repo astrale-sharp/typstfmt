@@ -169,7 +169,6 @@ impl Rule for IdentItemFunc {
 //pub(crate) struct NoSpaceAtEOF;
 //impl Rule for NoSpaceAtEOF {}
 
-
 #[cfg(test)]
 fn init() {
     let _ = env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
