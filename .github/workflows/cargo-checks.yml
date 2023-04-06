@@ -1,0 +1,5 @@
+- name: Cargo Test
+  uses: Kristories/cargo-test@v1.0.0
+
+- name: Check formatting of Rust code with rustfmt
+  uses: actions-rust-lang/rustfmt@v1.1.0
