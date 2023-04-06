@@ -1,6 +1,6 @@
 name: Run cargo test
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   run_test_cases:
