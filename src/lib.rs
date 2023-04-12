@@ -1,7 +1,6 @@
 use itertools::Itertools;
 use log::{debug, info};
 use regex::Regex;
-use std::iter::zip;
 use typst::syntax::parse;
 use typst::syntax::{ast, SyntaxNode};
 
@@ -22,33 +21,29 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
     info!("parsed : \n{init:?}\n");
     let mut result = String::with_capacity(1024);
 
-    let mut parents: Vec<(&SyntaxNode, Context)> = vec![(&init, Context::new(&init))];
+    let mut parents: Vec<Context> = vec![(Context::new(None, 0, vec![init]))];
     let mut writer = Writer::default();
-    //let mut deep = 0;
-
+    println!("start at parent: {parents:?}");
     while !parents.is_empty() {
-        let (this_node, context) = parents.pop().unwrap();
-        //let mut children: Vec<_> = this_node.children().map(|c| c).collect_vec();
-        let mut children = zip(
-            this_node.children(),
-            this_node.children().skip(1).map(Some).chain(vec![None]),
-        )
-        .map(|(now, next)| {
-            (
-                now,
-                Context {
-                    parent: Some(this_node),
-                    next_child: next,
-                    child: now,
-                },
-            )
-        })
-        .collect_vec();
+        let context = parents.pop().unwrap();
+        println!("after pop, parents: {parents:?}");
+        let node = context.child();
+        let mut children = node
+            .children()
+            .cloned()
+            .into_iter()
+            .enumerate()
+            .map(|(idx, _)| Context {
+                parent: Some(node.clone()),
+                child_idx: idx,
+                children: node.children().cloned().collect_vec(),
+            })
+            .collect_vec();
         children.reverse();
         parents.append(&mut children);
 
-        writer = writer.with_value(this_node.text().to_string());
-        for rule in rules.iter().filter(|&r| r.accept(this_node, &context)) {
+        writer = writer.with_value(node.text().to_string());
+        for rule in rules.iter().filter(|&r| r.accept(&context)) {
             debug!("MATCHED RULE {rule:?}");
             debug!("RULE FROM `{:?}`", writer.value());
             rule.eat(writer.take(), &context, &mut writer);
@@ -61,25 +56,33 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
 
 /// The context needed by a rule to accept the node && produce it's resulting text
 // How deep we are in the tree, who's the parent,
-// next childen of same level etc can easily be accessed right now.
+// next children of same level etc can easily be accessed right now.
 // todo test if the (parent, next_child) provided are the right one.
 #[derive(Debug)]
-struct Context<'a> {
-    child: &'a SyntaxNode,
-    parent: Option<&'a SyntaxNode>,
-    next_child: Option<&'a SyntaxNode>,
+struct Context {
+    parent: Option<SyntaxNode>,
+    child_idx: usize,
+    children: Vec<SyntaxNode>,
 }
 
-impl<'a> Context<'a> {
-    fn new(child: &'a SyntaxNode) -> Self {
+impl Context {
+    fn new(parent: Option<SyntaxNode>, child_idx: usize, children: Vec<SyntaxNode>) -> Self {
         Self {
-            child,
-            parent: None,
-            next_child: None,
+            parent,
+            child_idx,
+            children,
         }
     }
-}
 
-// rules :
-// ModuleImport, space after colon
-// ImportItems : trailing comma
+    pub fn child(&self) -> &SyntaxNode {
+        self.children.get(self.child_idx).unwrap()
+    }
+
+    pub fn next_child(&self) -> Option<&SyntaxNode> {
+        self.children.get(self.child_idx + 1)
+    }
+
+    pub fn child_at(&self, idx_rel: usize) -> Option<&SyntaxNode> {
+        self.children.get(self.child_idx + idx_rel)
+    }
+}
