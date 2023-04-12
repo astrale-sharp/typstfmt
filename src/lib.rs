@@ -23,10 +23,8 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
 
     let mut parents: Vec<Context> = vec![(Context::new(None, 0, vec![init]))];
     let mut writer = Writer::default();
-    println!("start at parent: {parents:?}");
     while !parents.is_empty() {
         let context = parents.pop().unwrap();
-        println!("after pop, parents: {parents:?}");
         let node = context.child();
         let mut children = node
             .children()
