@@ -1,7 +1,7 @@
 use super::*;
 use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool;
+    fn accept(&self, context: &Context) -> bool;
 
     fn eat(&self, text: String, context: &Context, writer: &mut Writer);
 
@@ -29,10 +29,10 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
 pub(crate) struct OneSpace;
 
 impl Rule for OneSpace {
-    fn accept(&self, syntax_node: &SyntaxNode, _: &Context) -> bool {
-        syntax_node.is::<ast::Space>()
-            || syntax_node.is::<ast::Markup>()
-            || syntax_node.is::<ast::Parbreak>()
+    fn accept(&self, context: &Context) -> bool {
+        context.child().is::<ast::Space>()
+            || context.child().is::<ast::Markup>()
+            || context.child().is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
@@ -45,10 +45,10 @@ impl Rule for OneSpace {
 pub(crate) struct NoSpaceAtEndLine;
 
 impl Rule for NoSpaceAtEndLine {
-    fn accept(&self, syntax_node: &SyntaxNode, _context: &Context) -> bool {
-        syntax_node.is::<ast::Space>()
-            || syntax_node.is::<ast::Markup>()
-            || syntax_node.is::<ast::Parbreak>()
+    fn accept(&self, context: &Context) -> bool {
+        context.child().is::<ast::Space>()
+            || context.child().is::<ast::Markup>()
+            || context.child().is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
@@ -59,12 +59,12 @@ impl Rule for NoSpaceAtEndLine {
 #[derive(Debug)]
 pub(crate) struct TrailingComma;
 impl Rule for TrailingComma {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
-        let Some(parent) = context.parent else {return false};
-        let Some(next_child) = context.next_child else {return false};
+    fn accept(&self, context: &Context) -> bool {
+        let Some(parent) = &context.parent else {return false};
+        let Some(next_child) = context.next_child() else {return false};
 
         parent.is::<ast::Args>()
-            && !(syntax_node.kind() == SyntaxKind::Comma)
+            && !(context.child().kind() == SyntaxKind::Comma)
             && next_child.kind().is_grouping()
     }
 
@@ -76,9 +76,9 @@ impl Rule for TrailingComma {
 #[derive(Debug)]
 pub(crate) struct SpaceAfterColon;
 impl Rule for SpaceAfterColon {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
-        let Some(next) = context.next_child else {return false};
-        syntax_node.kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
+    fn accept(&self, context: &Context) -> bool {
+        let Some(next) = context.next_child() else {return false};
+        context.child().kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
     }
 
     fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
@@ -89,9 +89,9 @@ impl Rule for SpaceAfterColon {
 #[derive(Debug)]
 pub(crate) struct NoSpaceBeforeColon;
 impl Rule for NoSpaceBeforeColon {
-    fn accept(&self, syntax_node: &SyntaxNode, context: &Context) -> bool {
-        let Some(next) = context.next_child else {return false};
-        next.kind() == SyntaxKind::Colon && syntax_node.is::<ast::Space>()
+    fn accept(&self, context: &Context) -> bool {
+        let Some(next) = context.next_child() else {return false};
+        next.kind() == SyntaxKind::Colon && context.child().is::<ast::Space>()
     }
 
     fn eat(&self, _: String, _context: &Context, _: &mut Writer) {
@@ -102,10 +102,10 @@ impl Rule for NoSpaceBeforeColon {
 #[derive(Debug)]
 pub(crate) struct JumpTwoLineMax;
 impl Rule for JumpTwoLineMax {
-    fn accept(&self, syntax_node: &SyntaxNode, _: &Context) -> bool {
-        syntax_node.is::<ast::Text>()
-            || syntax_node.is::<ast::Markup>()
-            || syntax_node.is::<ast::Parbreak>()
+    fn accept(&self, context: &Context) -> bool {
+        context.child().is::<ast::Text>()
+            || context.child().is::<ast::Markup>()
+            || context.child().is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
@@ -124,18 +124,20 @@ impl Rule for JumpTwoLineMax {
 pub(crate) struct IdentItemFunc;
 
 impl Rule for IdentItemFunc {
-    fn accept(&self, _syntax_node: &SyntaxNode, context: &Context) -> bool {
-        let Some(parent) = context.parent else {return false};
+    fn accept(&self, context: &Context) -> bool {
+        let Some(parent) = &context.parent else {return false};
         parent.is::<ast::Args>() || parent.is::<ast::FuncCall>()
     }
 
     fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
         // todo with last child, if not comma, if last elem, add a comma
-        if context.child.kind().is_grouping() {
+        if context.child().kind().is_grouping() {
             // is grouping opening
-            if context.next_child.is_some() {
+            if context.next_child().is_some() {
                 writer.push(&text).inc_indent().newline_with_indent();
-            } else if context.next_child.is_none() && context.parent.unwrap().is::<ast::Args>() {
+            } else if context.next_child().is_none()
+                && context.parent.as_ref().unwrap().is::<ast::Args>()
+            {
                 // is grouping nested closing
                 debug!("GROUPING NESTED CLOSING");
                 writer.dec_indent().newline_with_indent().push(&text);
@@ -150,14 +152,21 @@ impl Rule for IdentItemFunc {
                     .dec_indent()
                     .newline_with_indent();
             }
-        } else if context.child.kind() == SyntaxKind::Comma {
+        } else if context.child().kind() == SyntaxKind::Comma {
             //todo, ignore if is space and look at the next after the space
-            if context.next_child.is_some() && context.next_child.unwrap().kind().is_grouping() {
+            let mut next = context.next_child();
+            let mut i = 0;
+            while next.is_some() && next.unwrap().kind().is_trivia() {
+                i += 1;
+                next = context.child_at(i)
+            }
+
+            if next.is_some() && next.unwrap().kind().is_grouping() {
                 writer.push(&text);
             } else {
                 writer.push(&text).newline_with_indent();
             }
-        } else if context.child.is::<ast::Space>() {
+        } else if context.child().is::<ast::Space>() {
             // do nothing
         } else {
             writer.push(&text);
@@ -168,7 +177,6 @@ impl Rule for IdentItemFunc {
 //#[derive(Debug)]
 //pub(crate) struct NoSpaceAtEOF;
 //impl Rule for NoSpaceAtEOF {}
-
 
 #[cfg(test)]
 fn init() {
@@ -194,7 +202,7 @@ mod tests {
 
         #[test]
         fn one_space_is_unchanged() {
-            init();
+            //    init();
 
             similar_asserts::assert_eq!(format_with_rules("#{ }", &[OneSpace.as_dyn()]), "#{ }");
             similar_asserts::assert_eq!(
@@ -296,11 +304,19 @@ mod tests {
         }
 
         #[test]
-        fn reduce_space() {
+        fn reduce_space_trailing() {
             init();
             similar_asserts::assert_eq!(
                 format_with_rules("#{f1(\n\n1,\n\n2,\n\n3,\n)}", &[IdentItemFunc.as_dyn()]),
-                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n{0})}}", " ".repeat(4))
+                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3,\n)}}", " ".repeat(4))
+            );
+        }
+
+        #[test]
+        fn reduce_space_non_trailing() {
+            similar_asserts::assert_eq!(
+                format_with_rules("#{f1(\n\n1,\n\n2,\n\n3)}", &[IdentItemFunc.as_dyn()]),
+                format!("#{{f1(\n{0}1,\n{0}2,\n{0}3\n)}}", " ".repeat(4))
             );
         }
 
@@ -361,8 +377,8 @@ mod tests_typst_format {
 
     #[test]
     fn test_eof() {
-        similar_asserts::assert_eq!(typst_format(r"#{} \n"), r"#{}");
-        similar_asserts::assert_eq!(typst_format(r"#{} \n "), r"#{}");
+        similar_asserts::assert_eq!(typst_format("#{} \n"), r"#{}");
+        similar_asserts::assert_eq!(typst_format("#{} \n "), r"#{}");
         //pass
         // todo new rules, No /n before end of file.
         similar_asserts::assert_eq!(typst_format(r"#{}"), r"#{}");
