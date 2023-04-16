@@ -11,40 +11,33 @@ impl Default for Style {
     }
 }
 
-impl Default for Writer {
-    fn default() -> Self {
-        Writer {
-            style: Style::default(),
-            indent_level: 0,
-            value: String::new(),
-        }
-    }
-}
-
 /// A context object used to store state while formatting.
-#[derive(Clone)]
-pub struct Writer {
+pub struct Writer<'a> {
+    final_result: &'a mut String,
     value: String,
     /// The style to use for formatting the text.
     pub style: Style,
     /// The current indentation level, in spaces.
     indent_level: usize,
+    /// Current line length in bytes.
+    line_length: usize,
 }
 
-impl Writer {
-    #[allow(dead_code)]
-    pub fn new(init: String, style: Style, indent_level: usize) -> Self {
+impl<'a> Writer<'a> {
+    pub fn default(s: &'a mut String) -> Self {
         Self {
-            style,
-            indent_level,
-            value: init,
+            final_result: s,
+            indent_level: 0,
+            line_length: 0,
+            style: Default::default(),
+            value: Default::default(),
         }
     }
 
-    // pub fn with_style(mut self, style: Style) -> Self {
-    //     self.style = style;
-    //     self
-    // }
+    pub fn with_style(mut self, style: Style) -> Self {
+        self.style = style;
+        self
+    }
 
     #[allow(dead_code)]
     pub fn with_indent_level(mut self, indent: usize) -> Self {
@@ -52,11 +45,23 @@ impl Writer {
         self
     }
 
-    pub fn with_value(mut self, s: String) -> Self {
-        self.value = s;
+    pub fn with_value(mut self, s: impl Into<String>) -> Self {
+        self.value = s.into();
         self
     }
 
+    pub fn current_line_length(&self) -> usize {
+        let Some(last_line) = self.final_result.lines().last() else {return 0};
+        if !self.value.contains('\n') {
+            last_line.len()
+        } else {
+            self.value().split('\n').last().unwrap().len()
+        }
+    }
+
+    pub fn flush(&mut self) {
+        self.final_result.push_str(&self.value)
+    }
     // #[must_use]
     // pub fn indent_level(&self) -> usize {
     //     self.indent_level
@@ -151,7 +156,8 @@ mod tests {
 
     #[test]
     fn state_persistent() {
-        let mut writer = Writer::default();
+        let mut res = String::from("");
+        let mut writer = Writer::default(&mut res);
         similar_asserts::assert_eq!(writer.value(), "");
         writer.inc_indent();
         writer.newline_with_indent();
@@ -161,15 +167,18 @@ mod tests {
 
     #[test]
     fn creation() {
-        let writer = Writer::new("Hello".to_string(), Style { indent: 2 }, 4);
+        let mut res = String::from("");
+        let writer = Writer::default(&mut res)
+            .with_value("Hello")
+            .with_style(Style { indent: 2 });
         similar_asserts::assert_eq!(writer.value(), "Hello");
-        similar_asserts::assert_eq!(writer.indent_level, 4);
         similar_asserts::assert_eq!(writer.style.indent, 2);
     }
 
     #[test]
     fn complex() {
-        let mut writer = Writer::default();
+        let mut res = String::from("");
+        let mut writer = Writer::default(&mut res);
         let indent = writer.style.indent;
         writer
             .push("f(")
@@ -189,7 +198,8 @@ mod tests {
 
     #[test]
     fn indent_change() {
-        let mut writer = Writer::default().with_indent_level(0);
+        let mut res = String::from("");
+        let mut writer = Writer::default(&mut res).with_indent_level(0);
         let indent_style = writer.style.indent;
         similar_asserts::assert_eq!(writer.indent_level, 0);
         writer.inc_indent();

@@ -26,3 +26,9 @@ fn cond_rule() {
         "anything"
     );
 }
+
+#[test]
+fn apply_if_len_above_threshold() {
+    
+    
+}

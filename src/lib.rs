@@ -9,6 +9,8 @@ use rules::*;
 mod writer;
 use writer::Writer;
 
+use crate::writer::Style;
+
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
 pub fn typst_format(s: &str) -> String {
@@ -24,22 +26,23 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
 
     let mut parents: Vec<LinkedNode> = vec![root];
 
-    let mut writer = Writer::default();
+    let mut writer = Writer::default(&mut result);
     while !parents.is_empty() {
         let node = parents.pop().unwrap();
-
         let mut children = node.children().collect_vec();
         children.reverse();
         parents.append(&mut children);
 
         writer = writer.with_value(node.text().to_string());
+        // writer simulate node text.
         for rule in rules.iter().filter(|&r| r.accept(&node)) {
+            //writer simulate node text
             debug!("MATCHED RULE {rule:?}");
             debug!("RULE FROM `{:?}`", writer.value());
             rule.eat(writer.take(), &node, &mut writer);
             debug!("RULE TO `{:?}`", writer.value());
         }
-        result.push_str(writer.value());
+        writer.flush();
     }
     result
 }
