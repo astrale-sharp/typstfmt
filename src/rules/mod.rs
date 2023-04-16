@@ -3,6 +3,7 @@ use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
     fn accept(&self, node: &LinkedNode) -> bool;
 
+    /// eats the current writer value and replaces it.
     fn eat(&self, text: String, node: &LinkedNode, writer: &mut Writer);
 
     fn as_dyn(self: Self) -> Box<dyn Rule>
@@ -27,7 +28,7 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
 
 pub(crate) struct ConditionalRule<T: Rule> {
     pub rule: T,
-    condition: Box<dyn Fn(&LinkedNode) -> bool>,
+    condition: Box<dyn Fn(&String, &LinkedNode, &mut Writer) -> bool>,
 }
 impl<T: Rule> std::fmt::Debug for ConditionalRule<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -38,7 +39,10 @@ impl<T: Rule> std::fmt::Debug for ConditionalRule<T> {
 }
 
 impl<T: Rule> ConditionalRule<T> {
-    pub(crate) fn new(rule: T, condition: impl 'static + Fn(&LinkedNode) -> bool) -> Self {
+    pub(crate) fn new(
+        rule: T,
+        condition: impl 'static + Fn(&String, &LinkedNode, &mut Writer) -> bool,
+    ) -> Self {
         Self {
             rule,
             condition: Box::new(condition),
@@ -47,12 +51,16 @@ impl<T: Rule> ConditionalRule<T> {
 }
 
 impl<T: Rule> Rule for ConditionalRule<T> {
-    fn accept(&self, context: &LinkedNode) -> bool {
-        (self.condition)(context) && self.rule.accept(context)
+    fn accept(&self, node: &LinkedNode) -> bool {
+        self.rule.accept(node)
     }
 
-    fn eat(&self, text: String, context: &LinkedNode, writer: &mut Writer) {
-        self.rule.eat(text, context, writer)
+    fn eat(&self, text: String, node: &LinkedNode, writer: &mut Writer) {
+        if !(self.condition)(&text, node, writer) {
+            writer.push(&text);
+        } else {
+            self.rule.eat(text, node, writer)
+        }
     }
 }
 
@@ -83,6 +91,7 @@ impl Rule for NoSpaceAtEndLine {
         writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
 }
+
 #[derive(Debug)]
 pub(crate) struct TrailingComma;
 impl Rule for TrailingComma {

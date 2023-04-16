@@ -9,8 +9,6 @@ use rules::*;
 mod writer;
 use writer::Writer;
 
-use crate::writer::Style;
-
 // Optimize: could return Text edit that should be applied one after the other
 // instead of String
 pub fn typst_format(s: &str) -> String {
@@ -34,7 +32,6 @@ fn format_with_rules(s: &str, rules: &[Box<dyn Rule>]) -> String {
         parents.append(&mut children);
 
         writer = writer.with_value(node.text().to_string());
-        // writer simulate node text.
         for rule in rules.iter().filter(|&r| r.accept(&node)) {
             //writer simulate node text
             debug!("MATCHED RULE {rule:?}");

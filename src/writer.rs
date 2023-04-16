@@ -19,8 +19,6 @@ pub struct Writer<'a> {
     pub style: Style,
     /// The current indentation level, in spaces.
     indent_level: usize,
-    /// Current line length in bytes.
-    line_length: usize,
 }
 
 impl<'a> Writer<'a> {
@@ -28,7 +26,6 @@ impl<'a> Writer<'a> {
         Self {
             final_result: s,
             indent_level: 0,
-            line_length: 0,
             style: Default::default(),
             value: Default::default(),
         }
@@ -50,12 +47,25 @@ impl<'a> Writer<'a> {
         self
     }
 
-    pub fn current_line_length(&self) -> usize {
-        let Some(last_line) = self.final_result.lines().last() else {return 0};
-        if !self.value.contains('\n') {
-            last_line.len()
+    // todo test me
+    /// Ignore whitespace.
+    pub fn current_line_length(&self, s: &String) -> usize {
+        fn len_no_space(s: &str) -> usize {
+            s.len() - s.chars().filter(|x| x == &' ').count()
+        }
+        let Some(last_line) = self.final_result.lines().last() else {
+            if let Some(app) = s.lines().last() {
+                println!("no last line");
+               return len_no_space(app);
         } else {
-            self.value().split('\n').last().unwrap().len()
+                println!("no last line and no app lines");
+                return 0;
+            }
+        };
+        if !s.contains('\n') {
+            len_no_space(last_line) + len_no_space(s)
+        } else {
+            len_no_space(s.split('\n').last().unwrap())
         }
     }
 
