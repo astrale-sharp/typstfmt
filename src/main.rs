@@ -11,15 +11,14 @@ use clap::ValueEnum;
 #[command(version = "0.0.1", about="A formatter for the typst language", long_about = None)]
 struct Args {
     #[arg(
-        short, 
+        short,
         long,
-        value_enum, default_value_t = Mode::Format)]
+        value_enum, default_value_t = Mode::Format
+    )]
     mode: Mode,
 
     /// input file
-    #[arg(
-        help = "A file to format. If not specified, all .typ file will be formatted"
-    )]
+    #[arg(help = "A file to format. If not specified, all .typ file will be formatted")]
     input: Option<PathBuf>,
 
     #[arg(
@@ -51,12 +50,19 @@ fn main() {
         glob.into_iter().flat_map(|path| path.ok()).collect()
     };
     for path in paths.into_iter() {
-        let mut file =
-            File::options().read(true).open(&path).unwrap_or_else(|e| panic!("Couldn't open input file : {e}"));
+        let mut file = File::options()
+            .read(true)
+            .open(&path)
+            .unwrap_or_else(|e| panic!("Couldn't open input file : {e}"));
         let mut content = String::with_capacity(1024);
         file.read_to_string(&mut content).unwrap();
         drop(file);
-        let mut file = File::options().write(true).append(false).truncate(true).open(&path).unwrap();
+        let mut file = File::options()
+            .write(true)
+            .append(false)
+            .truncate(true)
+            .open(&path)
+            .unwrap();
         file.set_len(0).unwrap();
         let formatted = typst_format(&content);
         if let Some(output) = args.output {
