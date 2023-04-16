@@ -1,9 +1,9 @@
 use super::*;
 use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
-    fn accept(&self, context: &Context) -> bool;
+    fn accept(&self, node: &LinkedNode) -> bool;
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer);
+    fn eat(&self, text: String, node: &LinkedNode, writer: &mut Writer);
 
     fn as_dyn(self: Self) -> Box<dyn Rule>
     where
@@ -29,13 +29,13 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
 pub(crate) struct OneSpace;
 
 impl Rule for OneSpace {
-    fn accept(&self, context: &Context) -> bool {
-        context.child().is::<ast::Space>()
-            || context.child().is::<ast::Markup>()
-            || context.child().is::<ast::Parbreak>()
+    fn accept(&self, node: &LinkedNode) -> bool {
+        node.is::<ast::Space>()
+            || node.is::<ast::Markup>()
+            || node.is::<ast::Parbreak>()
     }
 
-    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
         let rg = Regex::new(r"( )+").unwrap();
         writer.push(rg.replace_all(&text, " ").to_string().as_str());
     }
@@ -45,13 +45,13 @@ impl Rule for OneSpace {
 pub(crate) struct NoSpaceAtEndLine;
 
 impl Rule for NoSpaceAtEndLine {
-    fn accept(&self, context: &Context) -> bool {
-        context.child().is::<ast::Space>()
-            || context.child().is::<ast::Markup>()
-            || context.child().is::<ast::Parbreak>()
+    fn accept(&self, node: &LinkedNode) -> bool {
+        node.is::<ast::Space>()
+            || node.is::<ast::Markup>()
+            || node.is::<ast::Parbreak>()
     }
 
-    fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
         let rg = Regex::new(r"( )+\n").unwrap();
         writer.push(rg.replace_all(&text, "\n").to_string().as_str());
     }
@@ -59,16 +59,16 @@ impl Rule for NoSpaceAtEndLine {
 #[derive(Debug)]
 pub(crate) struct TrailingComma;
 impl Rule for TrailingComma {
-    fn accept(&self, context: &Context) -> bool {
-        let Some(parent) = &context.parent else {return false};
-        let Some(next_child) = context.next_child() else {return false};
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(parent) = node.parent() else {return false};
+        let Some(next_child) = node.next_sibling() else {return false};
 
         parent.is::<ast::Args>()
-            && !(context.child().kind() == SyntaxKind::Comma)
+            && !(node.kind() == SyntaxKind::Comma)
             && next_child.kind().is_grouping()
     }
 
-    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
         writer.push(&text).push(",");
     }
 }
@@ -76,12 +76,14 @@ impl Rule for TrailingComma {
 #[derive(Debug)]
 pub(crate) struct SpaceAfterColon;
 impl Rule for SpaceAfterColon {
-    fn accept(&self, context: &Context) -> bool {
-        let Some(next) = context.next_child() else {return false};
-        context.child().kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(parent) = node.parent().cloned() else {return false};
+        let children = parent.children().collect_vec();
+        let Some(next) = children.get(node.index()+1) else {return false}; 
+        node.kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
     }
 
-    fn eat(&self, text: String, _context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
         writer.push(&text).push(" ");
     }
 }
@@ -89,12 +91,12 @@ impl Rule for SpaceAfterColon {
 #[derive(Debug)]
 pub(crate) struct NoSpaceBeforeColon;
 impl Rule for NoSpaceBeforeColon {
-    fn accept(&self, context: &Context) -> bool {
-        let Some(next) = context.next_child() else {return false};
-        next.kind() == SyntaxKind::Colon && context.child().is::<ast::Space>()
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(next) = node.next_sibling() else {return false};
+        next.kind() == SyntaxKind::Colon && node.is::<ast::Space>()
     }
 
-    fn eat(&self, _: String, _context: &Context, _: &mut Writer) {
+    fn eat(&self, _: String, _: &LinkedNode, _: &mut Writer) {
         // don't put the space.
     }
 }
@@ -102,13 +104,13 @@ impl Rule for NoSpaceBeforeColon {
 #[derive(Debug)]
 pub(crate) struct JumpTwoLineMax;
 impl Rule for JumpTwoLineMax {
-    fn accept(&self, context: &Context) -> bool {
-        context.child().is::<ast::Text>()
-            || context.child().is::<ast::Markup>()
-            || context.child().is::<ast::Parbreak>()
+    fn accept(&self, node: &LinkedNode) -> bool {
+        node.is::<ast::Text>()
+            || node.is::<ast::Markup>()
+            || node.is::<ast::Parbreak>()
     }
 
-    fn eat(&self, text: String, _: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
         let rg_one_line = Regex::new(r"(\s)*\n(\s)*").unwrap();
         let rg_two_line = Regex::new(r"(\s)*\n(\s)*\n(\s)*").unwrap();
         let to_add = if rg_two_line.is_match(&text) {
@@ -124,19 +126,19 @@ impl Rule for JumpTwoLineMax {
 pub(crate) struct IdentItemFunc;
 
 impl Rule for IdentItemFunc {
-    fn accept(&self, context: &Context) -> bool {
-        let Some(parent) = &context.parent else {return false};
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(parent) = &node.parent() else {return false};
         parent.is::<ast::Args>() || parent.is::<ast::FuncCall>()
     }
 
-    fn eat(&self, text: String, context: &Context, writer: &mut Writer) {
+    fn eat(&self, text: String, node: &LinkedNode, writer: &mut Writer) {
         // todo with last child, if not comma, if last elem, add a comma
-        if context.child().kind().is_grouping() {
+        if node.kind().is_grouping() {
             // is grouping opening
-            if context.next_child().is_some() {
+            if node.next_sibling().is_some() {
                 writer.push(&text).inc_indent().newline_with_indent();
-            } else if context.next_child().is_none()
-                && context.parent.as_ref().unwrap().is::<ast::Args>()
+            } else if node.next_sibling().is_none()
+                && node.parent().as_ref().unwrap().is::<ast::Args>()
             {
                 // is grouping nested closing
                 debug!("GROUPING NESTED CLOSING");
@@ -152,21 +154,14 @@ impl Rule for IdentItemFunc {
                     .dec_indent()
                     .newline_with_indent();
             }
-        } else if context.child().kind() == SyntaxKind::Comma {
-            //todo, ignore if is space and look at the next after the space
-            let mut next = context.next_child();
-            let mut i = 0;
-            while next.is_some() && next.unwrap().kind().is_trivia() {
-                i += 1;
-                next = context.child_at(i)
-            }
-
+        } else if node.kind() == SyntaxKind::Comma {
+            let next = node.next_sibling();
             if next.is_some() && next.unwrap().kind().is_grouping() {
                 writer.push(&text);
             } else {
                 writer.push(&text).newline_with_indent();
             }
-        } else if context.child().is::<ast::Space>() {
+        } else if node.is::<ast::Space>() {
             // do nothing
         } else {
             writer.push(&text);
