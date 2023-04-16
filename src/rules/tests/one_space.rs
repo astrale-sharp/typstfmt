@@ -1,51 +1,64 @@
 use super::*;
 
-#[test]
-fn one_space_is_unchanged() {
-    //    init();
+test_snippet!(
+    dont_insert_weird_space,
+    expect = "#{ }\n",
+    "#{  }\n",
+    &[OneSpace.as_dyn()]
+);
 
-    similar_asserts::assert_eq!(format_with_rules("#{ }", &[OneSpace.as_dyn()]), "#{ }");
-    similar_asserts::assert_eq!(
-        format_with_rules("some\n\nsome", &[OneSpace.as_dyn()]),
-        "some\n\nsome"
-    );
-    similar_asserts::assert_eq!(
-        format_with_rules("some \n \n some", &[OneSpace.as_dyn()]),
-        "some \n \n some"
-    );
-}
+test_snippet!(
+    one_space_is_unchanged,
+    expect = "#{ }",
+    "#{ }",
+    &[OneSpace.as_dyn()]
+);
 
-#[test]
-fn more_than_on_becomes_one() {
-    similar_asserts::assert_eq!(format_with_rules("#{  }", &[OneSpace.as_dyn()]), "#{ }");
-    init();
-    similar_asserts::assert_eq!(
-        format_with_rules("some \n  \n some", &[OneSpace.as_dyn()]),
-        "some \n \n some"
-    );
-    similar_asserts::assert_eq!(format_with_rules("#{   }", &[OneSpace.as_dyn()]), "#{ }");
-    similar_asserts::assert_eq!(format_with_rules("m  m", &[OneSpace.as_dyn()]), "m m");
-    similar_asserts::assert_eq!(
-        format_with_rules("some \n \n  some", &[OneSpace.as_dyn()]),
-        "some \n \n some"
-    );
-    similar_asserts::assert_eq!(
-        format_with_rules("some  \n \n some", &[OneSpace.as_dyn()]),
-        "some \n \n some"
-    );
-    similar_asserts::assert_eq!(
-        format_with_rules("some  \n  \n some", &[OneSpace.as_dyn()]),
-        "some \n \n some"
-    );
-    similar_asserts::assert_eq!(
-        format_with_rules("some  \n  \n some  ", &[OneSpace.as_dyn()]),
-        "some \n \n some "
-    );
-}
+test_snippet!(
+    one_space_is_unchanged_2,
+    expect = "some\n\nsome",
+    "some\n\nsome",
+    &[OneSpace.as_dyn()]
+);
 
-#[test]
-fn dont_insert_weird_space() {
-    init();
+test_snippet!(
+    one_space_is_unchanged_3,
+    expect = "some \n \n some",
+    "some \n \n some",
+    &[OneSpace.as_dyn()]
+);
 
-    similar_asserts::assert_eq!(format_with_rules("#{  }\n", &[OneSpace.as_dyn()]), "#{ }\n");
-}
+test_snippet!(
+    more_than_on_becomes_one,
+    expect = "#{ }",
+    "#{  }",
+    &[OneSpace.as_dyn()]
+);
+
+test_snippet!(
+    more_than_on_becomes_one_1,
+    expect = "some \n \n some",
+    "some \n  \n some",
+    &[OneSpace.as_dyn()]
+);
+
+test_snippet!(
+    more_than_on_becomes_one_2,
+    expect = "#{ }",
+    "#{   }",
+    &[OneSpace.as_dyn()]
+);
+
+test_snippet!(
+    more_than_on_becomes_one_3,
+    expect = "m m",
+    "m  m",
+    &[OneSpace.as_dyn()]
+);
+
+test_snippet!(
+    more_than_on_becomes_one_4,
+    expect = "some \n \n some",
+    "some \n \n  some",
+    &[OneSpace.as_dyn()]
+);

@@ -1,28 +1,39 @@
 use super::*;
 
-#[test]
-#[ignore]
-fn test_eof() {
-    similar_asserts::assert_eq!(typst_format("#{} \n"), r"#{}");
-    similar_asserts::assert_eq!(typst_format("#{} \n "), r"#{}");
-    //pass
-    // todo new rules, No /n before end of file.
-    similar_asserts::assert_eq!(typst_format(r"#{}"), r"#{}");
-    similar_asserts::assert_eq!(typst_format(r"#{} "), r"#{}");
-}
+test_snippet!(
+    test_eof,
+    ignore = "might get implemented another way",
+    expect = r"#{}",
+    "#{} \n",
+    rules().as_slice()
+);
+test_snippet!(
+    test_eof_1,
+    ignore = "might get implemented another way",
+    expect = r"#{}",
+    "#{} \n ",
+    rules().as_slice()
+);
+test_snippet!(test_eof_2, expect = r"#{}", r"#{}", rules().as_slice());
 
-#[test]
-fn test_let() {
-    init();
+test_snippet!(
+    test_eof_3,
+    ignore = "might get implemented another way",
+    expect = r"#{}",
+    r"#{} ",
+    rules().as_slice()
+);
 
-    similar_asserts::assert_eq!(typst_format(r"#let x = 4"), r"#let x = 4");
-}
+test_snippet!(
+    test_let,
+    expect = r"#let x = 4",
+    r"#let x = 4",
+    rules().as_slice()
+);
 
-#[test]
-fn complex() {
-    init();
-
-    let expected = r##"#import "template.typ": *
+test_snippet!(
+    complex,
+    expect = r##"#import "template.typ": *
 #show: letter.with(
     sender: [Jane Smith, Universal Exports, 1 Heavy Plaza, Morristown, NJ 07964,],
     recipient: [Mr. John Doe \ Acme Corp. \ 123 Glennwood Ave \ Quarto Creek, VA 22438],
@@ -37,14 +48,14 @@ Dear Joe,
     9,
 )
 
-Best,"##;
-    let input = r##"#import "template.typ": *
+Best,"##,
+    r##"#import "template.typ": *
 #show: letter.with(sender:[Jane Smith, Universal Exports, 1 Heavy Plaza, Morristown, NJ 07964,],recipient: [Mr. John Doe \ Acme Corp. \ 123 Glennwood Ave \ Quarto Creek, VA 22438],date: [Morristown, June 9th, 2023,],subject: [test],name: [Jane Smith \Regional Director],)
 
 Dear Joe,
 
 #lorem(9)
 
-Best,"##;
-    similar_asserts::assert_eq!(typst_format(input), expected);
-}
+Best,"##,
+    rules().as_slice()
+);

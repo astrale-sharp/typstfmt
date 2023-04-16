@@ -1,5 +1,22 @@
 use super::*;
 
+macro_rules! test_snippet {
+    (
+        $test_name:ident,
+        $(ignore = $ignore:tt ,)?
+        expect = $expected:expr,
+        $snippet:expr,
+        $rules:expr
+    ) => {
+        #[test]
+        $(#[ignore = $ignore])?
+        fn $test_name() {
+            init();
+            similar_asserts::assert_eq!(format_with_rules($snippet, $rules), $expected);
+        }
+    };
+}
+
 #[cfg(test)]
 fn init() {
     let _ = env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
@@ -7,14 +24,13 @@ fn init() {
         .try_init();
 }
 
-#[test]
-fn more_than_one_rule() {
-    init();
-    similar_asserts::assert_eq!(
-        format_with_rules("#{  }  \n", &[OneSpace.as_dyn(), NoSpaceAtEndLine.as_dyn()]),
-        "#{ }\n"
-    );
-}
+test_snippet!(
+    more_than_one_rule,
+    expect = "#{ }\n",
+    "#{  }  \n",
+    &[OneSpace.as_dyn(), NoSpaceAtEndLine.as_dyn()]
+);
+
 #[cfg(test)]
 mod no_space_when_line_ends;
 #[cfg(test)]
