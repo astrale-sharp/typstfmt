@@ -32,6 +32,9 @@ test_snippet!(
 );
 
 #[cfg(test)]
+mod cond_rule;
+
+#[cfg(test)]
 mod no_space_when_line_ends;
 #[cfg(test)]
 mod one_space;

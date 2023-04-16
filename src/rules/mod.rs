@@ -25,14 +25,43 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
     ]
 }
 
+pub(crate) struct ConditionalRule<T: Rule> {
+    pub rule: T,
+    condition: Box<dyn Fn(&LinkedNode) -> bool>,
+}
+impl<T: Rule> std::fmt::Debug for ConditionalRule<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ConditionalRule")
+            .field("rule", &self.rule)
+            .finish()
+    }
+}
+
+impl<T: Rule> ConditionalRule<T> {
+    pub(crate) fn new(rule: T, condition: impl 'static + Fn(&LinkedNode) -> bool) -> Self {
+        Self {
+            rule,
+            condition: Box::new(condition),
+        }
+    }
+}
+
+impl<T: Rule> Rule for ConditionalRule<T> {
+    fn accept(&self, context: &LinkedNode) -> bool {
+        (self.condition)(context) && self.rule.accept(context)
+    }
+
+    fn eat(&self, text: String, context: &LinkedNode, writer: &mut Writer) {
+        self.rule.eat(text, context, writer)
+    }
+}
+
 #[derive(Debug)]
 pub(crate) struct OneSpace;
 
 impl Rule for OneSpace {
     fn accept(&self, node: &LinkedNode) -> bool {
-        node.is::<ast::Space>()
-            || node.is::<ast::Markup>()
-            || node.is::<ast::Parbreak>()
+        node.is::<ast::Space>() || node.is::<ast::Markup>() || node.is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
@@ -46,9 +75,7 @@ pub(crate) struct NoSpaceAtEndLine;
 
 impl Rule for NoSpaceAtEndLine {
     fn accept(&self, node: &LinkedNode) -> bool {
-        node.is::<ast::Space>()
-            || node.is::<ast::Markup>()
-            || node.is::<ast::Parbreak>()
+        node.is::<ast::Space>() || node.is::<ast::Markup>() || node.is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
@@ -79,7 +106,7 @@ impl Rule for SpaceAfterColon {
     fn accept(&self, node: &LinkedNode) -> bool {
         let Some(parent) = node.parent().cloned() else {return false};
         let children = parent.children().collect_vec();
-        let Some(next) = children.get(node.index()+1) else {return false}; 
+        let Some(next) = children.get(node.index()+1) else {return false};
         node.kind() == SyntaxKind::Colon && !next.is::<ast::Space>()
     }
 
@@ -105,9 +132,7 @@ impl Rule for NoSpaceBeforeColon {
 pub(crate) struct JumpTwoLineMax;
 impl Rule for JumpTwoLineMax {
     fn accept(&self, node: &LinkedNode) -> bool {
-        node.is::<ast::Text>()
-            || node.is::<ast::Markup>()
-            || node.is::<ast::Parbreak>()
+        node.is::<ast::Text>() || node.is::<ast::Markup>() || node.is::<ast::Parbreak>()
     }
 
     fn eat(&self, text: String, _: &LinkedNode, writer: &mut Writer) {
