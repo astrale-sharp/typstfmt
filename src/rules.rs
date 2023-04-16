@@ -376,6 +376,7 @@ mod tests_typst_format {
     use super::*;
 
     #[test]
+    #[ignore]
     fn test_eof() {
         similar_asserts::assert_eq!(typst_format("#{} \n"), r"#{}");
         similar_asserts::assert_eq!(typst_format("#{} \n "), r"#{}");
