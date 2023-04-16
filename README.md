@@ -13,7 +13,7 @@ To push this formatter further, I need to know what you don't like.
 
 You can :
 - request features (something you'd like configurable)
-- show a problematic snippet of code.
+- open an issue with a snippet of code that is not formatted how you'd like it.
 
 ## Contributing to the Code Base
 
@@ -35,8 +35,17 @@ pub(crate) trait Rule: std::fmt::Debug {
 }
 ```
 
-To contribute you could help making new rules, choosing the order in which they are selected, write test, get familiar with typst AST etc or take a look at the issue on this repo!
+To contribute you could:
+- Choose an ignored test and make it pass, this will often require you to ad or modify a rule or the order in which they are applied. Sometimes you'll have to modify the Context struct.
+- Add a test containing an interesting snippet of code. It will usually look like this: 
+```rust
+test_snippet!(
+    no_apply_if_not_in_code_block,
+    ignore = "unimplemented",
+    expect = "#f()",
+    "#f()",
+    &[IdentItemFunc.as_dyn()]
+);
+```
 
-Another possible axe of contribution is  optimisation, which I have given 0 thoughts about so far.
-
-If there is no issue open, discussion before pull requests is appreciated.
+If there is no open issue, discussion before opening a pull requests is appreciated.

@@ -8,7 +8,6 @@ test_snippet!(
     &[IdentItemFunc.as_dyn()]
 );
 
-
 test_snippet!(
     no_change_if_no_args,
     ignore = "unimplemented",

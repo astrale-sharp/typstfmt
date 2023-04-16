@@ -5,8 +5,8 @@ mod eof;
 test_snippet!(
     later,
     ignore = "need to treat fn first",
-    expect = "#{\n    a()[]\n}", 
-    "#{\na()[]\n}", 
+    expect = "#{\n    a()[]\n}",
+    "#{\na()[]\n}",
     rules().as_slice()
 );
 
