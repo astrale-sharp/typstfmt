@@ -10,9 +10,23 @@ test_snippet!(
 );
 
 test_snippet!(
-    func_content,
+    func_content_in,
+    expect = "#a([])",
+    "#a([])",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content_after,
     expect = "#a()[]",
     "#a()[]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content_both,
+    expect = "#a([])[]",
+    "#a([])[]",
     rules().as_slice()
 );
 
