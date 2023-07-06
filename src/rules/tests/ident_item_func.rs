@@ -2,7 +2,6 @@ use super::*;
 
 test_snippet!(
     no_apply_if_not_in_code_block,
-    ignore = "unimplemented",
     expect = "#f()",
     "#f()",
     &[IdentItemFunc.as_dyn()]
@@ -10,7 +9,6 @@ test_snippet!(
 
 test_snippet!(
     no_change_if_no_args,
-    ignore = "unimplemented",
     expect = "#{f()}",
     "#{f()}",
     &[IdentItemFunc.as_dyn()]
