@@ -92,6 +92,28 @@ impl Rule for NoSpaceAtEndLine {
     }
 }
 
+/// Check whether the given parent node contains any non-empty non-grouping nodes.
+fn is_empty_grouping(parent: &LinkedNode) -> bool {
+    let mut children = parent.children();
+    let res = children.all(|c| {
+        let kind = c.kind();
+        if kind.is_grouping() {
+            true
+        } else {
+            match kind {
+                SyntaxKind::ContentBlock => is_empty_grouping(&c),
+                // TODO: add more types that could contain things.
+                _ => {
+                    debug!("child not empty: {:?}", c);
+                    c.is_empty()
+                }
+            }
+        }
+    });
+    debug!("is_empty parent:{:?} res:{}", parent, res);
+    res
+}
+
 #[derive(Debug)]
 pub(crate) struct TrailingComma;
 impl Rule for TrailingComma {
@@ -100,6 +122,7 @@ impl Rule for TrailingComma {
         let Some(next_child) = node.next_sibling() else {return false};
 
         parent.is::<ast::Args>()
+            && !is_empty_grouping(parent)
             && !(node.kind() == SyntaxKind::Comma)
             && next_child.kind().is_grouping()
     }
@@ -169,14 +192,21 @@ impl Rule for IdentItemFunc {
         // todo with last child, if not comma, if last elem, add a comma
         if node.kind().is_grouping() {
             // is grouping opening
+            let newline = !is_empty_grouping(node.parent().unwrap());
             if node.next_sibling().is_some() {
-                writer.push(&text).inc_indent().newline_with_indent();
+                writer.push(&text);
+                if newline {
+                    writer.inc_indent().newline_with_indent();
+                }
             } else if node.next_sibling().is_none()
                 && node.parent().as_ref().unwrap().is::<ast::Args>()
             {
                 // is grouping nested closing
                 debug!("GROUPING NESTED CLOSING");
-                writer.dec_indent().newline_with_indent().push(&text);
+                if newline {
+                    writer.dec_indent().newline_with_indent();
+                }
+                writer.push(&text);
             //                writer.newline_with_indent();
             } else {
                 debug!("GROUPING CLOSING GOOD");

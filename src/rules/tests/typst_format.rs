@@ -3,8 +3,22 @@ use super::*;
 mod eof;
 
 test_snippet!(
-    later,
-    ignore = "need to treat fn first",
+    simple,
+    expect = "#tablex()",
+    "#tablex()",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content,
+    expect = "#a()[]",
+    "#a()[]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    space_for_newline,
+    ignore = "need block enter indentation",
     expect = "#{\n    a()[]\n}",
     "#{\na()[]\n}",
     rules().as_slice()
