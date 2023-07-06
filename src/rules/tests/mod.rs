@@ -12,7 +12,10 @@ macro_rules! test_snippet {
         $(#[ignore = $ignore])?
         fn $test_name() {
             init();
-            similar_asserts::assert_eq!(format_with_rules($snippet, $rules), $expected);
+            let result = format_with_rules($snippet, $rules);
+            similar_asserts::assert_eq!(result, $expected, "first formatting");
+            let result2 = format_with_rules(&result, $rules);
+            similar_asserts::assert_eq!(result2, $expected, "second formatting");
         }
     };
 }
