@@ -1,3 +1,5 @@
+use std::unreachable;
+
 use super::*;
 use typst::syntax::SyntaxKind;
 pub(crate) trait Rule: std::fmt::Debug {
@@ -23,6 +25,9 @@ pub(crate) fn rules() -> Vec<Box<dyn rules::Rule>> {
         JumpTwoLineMax.as_dyn(),
         OneSpace.as_dyn(),
         NoSpaceAtEndLine.as_dyn(),
+        Newlines.as_dyn(),
+        BlockIndentPre.as_dyn(),
+        BlockIndentPost.as_dyn(),
     ]
 }
 
@@ -92,6 +97,28 @@ impl Rule for NoSpaceAtEndLine {
     }
 }
 
+/// Check whether the given parent node contains any non-empty non-grouping nodes.
+fn is_empty_grouping(parent: &LinkedNode) -> bool {
+    let mut children = parent.children();
+    let res = children.all(|c| {
+        let kind = c.kind();
+        if kind.is_grouping() {
+            true
+        } else {
+            match kind {
+                SyntaxKind::ContentBlock => is_empty_grouping(&c),
+                // TODO: add more types that could contain things.
+                _ => {
+                    debug!("child not empty: {:?}", c);
+                    c.is_empty()
+                }
+            }
+        }
+    });
+    debug!("is_empty parent:{:?} res:{}", parent, res);
+    res
+}
+
 #[derive(Debug)]
 pub(crate) struct TrailingComma;
 impl Rule for TrailingComma {
@@ -100,6 +127,7 @@ impl Rule for TrailingComma {
         let Some(next_child) = node.next_sibling() else {return false};
 
         parent.is::<ast::Args>()
+            && !is_empty_grouping(parent)
             && !(node.kind() == SyntaxKind::Comma)
             && next_child.kind().is_grouping()
     }
@@ -169,14 +197,21 @@ impl Rule for IdentItemFunc {
         // todo with last child, if not comma, if last elem, add a comma
         if node.kind().is_grouping() {
             // is grouping opening
+            let newline = !is_empty_grouping(node.parent().unwrap());
             if node.next_sibling().is_some() {
-                writer.push(&text).inc_indent().newline_with_indent();
+                writer.push(&text);
+                if newline {
+                    writer.inc_indent().newline_with_indent();
+                }
             } else if node.next_sibling().is_none()
                 && node.parent().as_ref().unwrap().is::<ast::Args>()
             {
                 // is grouping nested closing
                 debug!("GROUPING NESTED CLOSING");
-                writer.dec_indent().newline_with_indent().push(&text);
+                if newline {
+                    writer.dec_indent().newline_with_indent();
+                }
+                writer.push(&text);
             //                writer.newline_with_indent();
             } else {
                 debug!("GROUPING CLOSING GOOD");
@@ -199,6 +234,72 @@ impl Rule for IdentItemFunc {
             // do nothing
         } else {
             writer.push(&text);
+        }
+    }
+}
+
+/// Increment the indentation when entering a block.
+#[derive(Debug)]
+pub(crate) struct BlockIndentPre;
+impl Rule for BlockIndentPre {
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(parent) = node.parent() else {return false};
+        parent.kind().is_block()
+            && matches!(node.kind(), SyntaxKind::LeftBrace | SyntaxKind::LeftBracket)
+    }
+
+    fn eat(&self, text: String, _node: &LinkedNode, writer: &mut Writer) {
+        writer.push(&text).inc_indent();
+    }
+}
+
+/// Decrement the indentation when leaving a block.
+#[derive(Debug)]
+pub(crate) struct BlockIndentPost;
+impl Rule for BlockIndentPost {
+    fn accept(&self, node: &LinkedNode) -> bool {
+        let Some(parent) = node.parent() else {return false};
+        parent.kind().is_block()
+            && matches!(
+                node.kind(),
+                SyntaxKind::RightBrace | SyntaxKind::RightBracket
+            )
+    }
+
+    fn eat(&self, text: String, _node: &LinkedNode, writer: &mut Writer) {
+        writer.dec_indent().push(&text);
+    }
+}
+
+/// Ensure newlines are indented correctly.
+#[derive(Debug)]
+pub(crate) struct Newlines;
+impl Rule for Newlines {
+    fn accept(&self, node: &LinkedNode) -> bool {
+        // check whether we are at the end of the grouping
+        let at_end_of_grouping = node.next_sibling().map_or(true, |s| {
+            matches!(
+                s.kind(),
+                SyntaxKind::RightBracket | SyntaxKind::RightBrace | SyntaxKind::RightParen
+            )
+        });
+        // ensure that this is some newline-capable thing
+        matches!(node.kind(), SyntaxKind::Space | SyntaxKind::Parbreak)
+            // and that it contains a newline (space doesn't have to)
+            && node.text().contains("\n")
+            // and that we aren't at the end of a grouping
+            && !at_end_of_grouping
+    }
+
+    fn eat(&self, _text: String, node: &LinkedNode, writer: &mut Writer) {
+        match node.kind() {
+            SyntaxKind::Space => {
+                writer.newline_with_indent();
+            }
+            SyntaxKind::Parbreak => {
+                writer.newline().newline_with_indent();
+            }
+            _ => unreachable!(),
         }
     }
 }

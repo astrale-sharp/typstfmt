@@ -42,7 +42,7 @@ impl<'a> Writer<'a> {
         self
     }
 
-    pub fn with_value(mut self, s: impl Into<String>) -> Self {
+    pub fn set_value(&mut self, s: impl Into<String>) -> &mut Self {
         self.value = s.into();
         self
     }
@@ -178,9 +178,8 @@ mod tests {
     #[test]
     fn creation() {
         let mut res = String::from("");
-        let writer = Writer::default(&mut res)
-            .with_value("Hello")
-            .with_style(Style { indent: 2 });
+        let mut writer = Writer::default(&mut res).with_style(Style { indent: 2 });
+        writer.set_value("Hello");
         similar_asserts::assert_eq!(writer.value(), "Hello");
         similar_asserts::assert_eq!(writer.style.indent, 2);
     }

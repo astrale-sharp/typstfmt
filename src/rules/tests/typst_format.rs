@@ -3,8 +3,49 @@ use super::*;
 mod eof;
 
 test_snippet!(
-    later,
-    ignore = "need to treat fn first",
+    simple,
+    expect = "#tablex()",
+    "#tablex()",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content_in,
+    expect = "#a([])",
+    "#a([])",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content_after,
+    expect = "#a()[]",
+    "#a()[]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    func_content_both,
+    expect = "#a([])[]",
+    "#a([])[]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    comma_addition,
+    expect = "#set text(\n    font: \"Liberation Serif\",\n    lang: \"en\",\n)",
+    "#set text(font:\"Liberation Serif\",lang:\"en\")",
+    rules().as_slice()
+);
+
+test_snippet!(
+    comma_addition_simple,
+    expect = "#text(\n    lang: \"en\",\n)",
+    "#text(lang:\"en\")",
+    rules().as_slice()
+);
+
+test_snippet!(
+    space_for_newline,
     expect = "#{\n    a()[]\n}",
     "#{\na()[]\n}",
     rules().as_slice()
@@ -14,6 +55,20 @@ test_snippet!(
     test_let,
     expect = r"#let x = 4",
     r"#let x = 4",
+    rules().as_slice()
+);
+
+test_snippet!(
+    content_block_indent,
+    expect = "#[\n    1\n\n    \"a\"\n\n    1 \\ 2\n]",
+    "#[\n1\n\n\"a\"\n\n1 \\ 2\n]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    code_block_indent,
+    expect = "#{\n    1\n    \"a\"\n}",
+    "#{\n1\n\"a\"\n}",
     rules().as_slice()
 );
 
