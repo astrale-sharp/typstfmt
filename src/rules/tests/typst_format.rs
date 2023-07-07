@@ -46,7 +46,6 @@ test_snippet!(
 
 test_snippet!(
     space_for_newline,
-    ignore = "need block enter indentation",
     expect = "#{\n    a()[]\n}",
     "#{\na()[]\n}",
     rules().as_slice()
@@ -56,6 +55,20 @@ test_snippet!(
     test_let,
     expect = r"#let x = 4",
     r"#let x = 4",
+    rules().as_slice()
+);
+
+test_snippet!(
+    content_block_indent,
+    expect = "#[\n    1\n\n    \"a\"\n\n    1 \\ 2\n]",
+    "#[\n1\n\n\"a\"\n\n1 \\ 2\n]",
+    rules().as_slice()
+);
+
+test_snippet!(
+    code_block_indent,
+    expect = "#{\n    1\n    \"a\"\n}",
+    "#{\n1\n\"a\"\n}",
     rules().as_slice()
 );
 
