@@ -1,6 +1,7 @@
 *The crate is published with empty Typst*
 
 Howdy! This is a formatter for the Typst language!
+This hasn't been worked on for a while but I might start again soon.
 
 # Features
 
