@@ -30,4 +30,10 @@ macro_rules! make_test {
 mod basic;
 
 #[cfg(test)]
+mod nested;
+
+#[cfg(test)]
 mod args;
+
+#[cfg(test)]
+mod code_block;
