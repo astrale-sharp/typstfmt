@@ -199,15 +199,15 @@ fn format_args_breaking(children: &Vec<String>, parent: &LinkedNode<'_>, ctx: &m
 fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
     let mut next = node.next_sibling();
     while let Some(next_inner) = &next {
-        let kind = next_inner.kind(); 
+        let kind = next_inner.kind();
         if ignoring.contains(&kind) {
             next = next_inner.next_sibling();
-            continue
+            continue;
         }
         if kind == is {
             return true;
         } else {
-            return false
+            return false;
         }
     }
     false

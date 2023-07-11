@@ -1,95 +1,50 @@
 use super::*;
 
-macro_rules! test_snippet {
-    (
-        $test_name:ident,
-        $snippet:expr,
-        formatted = $expected:expr,
-        config = $config:expr $(,)?
-    ) => {
-        #[test]
-        fn $test_name() {
-            let _ = env_logger::builder()
-                .filter_level(log::LevelFilter::Debug)
-                .is_test(true)
-                .try_init();
-            let formatted = format($snippet, $config);
-            println!("===");
-            println!(
-                "input: {:?}\nexpected: {:?}\nfound: {:?}",
-                $snippet, $expected, formatted
-            );
-            similar_asserts::assert_eq!($expected, formatted);
-            println!("===");
-        }
-    };
+fn init() {
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init();
 }
 
-test_snippet!(
-    unchanged,
-    "#{ }",
-    formatted = "#{ }",
-    config = Config::default()
-);
+macro_rules! make_test {
+    ($test_name:ident, $input:literal) => {
+        make_test!($test_name, $input, Config::default());
+    };
 
-test_snippet!(
-    one_space,
-    "#{  }",
-    formatted = "#{ }",
-    config = Config::default()
-);
-test_snippet!(
-    one_space_b,
-    "#{   }",
-    formatted = "#{ }",
-    config = Config::default()
-);
-test_snippet!(
-    two_line_max,
-    "\n\n\n",
-    formatted = "\n\n",
-    config = Config::default()
-);
-test_snippet!(
-    empty_func_call,
-    "#f()",
-    formatted = "#f()",
-    config = Config::default()
-);
-test_snippet!(
-    simple_func_call,
-    "#f(1,2,3)",
-    formatted = "#f(1, 2, 3)",
-    config = Config::default()
-);
+    ($test_name:ident, $input:literal, $config:expr) => {
+        #[test]
+        fn $test_name() {
+            init();
+            let input = $input;
+            let formatted = format(input, $config);
+            insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
+                insta::assert_debug_snapshot!(formatted);
+            });
+        }
+    };
 
-test_snippet!(
-    long_func_call,
-    "#f(1,this_is_absurdly_loooooooooong,3)",
-    formatted = "#f(\n  1,\n  this_is_absurdly_loooooooooong,\n  3,\n)",
-    config = Config {
-        max_line_length: 5,
-        ..Default::default()
     }
-);
 
-
-test_snippet!(
-    expr_func_call,
-    "#f(1,1+1,3)",
-    formatted = "#f(\n  1,\n  1+1,\n  3,\n)",
-    config = Config {
+make_test!(unchanged, "#{ }");
+make_test!(on_space, "#{  }");
+make_test!(on_space_b, "#{   }");
+make_test!(two_line_max, "\n\n\n");
+make_test!(call_func_empty, "#f()");
+make_test!(call_func_simple, "#f(1,2,3)");
+make_test!(
+    call_func_long,
+    "#f(1,this_is_absurdly_loooooooooong,3)",
+    Config {
         max_line_length: 1,
         ..Default::default()
     }
 );
-
-test_snippet!(
-    long_func_call_trailing,
+make_test!(
+    call_func_long_trailing,
     "#f(1,this_is_absurdly_loooooooooong,3,)",
-    formatted = "#f(\n  1,\n  this_is_absurdly_loooooooooong,\n  3,\n)",
-    config = Config {
-        max_line_length: 5,
+    Config {
+        max_line_length: 1,
         ..Default::default()
     }
 );
