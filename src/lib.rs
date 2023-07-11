@@ -1,16 +1,13 @@
 //! Some crates are well documented, this crate has a personality instead (please help).
-//! 
+//!
 //! This lack is born out of wanting your program to work before documenting it, as long as I'm
 //! iterating I don't write docs so much.
 
 use log::debug;
 use typst::syntax::SyntaxKind;
-// use log::debug;
-
-// use typst::syntax::Span;
 use typst::syntax::SyntaxKind::*;
 use typst::syntax::{parse, LinkedNode};
-
+use Option::None;
 
 mod config;
 use config::Config;
@@ -125,6 +122,18 @@ fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> S
 
 fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let res = format_args_one_line(children, parent, ctx);
+    
+    let number_of_args = parent.children().filter_map(|node| {
+        if (&[Comma, Space, LeftParen, RightParen]).contains(&node.kind()) {
+            None
+        } else {
+            Some(node)
+        }
+    }).count();
+    
+    if number_of_args <= 1 {
+        return res;
+    }
 
     if max_line_length(&res) >= ctx.config.max_line_length {
         debug!("format_args::breaking");
@@ -208,7 +217,7 @@ fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) 
             next = next_inner.next_sibling();
             continue;
         }
-        return kind == is
+        return kind == is;
     }
     false
 }
