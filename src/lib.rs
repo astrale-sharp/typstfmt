@@ -122,15 +122,18 @@ fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> S
 
 fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let res = format_args_one_line(children, parent, ctx);
-    
-    let number_of_args = parent.children().filter_map(|node| {
-        if (&[Comma, Space, LeftParen, RightParen]).contains(&node.kind()) {
-            None
-        } else {
-            Some(node)
-        }
-    }).count();
-    
+
+    let number_of_args = parent
+        .children()
+        .filter_map(|node| {
+            if (&[Comma, Space, LeftParen, RightParen]).contains(&node.kind()) {
+                None
+            } else {
+                Some(node)
+            }
+        })
+        .count();
+
     if number_of_args <= 1 {
         return res;
     }
