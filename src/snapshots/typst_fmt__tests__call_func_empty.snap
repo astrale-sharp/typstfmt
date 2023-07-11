@@ -1,6 +1,0 @@
----
-source: src/tests.rs
-description: "INPUT\n===\n\"#f()\"\n===\n#f()\nFORMATTED\n===\n#f()"
-expression: formatted
----
-"#f()"

@@ -1,6 +1,0 @@
----
-source: src/tests.rs
-description: "===\n\"#f(1,2,3)\"\n===\n#f(1,2,3)"
-expression: formatted
----
-"#f(1, 2, 3)"
