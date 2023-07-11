@@ -1,12 +1,16 @@
-use itertools::Itertools;
+//! Some crates are well documented, this crate has a personality instead (please help).
+//! 
+//! This lack is born out of wanting your program to work before documenting it, as long as I'm
+//! iterating I don't write docs so much.
+
 use log::debug;
 use typst::syntax::SyntaxKind;
 // use log::debug;
-use typst::syntax::ast;
+
 // use typst::syntax::Span;
 use typst::syntax::SyntaxKind::*;
 use typst::syntax::{parse, LinkedNode};
-use Option::None;
+
 
 mod config;
 use config::Config;
@@ -111,7 +115,7 @@ fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> S
         _ => {
             res.push_str(node.text());
             for k in children {
-                res.push_str(&k);
+                res.push_str(k);
                 ctx.pushed_raw()
             }
         }
@@ -119,19 +123,19 @@ fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> S
     res
 }
 
-fn format_args(parent: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> String {
-    let res = format_args_one_line(&children, parent, ctx);
+fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
+    let res = format_args_one_line(children, parent, ctx);
 
     if max_line_length(&res) >= ctx.config.max_line_length {
         debug!("format_args::breaking");
         ctx.pushed_raw();
-        return format_args_breaking(&children, parent, ctx);
+        return format_args_breaking(children, parent, ctx);
     }
     debug!("format_args::one_line");
     res
 }
 
-fn format_args_one_line(children: &Vec<String>, parent: &LinkedNode<'_>, ctx: &mut Ctx) -> String {
+fn format_args_one_line(children: &[String], parent: &LinkedNode<'_>, ctx: &mut Ctx) -> String {
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
@@ -154,7 +158,7 @@ fn format_args_one_line(children: &Vec<String>, parent: &LinkedNode<'_>, ctx: &m
     res
 }
 
-fn format_args_breaking(children: &Vec<String>, parent: &LinkedNode<'_>, ctx: &mut Ctx) -> String {
+fn format_args_breaking(children: &[String], parent: &LinkedNode<'_>, ctx: &mut Ctx) -> String {
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
@@ -204,11 +208,7 @@ fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) 
             next = next_inner.next_sibling();
             continue;
         }
-        if kind == is {
-            return true;
-        } else {
-            return false;
-        }
+        return kind == is
     }
     false
 }
