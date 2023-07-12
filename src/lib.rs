@@ -4,7 +4,7 @@
 //! iterating I don't write docs so much.
 
 use itertools::Itertools;
-use log::{debug, trace};
+use log::debug;
 use typst::syntax::SyntaxKind;
 use typst::syntax::SyntaxKind::*;
 use typst::syntax::{parse, LinkedNode};
@@ -35,11 +35,17 @@ impl Ctx {
             ..Default::default()
         }
     }
+
+    /// Trim spaces for Space nodes if they contain a linebreak.
     /// avoids:
     /// - putting two consecutive spaces.
     /// - putting more than two consecutive newlines.
-    fn push_in(&mut self, s: &str, result: &mut String) {
-        trace!("PUSH_IN");
+    fn push_in(&mut self, s: &str, res: &mut String) {
+        let s = if s.contains('\n') {
+            s.trim_end_matches(' ')
+        } else {
+            s
+        };
         for c in s.chars() {
             match c {
                 ' ' => {
@@ -48,21 +54,21 @@ impl Ctx {
                     } else {
                         debug!("PUSHED SPACE");
                         self.just_spaced = true;
-                        result.push(' ');
+                        res.push(' ');
                     }
                 }
                 '\n' => {
                     if self.consec_new_line <= 1 {
                         debug!("PUSHED NEWLINE");
                         self.consec_new_line += 1;
-                        result.push('\n')
+                        res.push('\n')
                     } else {
                         debug!("IGNORED newline");
                     }
                 }
                 _ => {
                     debug!("PUSHED {c}");
-                    result.push(c);
+                    res.push(c);
                     self.lost_context();
                 }
             }
@@ -72,7 +78,7 @@ impl Ctx {
     /// makes the context aware it missed info,
     /// should be called when pushing directly in result.
     fn push_raw_in(&mut self, s: &str, result: &mut String) {
-        trace!("PUSH_RAW");
+        debug!("PUSH_RAW: {s:?}");
         result.push_str(s);
         self.lost_context()
     }
@@ -115,6 +121,8 @@ pub fn format(s: &str, config: Config) -> String {
 /// This is recursively called on the AST, the formatting is bottom up,
 /// nodes will decide based on the size of their children and the max line length
 /// how they will be formatted.
+///
+/// One assumed rule is that no kind should be formatting with surrounded space
 fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     let mut res: Vec<String> = vec![];
     for child in node.children() {
@@ -130,32 +138,24 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
 }
 
 /// formats a node for which no specific function was found. Last resort.
-fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> String {
-    debug!("format_default");
+/// For the text of the node: 
+/// Trim spaces for Space nodes if they contain a linebreak.
+/// avoids:
+/// - putting two consecutive spaces.
+/// - putting more than two consecutive newlines.
+/// 
+/// For the already formatted children, change nothing.
+fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
+    debug!("::format_default: {:?}", node.kind());
     let mut res = String::new();
+    debug!(
+        "with children: {:?}",
+        node.children().map(|c| c.kind()).collect_vec()
+    );
 
-    match node.kind() {
-        Space => {
-            for c in node.text().chars() {
-                match c {
-                    ' ' | '\n' => ctx.push_in(&c.to_string(), &mut res),
-                    _ => panic!("Encountered char {c} in kind Space which is assumed impossible"),
-                }
-            }
-        }
-        Parbreak => {
-            debug!("format_default::ParBreak");
-            for _ in 0..node.text().lines().count() {
-                debug!("---try push newline");
-                ctx.push_in("\n", &mut res);
-            }
-        }
-        _ => {
-            ctx.push_raw_in(node.text(), &mut res);
-            for s in children {
-                ctx.push_raw_in(s, &mut res);
-            }
-        }
+    ctx.push_in(node.text(), &mut res);
+    for s in children {
+        ctx.push_raw_in(s, &mut res);
     }
     res
 }
