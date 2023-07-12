@@ -18,12 +18,12 @@ categories = ["command-line-utilities", "development-tools"]
 [dependencies]
 globmatch = "0.2.3"
 itertools = "0.10.5"
-log = "0.4.17"
 regex = "1.7.3"
 toml = "0.7.3"
+tracing = { version = "0.1.37", features = ["attributes"] }
 typst = { git = "https://github.com/typst/typst.git" }
-env_logger = "0.10.0"
 
 
 [dev-dependencies]
 insta = "1.30.0"
+tracing-subscriber = "0.3.17"

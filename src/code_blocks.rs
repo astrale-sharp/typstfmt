@@ -1,33 +1,39 @@
 use super::*;
 
+#[instrument(skip_all)]
 pub(crate) fn format_code_blocks(
     parent: &LinkedNode,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
-    debug!("format code_blocks!");
-    if children.iter().any(|c| c.contains('\n'))
-        || [Some(ForLoop), Some(WhileLoop)].contains(&parent.parent_kind())
-    {
+    let children_contains_lines = children.iter().any(|c| c.contains('\n'));
+    let parent_is_loop = [Some(ForLoop), Some(WhileLoop)].contains(&parent.parent_kind());
+    if children_contains_lines || parent_is_loop {
+        debug!("format breaking cause: children contains breakline: {children_contains_lines}");
+        debug!("or because parent is loop: {parent_is_loop}");
         return format_code_blocks_breaking(parent, children, ctx);
     }
 
     let res = format_code_blocks_tight(parent, children, ctx);
+    let max_line_length = utils::max_line_length(&res);
 
-    if utils::max_line_length(&res) >= ctx.config.max_line_length {
-        debug!("format_args breaking");
+    if max_line_length >= ctx.config.max_line_length {
+        debug!(
+            "format breaking cause max_line_length ({}) above limit",
+            max_line_length
+        );
         return format_code_blocks_breaking(parent, children, ctx);
     }
-    debug!("format_code_blocks tight");
+    debug!("format tight");
     res
 }
 
+#[instrument(skip_all)]
 pub(crate) fn format_code_blocks_tight(
     parent: &LinkedNode,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
-    debug!("::format_code_blocks_tight");
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
@@ -58,12 +64,12 @@ pub(crate) fn format_code_blocks_tight(
     res
 }
 
+#[instrument(skip_all, ret)]
 pub(crate) fn format_code_blocks_breaking(
     parent: &LinkedNode,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
-    debug!("::format_code_blocks_tight");
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {

@@ -1,10 +1,17 @@
 use super::*;
+use tracing_subscriber::FmtSubscriber;
 
 fn init() {
-    let _ = env_logger::builder()
-        .filter_level(log::LevelFilter::Debug)
-        .is_test(true)
-        .try_init();
+    let subscriber = FmtSubscriber::builder()
+        .with_test_writer()
+        .without_time()
+        .compact()
+        // .with_ansi(false)
+        // .with_writer(make_writer)
+        .finish();
+    let _ = tracing::subscriber::set_global_default(subscriber)
+        // .expect("setting tracing default failed")
+        ;
 }
 
 macro_rules! make_test {

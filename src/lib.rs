@@ -1,10 +1,11 @@
-//! Some crates are well documented, this crate has a personality instead (please help).
+//! Some crates are well documented, this crate has a personality instead (help).
 //!
 //! This lack is born out of wanting your program to work before documenting it, as long as I'm
-//! iterating I don't write docs so much.
+//! iterating I don't write docs so much (I'm toxic).
 
 use itertools::Itertools;
-use log::debug;
+use tracing::debug;
+use tracing::instrument;
 use typst::syntax::SyntaxKind;
 use typst::syntax::SyntaxKind::*;
 use typst::syntax::{parse, LinkedNode};
@@ -40,6 +41,7 @@ impl Ctx {
     /// avoids:
     /// - putting two consecutive spaces.
     /// - putting more than two consecutive newlines.
+    #[instrument(skip_all)]
     fn push_in(&mut self, s: &str, res: &mut String) {
         let s = if s.contains('\n') {
             s.trim_end_matches(' ')
@@ -67,7 +69,7 @@ impl Ctx {
                     }
                 }
                 _ => {
-                    debug!("PUSHED {c}");
+                    // debug!("PUSHED {c}");
                     res.push(c);
                     self.lost_context();
                 }
@@ -85,6 +87,7 @@ impl Ctx {
 
     /// adds an indentation for each line the input except the first to match the current level of identation.
     fn push_raw_indent(&mut self, s: &str, result: &mut String) {
+        debug!("push::raw::indent");
         let mut is_first = true;
         for s in s.lines() {
             if is_first {
@@ -123,18 +126,25 @@ pub fn format(s: &str, config: Config) -> String {
 /// how they will be formatted.
 ///
 /// One assumed rule is that no kind should be formatting with surrounded space
+#[instrument(skip_all,name = "V" , ret, fields(kind = format!("{:?}",node.kind())))]
 fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     let mut res: Vec<String> = vec![];
     for child in node.children() {
         let child_fmt = visit(&child, ctx);
         res.push(child_fmt);
     }
-    match node.kind() {
+    let res = match node.kind() {
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
         Args => args::format_args(node, &res, ctx),
         LetBinding => format_let_binding(node, &res, ctx),
         _ => format_default(node, &res, ctx),
+    };
+    if node.children().count() == 0 {
+        debug!("visiting token {:?}", node.kind());
+    } else {
+        debug!("visiting parent: {:?}", node.kind());
     }
+    res
 }
 
 /// formats a node for which no specific function was found. Last resort.
@@ -145,6 +155,8 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
 /// - putting more than two consecutive newlines.
 ///
 /// For the already formatted children, change nothing.
+///
+#[instrument(skip_all)]
 fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     debug!("::format_default: {:?}", node.kind());
     let mut res = String::new();
@@ -160,12 +172,12 @@ fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> Stri
     res
 }
 
+#[instrument(skip_all)]
 pub(crate) fn format_let_binding(
     parent: &LinkedNode,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
-    debug!("::format_let_binding");
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {

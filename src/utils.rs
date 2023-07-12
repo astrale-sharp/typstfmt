@@ -24,7 +24,7 @@ pub(crate) fn find_child<'a>(
 }
 
 pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
-    debug!("fn::next_is_ignoring");
+    debug!("fn::next_is_ignoring, current is: {:?}", node);
     let mut next = node.next_sibling();
     debug!("{:?}", next);
     while let Some(next_inner) = &next {
