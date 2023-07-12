@@ -69,17 +69,22 @@ pub(crate) fn format_code_blocks_breaking(
         match node.kind() {
             LeftBrace => {
                 res.push_str(&format!("{s}\n{}", ctx.get_indent()));
+                ctx.just_spaced = true;
             }
             RightBrace => {
                 res.push_str(&format!("\n{s}"));
             }
             Space => {
-                // check if ok, can iter
-                ctx.push_in(s, &mut res);
+                let prev_is_brace = node.prev_sibling_kind() != Some(LeftBrace);
+                let nexy_is_brace = node.next_sibling_kind() != Some(RightBrace);
+                if prev_is_brace && nexy_is_brace {
+                    ctx.push_in(&s.replace(' ', ""), &mut res)
+                } else {
+                    debug!("ignored space cause {prev_is_brace:?} or {nexy_is_brace:?}")
+                }
             }
             _ => {
                 ctx.push_raw_indent(s, &mut res);
-                // ctx.push_raw_in(s, &mut res);
             }
         }
     }
