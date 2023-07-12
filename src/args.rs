@@ -3,6 +3,11 @@ use super::*;
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = format_args_one_line(parent, children, ctx);
 
+    if children.iter().any(|c|c.contains('\n')) {
+        return format_args_breaking(parent, children, ctx);
+    }
+
+
     let number_of_args = parent
         .children()
         .filter_map(|node| {
