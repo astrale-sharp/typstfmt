@@ -19,6 +19,7 @@ make_test!(
 );
 make_test!(while_loop, WHILE_LOOP);
 make_test!(for_loop, FOR_LOOP);
+make_test!(official, OFFICIAL);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -30,3 +31,15 @@ const WHILE_LOOP: &str = r#"#let i = 0
   if i > 15 { break }
   repr(i) + " "
 }"#;
+
+const OFFICIAL: &str = r#"Glaciers as the one shown in
+@glaciers will cease to exist if
+we don't take action soon!
+
+#figure(
+  image("glacier.jpg", width: 70%),
+  caption: [
+    _Glaciers_ form an important part
+    of the earth's climate system.
+  ],
+) <glaciers>"#;
