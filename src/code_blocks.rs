@@ -6,12 +6,17 @@ pub(crate) fn format_code_blocks(
     ctx: &mut Ctx,
 ) -> String {
     debug!("format code_blocks!");
-    let mut res = format_code_blocks_tight(parent, children, ctx);
+    if children.iter().any(|c| c.contains('\n'))
+        || [Some(ForLoop), Some(WhileLoop)].contains(&parent.parent_kind())
+    {
+        return format_code_blocks_breaking(parent, children, ctx);
+    }
+
+    let res = format_code_blocks_tight(parent, children, ctx);
 
     if utils::max_line_length(&res) >= ctx.config.max_line_length {
         debug!("format_args breaking");
-        res = format_code_blocks_breaking(parent, children, ctx);
-        return res;
+        return format_code_blocks_breaking(parent, children, ctx);
     }
     debug!("format_code_blocks tight");
     res
