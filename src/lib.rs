@@ -23,7 +23,6 @@ struct Ctx {
     config: Config,
     just_spaced: bool,
     consec_new_line: i32,
-    // result: String,
 }
 
 /// you may push into your own buffer using this to ensure you push considering context
@@ -41,32 +40,35 @@ impl Ctx {
     /// - putting more than two consecutive newlines.
     fn push_in(&mut self, s: &str, result: &mut String) {
         trace!("PUSH_IN");
-        match s {
-            " " => {
-                if self.just_spaced {
-                    debug!("IGNORED space");
-                } else {
-                    debug!("PUSHED SPACE");
-                    self.just_spaced = true;
-                    result.push(' ');
+        for c in s.chars() {
+            match c {
+                ' ' => {
+                    if self.just_spaced {
+                        debug!("IGNORED space");
+                    } else {
+                        debug!("PUSHED SPACE");
+                        self.just_spaced = true;
+                        result.push(' ');
+                    }
                 }
-            }
-            "\n" => {
-                if self.consec_new_line <= 1 {
-                    debug!("PUSHED NEWLINE");
-                    self.consec_new_line += 1;
-                    result.push('\n')
-                } else {
-                    debug!("IGNORED newline");
+                '\n' => {
+                    if self.consec_new_line <= 1 {
+                        debug!("PUSHED NEWLINE");
+                        self.consec_new_line += 1;
+                        result.push('\n')
+                    } else {
+                        debug!("IGNORED newline");
+                    }
                 }
-            }
-            _ => {
-                debug!("PUSHED {s}");
-                result.push_str(s);
-                self.lost_context();
+                _ => {
+                    debug!("PUSHED {c}");
+                    result.push(c);
+                    self.lost_context();
+                }
             }
         }
     }
+
     /// makes the context aware it missed info,
     /// should be called when pushing directly in result.
     fn push_raw_in(&mut self, s: &str, result: &mut String) {
@@ -89,6 +91,7 @@ impl Ctx {
             self.push_raw_in(s, result)
         }
     }
+
     /// must be called when you cannot keep track of what you pushed
     /// so that context doesn't refuse your next pushes for no reasons.
     fn lost_context(&mut self) {
@@ -96,6 +99,7 @@ impl Ctx {
         self.consec_new_line = 0;
     }
 
+    /// returns an indent using config to get it's length.
     fn get_indent(&self) -> String {
         " ".repeat(self.config.ident_space)
     }
@@ -108,6 +112,9 @@ pub fn format(s: &str, config: Config) -> String {
     visit(&root, &mut context)
 }
 
+/// This is recursively called on the AST, the formatting is bottom up,
+/// nodes will decide based on the size of their children and the max line length
+/// how they will be formatted.
 fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     let mut res: Vec<String> = vec![];
     for child in node.children() {
@@ -122,19 +129,20 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     }
 }
 
+/// formats a node for which no specific function was found. Last resort.
 fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> String {
     debug!("format_default");
     let mut res = String::new();
 
     match node.kind() {
-        // Space => {
-        //     for c in node.text().chars() {
-        //         match c {
-        //             ' '  => res.push_str(config.process(" ")),
-        //             '\n' => res
-        //         }
-        //     }
-        // },
+        Space => {
+            for c in node.text().chars() {
+                match c {
+                    ' ' | '\n' => ctx.push_in(&c.to_string(), &mut res),
+                    _ => panic!("Encountered char {c} in kind Space which is assumed impossible"),
+                }
+            }
+        }
         Parbreak => {
             debug!("format_default::ParBreak");
             for _ in 0..node.text().lines().count() {
