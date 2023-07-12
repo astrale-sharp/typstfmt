@@ -1,6 +1,5 @@
 use super::*;
 
-
 /// find any child recursively that fits predicate
 pub(crate) fn find_child<'a>(
     node: &LinkedNode<'a>,

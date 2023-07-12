@@ -138,12 +138,12 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
 }
 
 /// formats a node for which no specific function was found. Last resort.
-/// For the text of the node: 
+/// For the text of the node:
 /// Trim spaces for Space nodes if they contain a linebreak.
 /// avoids:
 /// - putting two consecutive spaces.
 /// - putting more than two consecutive newlines.
-/// 
+///
 /// For the already formatted children, change nothing.
 fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     debug!("::format_default: {:?}", node.kind());
