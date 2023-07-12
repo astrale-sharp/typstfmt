@@ -8,11 +8,11 @@ fn init() {
 }
 
 macro_rules! make_test {
-    ($test_name:ident, $input:literal) => {
+    ($test_name:ident, $input:expr) => {
         make_test!($test_name, $input, Config::default());
     };
 
-    ($test_name:ident, $input:literal, $config:expr) => {
+    ($test_name:ident, $input:expr, $config:expr) => {
         #[test]
         fn $test_name() {
             init();
@@ -30,7 +30,7 @@ macro_rules! make_test {
 mod basic;
 
 #[cfg(test)]
-mod nested;
+mod snippets;
 
 #[cfg(test)]
 mod args;
