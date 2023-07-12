@@ -13,6 +13,9 @@ use Option::None;
 mod config;
 use config::Config;
 
+//formatting stuff starts here
+mod args;
+mod code_blocks;
 #[derive(Default)]
 struct Ctx {
     config: Config,
@@ -70,14 +73,20 @@ impl Ctx {
         self.lost_context()
     }
 
-    // fn push_raw(&mut self, s : &str) {
-    //     self.push_raw_in(s, &mut self.result);
-    // }
-
-    // fn push(&mut self, s : &str) {
-    //     self.push_in(s, &mut self.result);
-    // }
-
+    /// adds an indentation for each line the input except the first to match the current level of identation.
+    fn push_raw_indent(&mut self, s: &str, result: &mut String) {
+        let mut is_first = true;
+        for s in s.lines() {
+            if is_first {
+                is_first = false;
+                self.push_raw_in(s, result);
+                continue;
+            }
+            self.push_raw_in("\n", result);
+            self.push_raw_in(&self.get_indent(), result);
+            self.push_raw_in(s, result)
+        }
+    }
     /// must be called when you cannot keep track of what you pushed
     /// so that context doesn't refuse your next pushes for no reasons.
     fn lost_context(&mut self) {
@@ -104,8 +113,8 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         res.push(child_fmt);
     }
     match node.kind() {
-        CodeBlock => format_code_blocks(node, &res, ctx),
-        Args => format_args::format_args(node, &res, ctx),
+        CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
+        Args => args::format_args(node, &res, ctx),
         Space => String::from(" "),
         _ => format_default(node, &res, ctx),
     }
@@ -139,171 +148,6 @@ fn format_default(node: &LinkedNode, children: &Vec<String>, ctx: &mut Ctx) -> S
         }
     }
     res
-}
-
-pub(crate) fn format_code_blocks(
-    parent: &LinkedNode,
-    children: &[String],
-    ctx: &mut Ctx,
-) -> String {
-    debug!("format code_blocks!");
-    let mut res = format_code_blocks_tight(parent, children, ctx);
-
-    if max_line_length(&res) >= ctx.config.max_line_length {
-        debug!("format_args::breaking");
-        res = format_code_blocks_breaking(parent, children, ctx);
-        return res;
-    }
-    debug!("format_args::one_line");
-    res
-}
-
-pub(crate) fn format_code_blocks_tight(
-    parent: &LinkedNode,
-    children: &[String],
-    ctx: &mut Ctx,
-) -> String {
-    debug!("::format_code_blocks_tight");
-    let mut res = String::new();
-    for (s, node) in children.iter().zip(parent.children()) {
-        match node.kind() {
-            LeftBrace => {
-                debug!("leftbrace!");
-
-                let code = node.next_sibling().unwrap();
-                assert!(code.kind() == Code);
-                let non_space_child = find_child(&code, &|c| c.kind() != Space);
-
-                let code_is_empty = non_space_child.is_none();
-                // find_child(&node, &|c| !(c.kind() == Space) && !c.kind().is_trivia()).is_some();
-
-                if code_is_empty {
-                    debug!("format_empty_code_block and exit");
-                    ctx.push_raw_in("{}", &mut res);
-                    break;
-                }
-
-                // if next_is_ignoring(&node, RightBrace, &[Space]) {
-                // debug!("format_empty_code_block");
-                // res.push_str("{}");
-                // break;
-                // }
-                debug!("leftbrace formatted not empty!");
-                debug!("adding: {s:?}");
-                res.push_str(s);
-                res.push(' ');
-            }
-            RightBrace => {
-                res.push(' ');
-                res.push_str(s);
-            }
-            Space => {}
-            _ => {
-                ctx.push_raw_in(s, &mut res);
-            }
-        }
-    }
-    res
-}
-
-pub(crate) fn format_code_blocks_breaking(
-    _parent: &LinkedNode,
-    _children: &[String],
-    _ctx: &mut Ctx,
-) -> String {
-    panic!()
-}
-
-mod format_args {
-    use super::*;
-    pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-        let mut res = format_args_one_line(parent, children, ctx);
-
-        let number_of_args = parent
-            .children()
-            .filter_map(|node| {
-                if [Comma, Space, LeftParen, RightParen].contains(&node.kind()) {
-                    None
-                } else {
-                    Some(node)
-                }
-            })
-            .count();
-
-        if number_of_args <= 1 {
-            return res;
-        }
-
-        if max_line_length(&res) >= ctx.config.max_line_length {
-            debug!("format_args::breaking");
-            res = format_args_breaking(parent, children, ctx);
-            return res;
-        }
-        debug!("format_args::one_line");
-        res
-    }
-
-    pub(crate) fn format_args_one_line(
-        parent: &LinkedNode<'_>,
-        children: &[String],
-        ctx: &mut Ctx,
-    ) -> String {
-        let mut res = String::new();
-        for (s, node) in children.iter().zip(parent.children()) {
-            match node.kind() {
-                Space => {}
-                Comma => {
-                    if is_trailing_comma(&node) {
-                        // don't print
-                    } else {
-                        ctx.push_raw_in(s, &mut res);
-                        ctx.push_in(" ", &mut res);
-                    }
-                }
-                _ => {
-                    ctx.push_raw_in(&s, &mut res);
-                }
-            }
-        }
-        res
-    }
-
-    pub(crate) fn format_args_breaking(
-        parent: &LinkedNode<'_>,
-        children: &[String],
-        ctx: &mut Ctx,
-    ) -> String {
-        let mut res = String::new();
-        for (s, node) in children.iter().zip(parent.children()) {
-            match node.kind() {
-                LeftParen => {
-                    res.push_str(s);
-                    res.push('\n');
-                    res.push_str(&ctx.get_indent());
-                }
-                Space => {}
-                Comma => {
-                    // print the last comma but don't indent
-                    if is_last_comma(&node) && is_trailing_comma(&node) {
-                        ctx.push_raw_in(&s, &mut res);
-                        ctx.push_in("\n", &mut res);
-                    } else {
-                        ctx.push_raw_in(&format!("{s}\n{}", ctx.get_indent()), &mut res);
-                    }
-                }
-                _ => {
-                    // also cannot be a comma
-                    // so last and no trailing comma
-                    if next_is_ignoring(&node, RightParen, &[Space]) {
-                        ctx.push_raw_in(&format!("{s},\n"), &mut res);
-                    } else {
-                        ctx.push_raw_in(s, &mut res);
-                    }
-                }
-            }
-        }
-        res
-    }
 }
 
 /// find any child recursively that fits predicate
@@ -375,24 +219,12 @@ fn is_last_comma(node: &LinkedNode) -> bool {
 }
 
 fn max_line_length(s: &str) -> usize {
-    fn len_no_space(s: &str) -> usize {
-        s.len() - s.chars().filter(|x| x == &' ').count()
-    }
-    let Some(last_line) = s.lines().last() else {
-        if let Some(app) = s.lines().last() {
-            debug!("no last line");
-           return len_no_space(app);
-    } else {
-            debug!("no last line and no app lines");
-            return 0;
-        }
-    };
-    if !s.contains('\n') {
-        len_no_space(last_line) + len_no_space(s)
-    } else {
-        len_no_space(s.split('\n').last().unwrap())
-    }
+    s.lines()
+        .map(|l| l.trim().chars().count())
+        .max()
+        .unwrap_or(0)
 }
+
 
 #[cfg(test)]
 mod tests;
