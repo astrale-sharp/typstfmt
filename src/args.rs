@@ -18,7 +18,7 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
         return res;
     }
 
-    if max_line_length(&res) >= ctx.config.max_line_length {
+    if utils::max_line_length(&res) >= ctx.config.max_line_length {
         debug!("format_args::breaking");
         res = format_args_breaking(parent, children, ctx);
         return res;
@@ -37,7 +37,7 @@ pub(crate) fn format_args_one_line(
         match node.kind() {
             Space => {}
             Comma => {
-                if is_trailing_comma(&node) {
+                if utils::is_trailing_comma(&node) {
                     // don't print
                 } else {
                     ctx.push_raw_in(s, &mut res);
@@ -68,7 +68,7 @@ pub(crate) fn format_args_breaking(
             Space => {}
             Comma => {
                 // print the last comma but don't indent
-                if is_last_comma(&node) && is_trailing_comma(&node) {
+                if utils::is_last_comma(&node) && utils::is_trailing_comma(&node) {
                     ctx.push_raw_in(&s, &mut res);
                     ctx.push_in("\n", &mut res);
                 } else {
@@ -78,7 +78,7 @@ pub(crate) fn format_args_breaking(
             _ => {
                 // cannot be a comma
                 // so last and no trailing comma, adding a trailing comma.
-                if next_is_ignoring(&node, RightParen, &[Space]) {
+                if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     ctx.push_raw_indent(s, &mut res);
                     ctx.push_raw_in(",\n", &mut res);
                 } else {

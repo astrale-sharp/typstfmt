@@ -8,7 +8,7 @@ pub(crate) fn format_code_blocks(
     debug!("format code_blocks!");
     let mut res = format_code_blocks_tight(parent, children, ctx);
 
-    if max_line_length(&res) >= ctx.config.max_line_length {
+    if utils::max_line_length(&res) >= ctx.config.max_line_length {
         debug!("format_args breaking");
         res = format_code_blocks_breaking(parent, children, ctx);
         return res;
@@ -29,7 +29,7 @@ pub(crate) fn format_code_blocks_tight(
             LeftBrace => {
                 let code = node.next_sibling().unwrap();
                 assert!(code.kind() == Code);
-                let non_space_child = find_child(&code, &|c| c.kind() != Space);
+                let non_space_child = utils::find_child(&code, &|c| c.kind() != Space);
                 let code_is_empty = non_space_child.is_none();
                 if code_is_empty {
                     debug!("format_empty_code_block and exit");
