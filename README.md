@@ -8,6 +8,10 @@ In progress formatter for the Typst language!
 - [Architecture](#architecture)
   - [Main logic](#main-logic)
 - [Testing and visualizing](#testing-and-visualizing)
+  - [Installing Insta](#installing-insta)
+  - [Using insta here](#using-insta-here)
+    - [Can I see it in action?](#can-i-see-it-in-action)
+    - [Is that all I have to help me test?](#is-that-all-i-have-to-help-me-test)
 
 
 # Goals
@@ -37,12 +41,27 @@ Children have access to arbitrary context (they can know the kind of their paren
 
 # Testing and visualizing
 
+## Installing Insta
 We use insta! If you don't have it installed take a look [here](https://insta.rs/docs/cli/) (I advise installing with [cargo binstall](https://github.com/cargo-bins/cargo-binstall) since I have a small computer and don't like waiting for things to compile)
 
 one liner for cargo binstall : `curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash`
 
 then `cargo binstall cargo-insta`
 
+## Using insta here
+
+### Can I see it in action?
+to see how it currently formats all the snippets 
++ run `cargo test`, a failing test indicates one of the snippets displayed in the next step is not formatted like this anymore.
++ run `show_all.sh`
+
+### Is that all I have to help me test?
+Of course not! We have tracing enabled during tests!
+
 If you're contributing tests you should add a test case under `src/tests` for instance: `make_test!(call_func_empty, "#f()");`
 
-you may also explore by modifying an existing test (add a space somewhere) and running `cargo insta test && cargo insta review`
+then running your tests: `cargo test && cargo insta review`
+
+if the info log isn't enough, run `DEBUG=true cargo test`.
+if you wish to pipe to a file run `NO_COLOR=true cargo test`
+you may also set the `NOLOG` env variable if you wish to disable logging entirely.
