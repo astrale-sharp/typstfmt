@@ -1,7 +1,5 @@
-//! Some crates are well documented, this crate has a personality instead (help).
-//!
-//! This lack is born out of wanting your program to work before documenting it, as long as I'm
-//! iterating I don't write docs so much (I'm toxic).
+#![doc = include_str!("../README.md")]
+
 
 use itertools::Itertools;
 use tracing::debug;
