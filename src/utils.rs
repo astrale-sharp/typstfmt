@@ -3,6 +3,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use super::*;
 
 /// find any child recursively that fits predicate
+#[instrument(ret, skip_all)]
 pub(crate) fn find_child<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
@@ -25,25 +26,43 @@ pub(crate) fn find_child<'a>(
     None
 }
 
-pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
-    debug!("fn::next_is_ignoring, current is: {:?}", node);
+#[instrument(ret, skip_all)]
+pub(crate) fn find_next<'a>(
+    node: &LinkedNode<'a>,
+    predicate: &impl Fn(&LinkedNode) -> bool,
+) -> Option<LinkedNode<'a>> {
     let mut next = node.next_sibling();
-    debug!("{:?}", next);
+    while let Some(next_inner) = next {
+        if predicate(&next_inner) {
+            return Some(next_inner);
+        }
+        next = next_inner.next_sibling();
+    }
+    None
+}
+
+#[instrument(ret, skip_all)]
+pub(crate) fn get_next_ignoring<'a>(
+    node: &LinkedNode<'a>,
+    ignoring: &[SyntaxKind],
+) -> Option<LinkedNode<'a>> {
+    let mut next = node.next_sibling();
     while let Some(next_inner) = &next {
-        debug!("{:?}", next);
         let kind = next_inner.kind();
         if ignoring.contains(&kind) {
-            debug!("ignoring {:?}", kind);
-
             next = next_inner.next_sibling();
             continue;
         }
-        let next_is = kind == is;
-        debug!("next is: {next_is}");
-        return next_is;
+        return Some(next_inner.clone());
     }
-    debug!("next is not {is:?}");
-    false
+    None
+}
+
+#[instrument(ret, skip_all)]
+pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
+    let n = get_next_ignoring(node, ignoring);
+    debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
+    n.is_some_and(|n| n.kind() == is)
 }
 
 pub(crate) fn max_line_length(s: &str) -> usize {

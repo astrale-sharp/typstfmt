@@ -154,7 +154,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
 ///
 /// For the already formatted children, change nothing.
 ///
-#[instrument(skip_all)]
+#[instrument(skip_all, ret)]
 fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     debug!("::format_default: {:?}", node.kind());
     let mut res = String::new();

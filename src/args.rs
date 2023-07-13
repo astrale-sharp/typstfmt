@@ -64,6 +64,7 @@ pub(crate) fn format_args_breaking(
 ) -> String {
     debug!("format arg breaking");
     let mut res = String::new();
+    let mut missing_trailing = false;
     for (s, node) in children.iter().zip(parent.children()) {
         debug!("formatting kind: {:?}", node.kind());
         match node.kind() {
@@ -72,33 +73,32 @@ pub(crate) fn format_args_breaking(
                 res.push('\n');
                 res.push_str(&ctx.get_indent());
             }
+            RightParen => {
+                res.push_str(s);
+            }
             Space => {}
             Comma => {
                 // print the last comma but don't indent
-                let is_last_comma = utils::next_is_ignoring(&node, Comma, &[Space]);
-                let is_trailing = utils::next_is_ignoring(&node, LeftParen, &[Space]);
+                let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
+                let is_trailing = utils::next_is_ignoring(&node, RightParen, &[Space]);
+                
                 if is_last_comma && is_trailing {
+                    // no indent
+                    assert!(s == ",");
                     ctx.push_raw_in(s, &mut res);
-                    ctx.push_in("\n", &mut res);
-                    continue;
+                    ctx.push_raw_in("\n", &mut res);
                 } else {
                     ctx.push_raw_in(&format!("{s}\n{}", ctx.get_indent()), &mut res);
+                    if is_last_comma && !is_trailing {
+                        missing_trailing = true;
+                    }
                 }
             }
             _ => {
-                // cannot be a comma
-                // so last and no trailing comma, adding a trailing comma.
-                debug!(
-                    "decide if indent according to: {:?}",
-                    utils::next_is_ignoring(&node, RightParen, &[Space])
-                );
-                //or s contains n
-                if utils::next_is_ignoring(&node, RightParen, &[Space]) || s.contains('\n') {
-                    debug!("Adding that trailing comma");
-                    ctx.push_raw_indent(s, &mut res);
-                    // ctx.push_raw_in(",\n", &mut res);
-                } else {
-                    ctx.push_raw_in(s, &mut res);
+                ctx.push_raw_indent(s, &mut res);
+                let is_last = utils::next_is_ignoring(&node, RightParen, &[Space]);
+                if is_last && missing_trailing {
+                    ctx.push_raw_in(",\n", &mut res)
                 }
             }
         }
