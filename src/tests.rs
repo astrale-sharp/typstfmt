@@ -1,13 +1,24 @@
 use super::*;
+use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
 
 fn init() {
+    if std::env::var("NOLOG").is_ok() {
+        return;
+    }
+    let level = if std::env::var("DEBUG").is_ok() {
+        Level::DEBUG
+    } else {
+        Level::INFO
+    };
+    let ainsi = std::env::var("NO_COLOR").is_ok();
+
     let subscriber = FmtSubscriber::builder()
         .with_test_writer()
         .without_time()
         .compact()
-        // .with_ansi(false)
-        // .with_writer(make_writer)
+        .with_max_level(level)
+        .with_ansi(ainsi)
         .finish();
     let _ = tracing::subscriber::set_global_default(subscriber)
         // .expect("setting tracing default failed")
