@@ -71,6 +71,7 @@ impl Ctx {
         debug!("push::raw::indent");
         let mut is_first = true;
         for s in s.lines() {
+            let s = s.trim_end();
             if is_first {
                 is_first = false;
                 self.push_raw_in(s, result);
