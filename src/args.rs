@@ -81,7 +81,7 @@ pub(crate) fn format_args_breaking(
                 // print the last comma but don't indent
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
                 let is_trailing = utils::next_is_ignoring(&node, RightParen, &[Space]);
-                
+
                 if is_last_comma && is_trailing {
                     // no indent
                     assert!(s == ",");
