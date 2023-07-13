@@ -9,7 +9,7 @@ use typst::syntax::{parse, LinkedNode};
 use Option::None;
 
 mod config;
-use config::Config;
+pub use config::Config;
 mod utils;
 
 mod content_blocks;
