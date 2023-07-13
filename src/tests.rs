@@ -11,7 +11,7 @@ fn init() {
     } else {
         Level::INFO
     };
-    let ainsi = std::env::var("NO_COLOR").is_ok();
+    let ainsi = std::env::var("NO_COLOR").is_err();
 
     let subscriber = FmtSubscriber::builder()
         .with_test_writer()
