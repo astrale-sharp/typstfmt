@@ -3,6 +3,7 @@ make_test!(empty, "#{}");
 make_test!(empty_, "#{ }");
 make_test!(empty__, "#{  }");
 make_test!(empty___, "#{   }");
+make_test!(line_breaks, "#{\n\n\n}");
 make_test!(period_separated_too_much_space, "#{  a;b  }");
 make_test!(begin_space_enforces_breaking, "#{\na;b}");
 make_test!(end_space_enforces_breaking, "#{a;b\n}");

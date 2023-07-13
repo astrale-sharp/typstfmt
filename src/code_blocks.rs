@@ -8,6 +8,11 @@ pub(crate) fn format_code_blocks(
 ) -> String {
     let children_contains_lines = children.iter().any(|c| c.contains('\n'));
     let parent_is_loop = [Some(ForLoop), Some(WhileLoop)].contains(&parent.parent_kind());
+    let code = utils::find_child(parent, &|x| x.kind() == Code).unwrap();
+    if code.is_empty() || code.children().all(|c| c.kind() == Space) {
+        return format_code_blocks_tight(parent, children, ctx);
+    }
+
     if children_contains_lines || parent_is_loop {
         debug!("format breaking cause: children contains breakline: {children_contains_lines}");
         debug!("or because parent is loop: {parent_is_loop}");
@@ -78,17 +83,10 @@ pub(crate) fn format_code_blocks_breaking(
                 ctx.just_spaced = true;
             }
             RightBrace => {
-                res.push_str(&format!("\n{s}"));
+                ctx.push_in("\n", &mut res);
+                res.push_str(s);
             }
-            Space => {
-                let prev_is_brace = node.prev_sibling_kind() != Some(LeftBrace);
-                let nexy_is_brace = node.next_sibling_kind() != Some(RightBrace);
-                if prev_is_brace && nexy_is_brace {
-                    ctx.push_in(&s.replace(' ', ""), &mut res)
-                } else {
-                    debug!("ignored space cause {prev_is_brace:?} or {nexy_is_brace:?}")
-                }
-            }
+            Space => {}
             _ => {
                 ctx.push_raw_indent(s, &mut res);
             }
