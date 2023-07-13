@@ -1,3 +1,5 @@
+use unicode_segmentation::UnicodeSegmentation;
+
 use super::*;
 
 /// find any child recursively that fits predicate
@@ -46,7 +48,7 @@ pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[Sy
 
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()
-        .map(|l| l.trim().chars().count())
+        .map(|l| l.trim().graphemes(true).count())
         .max()
         .unwrap_or(0)
 }

@@ -1027,6 +1027,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "typst",
+ "unicode-segmentation",
 ]
 
 [[package]]
