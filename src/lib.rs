@@ -12,6 +12,8 @@ mod config;
 use config::Config;
 mod utils;
 
+mod content_blocks;
+
 //formatting stuff starts here
 mod args;
 mod code_blocks;
@@ -40,6 +42,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     }
     let res = match node.kind() {
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
+        ContentBlock => content_blocks::format_content_blocks(node, &res, ctx),
         Args => args::format_args(node, &res, ctx),
         LetBinding => format_let_binding(node, &res, ctx),
         _ => format_default(node, &res, ctx),
