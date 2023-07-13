@@ -42,7 +42,7 @@ pub(crate) fn format_args_one_line(
         match node.kind() {
             Space => {}
             Comma => {
-                if utils::is_trailing_comma(&node) {
+                if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     // don't print
                 } else {
                     ctx.push_raw_in(s, &mut res);
@@ -50,7 +50,7 @@ pub(crate) fn format_args_one_line(
                 }
             }
             _ => {
-                ctx.push_raw_in(&s, &mut res);
+                ctx.push_raw_in(s, &mut res);
             }
         }
     }
@@ -75,9 +75,12 @@ pub(crate) fn format_args_breaking(
             Space => {}
             Comma => {
                 // print the last comma but don't indent
-                if utils::is_last_comma(&node) && utils::is_trailing_comma(&node) {
-                    ctx.push_raw_in(&s, &mut res);
+                let is_last_comma = utils::next_is_ignoring(&node, Comma, &[Space]);
+                let is_trailing = utils::next_is_ignoring(&node, LeftParen, &[Space]);
+                if is_last_comma && is_trailing {
+                    ctx.push_raw_in(s, &mut res);
                     ctx.push_in("\n", &mut res);
+                    continue;
                 } else {
                     ctx.push_raw_in(&format!("{s}\n{}", ctx.get_indent()), &mut res);
                 }
@@ -91,8 +94,9 @@ pub(crate) fn format_args_breaking(
                 );
                 //or s contains n
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) || s.contains('\n') {
+                    debug!("Adding that trailing comma");
                     ctx.push_raw_indent(s, &mut res);
-                    ctx.push_raw_in(",\n", &mut res);
+                    // ctx.push_raw_in(",\n", &mut res);
                 } else {
                     ctx.push_raw_in(s, &mut res);
                 }
