@@ -7,7 +7,8 @@ make_test!(
     Config {
         max_line_length: 2,
         ..Default::default()
-    }
+    },
+    ignore_ast
 );
 make_test!(
     code_func_break_nested,
@@ -15,12 +16,19 @@ make_test!(
     Config {
         max_line_length: 2,
         ..Default::default()
-    }
+    },
+    ignore_ast
 );
 make_test!(while_loop, WHILE_LOOP);
 make_test!(for_loop, FOR_LOOP);
 make_test!(official, OFFICIAL);
-make_test!(let_closure_params_named, TABLEX);
+make_test!(
+    let_closure_params_named,
+    TABLEX,
+    Config::default(),
+    ignore_ast
+);
+
 // todo
 // this is not passing since we'd like the last line to look like this:
 // `  expand: none, // some comment here`

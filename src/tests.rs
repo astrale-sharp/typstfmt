@@ -39,11 +39,33 @@ fn init() {
 /// - An AST test (if an input is formatted, the output AST should be the same as the input).
 ///
 /// TODO : currently for the AST test, all Space and parbeak are skipped, maybe there is a better way.
+/// TODO : AST check when we had a trailing comma, find a way to allow it to be able to run test for these snippets too.
 macro_rules! make_test {
     ($test_name:ident, $input:expr) => {
         make_test!($test_name, $input, Config::default());
     };
+    //temporary hack
+    ($test_name:ident, $input:expr, $config:expr, ignore_ast) => {
+        paste! {
+            #[test]
+            fn [<$test_name _snapshot>]()  {
+                init();
+                let input = $input;
+                let formatted = format(input, $config);
+                insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
+                    insta::assert_debug_snapshot!(formatted);
+                });
+            }
 
+            #[test]
+            fn [<$test_name _double_format>]()  {
+                let input = $input;
+                let format_once = format(input, $config);
+                let format_twice = format(&format_once, $config);
+                similar_asserts::assert_eq!(format_once, format_twice);
+            }
+        }
+    };
     ($test_name:ident, $input:expr, $config:expr) => {
         paste! {
             #[test]

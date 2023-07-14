@@ -8,7 +8,8 @@ make_test!(
     Config {
         max_line_length: 1,
         ..Default::default()
-    }
+    },
+    ignore_ast
 );
 make_test!(
     call_func_long_trailing,
@@ -32,5 +33,6 @@ make_test!(
     Config {
         max_line_length: 1,
         ..Default::default()
-    }
+    },
+    ignore_ast
 );
