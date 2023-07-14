@@ -4,6 +4,7 @@ In progress formatter for the Typst language!
 
 - [Goals](#goals)
 - [State](#state)
+- [Installing](#installing)
 - [Contributing](#contributing)
 - [Architecture](#architecture)
   - [Main logic](#main-logic)
@@ -21,14 +22,16 @@ In progress formatter for the Typst language!
 
 # State
 
-Currently the output is almost never decent, when it will be I'll add a bin target!
+Currently, the output shouldn't be always trusted and isn't perfect but should be lossless.
 
+# Installing
+
+`cargo install --path .` would do the trick. 
 # Contributing
 - feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (at Astrale).
 - once discussed, you may open a PR, not before cause I'm a bit chaotic and this is wip so things change fast and I would hate it if you lost your time.
 
 # Architecture
-
 ## Main logic
 
 Since we're visiting a AST (which is a tree) we have a recursive function
