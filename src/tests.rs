@@ -77,22 +77,42 @@ macro_rules! make_test {
 fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
     let is_space_or_parbreak = |x: &LinkedNode| [Space, Parbreak].contains(&x.kind());
 
-    if node.kind() != other_node.kind() {
-        return false;
-    }
-    if node.text() != other_node.text() && !is_space_or_parbreak(node) {
+    let node_kind = node.kind();
+    let other_kind = other_node.kind();
+    if node_kind != other_kind {
+        debug!("kind differs! {:?}-{:?}", node_kind, other_kind);
         return false;
     }
 
-    if node.children().filter(is_space_or_parbreak).count()
-        != other_node.children().filter(is_space_or_parbreak).count()
-    {
+    if (node.text() != other_node.text()) && !is_space_or_parbreak(node) {
+        debug!(
+            "kind ok {:?}\ntext differ:{:?}-{:?}",
+            node.kind(),
+            node.text(),
+            other_node.text()
+        );
+        return false;
+    }
+
+    let fchildren = node
+        .children()
+        .filter(|x| !is_space_or_parbreak(x))
+        .collect_vec();
+    let fchildren_oth = other_node
+        .children()
+        .filter(|x| !is_space_or_parbreak(x))
+        .collect_vec();
+    if fchildren.len() != fchildren_oth.len() {
+        debug!(
+            "children count differ! {:?}\n{:?}",
+            fchildren, fchildren_oth
+        );
         return false;
     }
     if node
         .children()
-        .filter(is_space_or_parbreak)
-        .zip(other_node.children().filter(is_space_or_parbreak))
+        .filter(|x| !is_space_or_parbreak(x))
+        .zip(other_node.children().filter(|x| !is_space_or_parbreak(x)))
         .any(|(c, oth)| !tree_are_equal(&c, &oth))
     {
         return false;
@@ -100,13 +120,15 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
     true
 }
 
+#[instrument(skip_all)]
 fn parses_the_same(s: &str, oth: &str) -> bool {
+    init();
     let parse1 = parse(s);
     let lkn = LinkedNode::new(&parse1);
     let parse2 = parse(oth);
     let lkn_oth = LinkedNode::new(&parse2);
-    println!("{:?}", parse1);
-    println!("{:?}", parse2);
+    debug!("{:?}", parse1);
+    debug!("{:?}", parse2);
     tree_are_equal(&lkn, &lkn_oth)
 }
 

@@ -10,3 +10,5 @@ make_test!(
     content_block_spaced,
     "#[\n_Glaciers_ form an important part \nof the earth's climate system.]"
 );
+// todo, fix array formatting trailing comma
+make_test!(parenthesized, "#(auto,)");
