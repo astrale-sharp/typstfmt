@@ -1,6 +1,0 @@
----
-source: src/tests/nested.rs
-description: "INPUT\n===\n\"#{{f(1,2,3)}}\"\n===\n#{{f(1,2,3)}}\n===\nFORMATTED\n===\n#{\n  {\n    f(\n      1,\n      2,\n      3,\n    )\n  }\n}"
-expression: formatted
----
-"#{\n  {\n    f(\n      1,\n      2,\n      3,\n    )\n  }\n}"
