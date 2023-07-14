@@ -26,7 +26,21 @@ Currently, the output shouldn't be always trusted and isn't perfect but should b
 
 # Installing
 
-`cargo install --path .` would do the trick. 
+```sh
+cargo install --git https://github.com/astrale-sharp/typst-fmt.git
+```
+
+This will put the compiled binary in `~/.cargo/bin/`. To use it without prefixing path to the binary you must add this directory to your `PATH`. You can check if it was already added with `echo "$PATH"`.
+
+If you haven't added `~/.cargo/bin` to you `PATH`, you should add next line in your `.bashrc`, `.zshrc` etc.:
+
+```sh
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+New instances of your shell (bash, zsh) will have an updated `PATH`.
+Or you can add this to your `.profile` or `.zshenv` to update your `PATH` when the OS is booted. This will require a restart of the machine.
+
 # Contributing
 - feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (at Astrale).
 - once discussed, you may open a PR, not before cause I'm a bit chaotic and this is wip so things change fast and I would hate it if you lost your time.
