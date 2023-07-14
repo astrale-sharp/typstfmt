@@ -1,0 +1,8 @@
+---
+- id: typstfmt
+  name: typstfmt
+  description: >
+    format typst
+  entry: typstfmt
+  language: rust
+  files: \.typ$

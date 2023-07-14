@@ -31,6 +31,26 @@ Currently, the output shouldn't be always trusted and isn't perfect but should b
 - feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (at Astrale).
 - once discussed, you may open a PR, not before cause I'm a bit chaotic and this is wip so things change fast and I would hate it if you lost your time.
 
+# Pre-commit hook
+
+Refer <https://pre-commit.com>, add `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/astrale-sharp/typstfmt
+    rev: HEAD
+    hooks:
+      - id: typstfmt
+```
+
+Install pre-commit for this repository:
+
+```shell
+pre-commit install
+```
+
+Now every `git commit`, changed `*.typ` from last git commit will be formatted automatically.
+
 # Architecture
 ## Main logic
 
