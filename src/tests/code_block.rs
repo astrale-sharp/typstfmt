@@ -1,8 +1,8 @@
 use super::*;
 make_test!(empty, "#{}");
-make_test!(empty_, "#{ }");
-make_test!(empty__, "#{  }");
-make_test!(empty___, "#{   }");
+make_test!(empty_two, "#{ }");
+make_test!(empty_three, "#{  }");
+make_test!(empty_four, "#{   }");
 make_test!(line_breaks, "#{\n\n\n}");
 make_test!(period_separated_too_much_space, "#{  a;b  }");
 make_test!(begin_space_enforces_breaking, "#{\na;b}");
