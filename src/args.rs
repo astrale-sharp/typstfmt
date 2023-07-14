@@ -42,6 +42,11 @@ pub(crate) fn format_args_one_line(
             Space => {}
             Comma => {
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) {
+                    // not putting the comma in would result in a parenthesized expression, not an array
+                    // "(a,) != (a)"
+                    if node.parent_kind() == Some(Array) {
+                        ctx.push_raw_in(",", &mut res)
+                    }
                     // don't print
                 } else {
                     ctx.push_raw_in(s, &mut res);
