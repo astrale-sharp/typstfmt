@@ -9,7 +9,7 @@ impl Default for Config {
         Self {
             // this being strictly > to 1 is assumed.
             ident_space: 2,
-            max_line_length: 100,
+            max_line_length: 50,
         }
     }
 }
