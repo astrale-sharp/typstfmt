@@ -71,12 +71,12 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
 #[instrument(skip_all, ret)]
 fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     debug!("::format_default: {:?}", node.kind());
-    let mut res = String::new();
     debug!(
         "with children: {:?}",
         node.children().map(|c| c.kind()).collect_vec()
     );
 
+    let mut res = String::new();
     ctx.push_in(node.text(), &mut res);
     for s in children {
         ctx.push_raw_in(s, &mut res);
