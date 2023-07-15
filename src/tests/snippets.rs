@@ -63,23 +63,8 @@ we don't take action soon!
 ) <glaciers>"#;
 
 // this is taken from tablex by Pg Biel whom we love.
-// this is uglified
-// - missing a trailing comma
-// - spaces and lines added
-const TABLEX: &str = r#"#let hlinex(
-  start: 0, end: auto, y  : auto,
-
-  stroke: auto,
-  stop-pre-gutter: auto, gutter-restrict: none,
-  
-  
-  stroke-expand: true,
-  expand: none
-) = (
-  tablex-dict-type: "hline",
-  start: start,
-  end : end,
-  y:y  ,
-  stroke: stroke, 
-  parent: none
-)"#;
+const TABLEX: &str = r#"#let is-tablex-dict(x) = (
+  type(x) == "dictionary"
+      and "tablex-dict-type" in x
+)
+"#;

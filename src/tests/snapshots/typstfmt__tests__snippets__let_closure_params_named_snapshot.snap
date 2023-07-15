@@ -1,6 +1,6 @@
 ---
 source: src/tests/snippets.rs
-description: "INPUT\n===\n\"#let hlinex(\\n  start: 0, end: auto, y  : auto,\\n\\n  stroke: auto,\\n  stop-pre-gutter: auto, gutter-restrict: none,\\n  \\n  \\n  stroke-expand: true,\\n  expand: none\\n) = (\\n  tablex-dict-type: \\\"hline\\\",\\n  start: start,\\n  end : end,\\n  y:y  ,\\n  stroke: stroke, \\n  parent: none\\n)\"\n===\n#let hlinex(\n  start: 0, end: auto, y  : auto,\n\n  stroke: auto,\n  stop-pre-gutter: auto, gutter-restrict: none,\n  \n  \n  stroke-expand: true,\n  expand: none\n) = (\n  tablex-dict-type: \"hline\",\n  start: start,\n  end : end,\n  y:y  ,\n  stroke: stroke, \n  parent: none\n)\n===\nFORMATTED\n===\n#let hlinex(\n  start: 0,\n  end: auto,\n  y: auto,\n  stroke: auto,\n  stop-pre-gutter: auto,\n  gutter-restrict: none,\n  stroke-expand: true,\n  expand: none,\n) = (\n  tablex-dict-type: \"hline\",\n  start: start,\n  end: end,\n  y: y,\n  stroke: stroke,\n  parent: none,\n)"
+description: "INPUT\n===\n\"#let is-tablex-dict(x) = (\\n  type(x) == \\\"dictionary\\\"\\n      and \\\"tablex-dict-type\\\" in x\\n)\\n\"\n===\n#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\"\n      and \"tablex-dict-type\" in x\n)\n\n===\nFORMATTED\n===\n#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\" and \"tablex-dict-type\" in x\n)\n"
 expression: formatted
 ---
-"#let hlinex(\n  start: 0,\n  end: auto,\n  y: auto,\n  stroke: auto,\n  stop-pre-gutter: auto,\n  gutter-restrict: none,\n  stroke-expand: true,\n  expand: none,\n) = (\n  tablex-dict-type: \"hline\",\n  start: start,\n  end: end,\n  y: y,\n  stroke: stroke,\n  parent: none,\n)"
+"#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\" and \"tablex-dict-type\" in x\n)\n"

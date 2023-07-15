@@ -85,6 +85,10 @@ pub(crate) fn format_args_breaking(
                 }
             }
             RightParen => {
+                if parent.kind() == Parenthesized {
+                    // no trailing comma we don't have a newline!
+                    res.push('\n');
+                }
                 res.push_str(s);
             }
             LineComment | BlockComment => {
