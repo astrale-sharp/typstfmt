@@ -1,6 +1,10 @@
+use super::*;
 use unicode_segmentation::UnicodeSegmentation;
 
-use super::*;
+/// like next sibling but doesn't skip trivia.
+pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
+    node.parent()?.children().nth(node.index() + 1)
+}
 
 /// find any child recursively that fits predicate
 #[instrument(ret, skip_all)]
@@ -31,26 +35,26 @@ pub(crate) fn find_next<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
 ) -> Option<LinkedNode<'a>> {
-    let mut next = node.next_sibling();
+    let mut next = next_sibling_or_trivia(node);
     while let Some(next_inner) = next {
         if predicate(&next_inner) {
             return Some(next_inner);
         }
-        next = next_inner.next_sibling();
+        next = next_sibling_or_trivia(&next_inner);
     }
     None
 }
 
 #[instrument(ret, skip_all)]
 pub(crate) fn get_next_ignoring<'a>(
-    node: &LinkedNode<'a>,
+    node: &'a LinkedNode<'a>,
     ignoring: &[SyntaxKind],
 ) -> Option<LinkedNode<'a>> {
-    let mut next = node.next_sibling();
+    let mut next = next_sibling_or_trivia(node);
     while let Some(next_inner) = &next {
         let kind = next_inner.kind();
         if ignoring.contains(&kind) {
-            next = next_inner.next_sibling();
+            next = next_sibling_or_trivia(&next_inner.clone());
             continue;
         }
         return Some(next_inner.clone());
@@ -62,7 +66,7 @@ pub(crate) fn get_next_ignoring<'a>(
 pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
     let n = get_next_ignoring(node, ignoring);
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
-    n.is_some_and(|n| n.kind() == is)
+    n.is_some_and(|n| is == n.kind())
 }
 
 pub(crate) fn max_line_length(s: &str) -> usize {

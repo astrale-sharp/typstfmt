@@ -32,7 +32,7 @@ make_test!(
 // todo
 // this is not passing since we'd like the last line to look like this:
 // `  expand: none, // some comment here`
-// make_test!(param_comment, PARAMS_COMMENT);
+make_test!(param_comment, PARAMS_COMMENT);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
