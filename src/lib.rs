@@ -36,7 +36,7 @@ pub fn format(s: &str, config: Config) -> String {
 /// how they will be formatted.
 ///
 /// One assumed rule is that no kind should be formatting with surrounded space
-#[instrument(skip_all,name = "V" , ret, fields(kind = format!("{:?}",node.kind())))]
+#[instrument(skip_all,name = "V", fields(kind = format!("{:?}",node.kind())))]
 fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     let mut res: Vec<String> = vec![];
     for child in node.children() {

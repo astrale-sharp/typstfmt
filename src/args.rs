@@ -1,5 +1,3 @@
-use tracing::warn;
-
 use super::*;
 
 #[instrument(skip_all)]
@@ -8,7 +6,7 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
         return format_args_breaking(parent, children, ctx);
     }
 
-    let mut res = format_args_one_line(parent, children, ctx);
+    let mut res = format_args_tight(parent, children, ctx);
     let number_of_args = parent
         .children()
         .filter_map(|node| {
@@ -25,15 +23,13 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
     }
 
     if utils::max_line_length(&res) >= ctx.config.max_line_length {
-        debug!("format_args::breaking");
         res = format_args_breaking(parent, children, ctx);
         return res;
     }
-    debug!("format_args::one_line");
     res
 }
 
-pub(crate) fn format_args_one_line(
+pub(crate) fn format_args_tight(
     parent: &LinkedNode<'_>,
     children: &[String],
     ctx: &mut Ctx,
