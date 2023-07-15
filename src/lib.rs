@@ -4,6 +4,8 @@
 use itertools::Itertools;
 use tracing::debug;
 use tracing::instrument;
+use tracing::warn;
+use typst::syntax::ast::BinOp;
 use typst::syntax::SyntaxKind;
 use typst::syntax::SyntaxKind::*;
 use typst::syntax::{parse, LinkedNode};
@@ -42,7 +44,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         res.push(child_fmt);
     }
     let res = match node.kind() {
-        Named => format_named_args(node, &res, ctx),
+        Binary => format_bin_left_assoc(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
         ContentBlock => content_blocks::format_content_blocks(node, &res, ctx),
         Args | Params | Dict | Array => args::format_args(node, &res, ctx),
@@ -77,6 +79,69 @@ fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> Stri
     ctx.push_in(node.text(), &mut res);
     for s in children {
         ctx.push_raw_in(s, &mut res);
+    }
+    res
+}
+
+#[instrument(skip_all, ret)]
+pub(crate) fn format_bin_left_assoc(
+    parent: &LinkedNode,
+    children: &[String],
+    ctx: &mut Ctx,
+) -> String {
+    let res = format_bin_left_assoc_tight(parent, children, ctx);
+
+    if crate::utils::max_line_length(&res) >= ctx.config.max_line_length {
+        warn!(
+            "Breaking binary operation is not supported in typst (yet?) but would be great here."
+        );
+        // return format_bin_left_assoc_breaking(parent, children, ctx);
+    }
+    res
+}
+
+#[instrument(skip_all)]
+pub(crate) fn format_bin_left_assoc_breaking(
+    parent: &LinkedNode,
+    children: &[String],
+    ctx: &mut Ctx,
+) -> String {
+    let mut res = String::new();
+    for (s, node) in children.iter().zip(parent.children()) {
+        match node.kind() {
+            x if BinOp::from_kind(x).is_some() => {
+                ctx.push_in("\n", &mut res);
+                ctx.push_raw_indent(s, &mut res);
+                ctx.push_raw_in(" ", &mut res);
+            }
+            Space => {}
+            _ => {
+                ctx.push_raw_in(s, &mut res);
+            }
+        }
+    }
+    res
+}
+
+#[instrument(skip_all)]
+pub(crate) fn format_bin_left_assoc_tight(
+    parent: &LinkedNode,
+    children: &[String],
+    ctx: &mut Ctx,
+) -> String {
+    let mut res = String::new();
+    for (s, node) in children.iter().zip(parent.children()) {
+        match node.kind() {
+            x if BinOp::from_kind(x).is_some() => {
+                ctx.push_in(" ", &mut res);
+                ctx.push_raw_in(s, &mut res);
+                ctx.push_in(" ", &mut res);
+            }
+            Space => {}
+            _ => {
+                ctx.push_raw_in(s, &mut res);
+            }
+        }
     }
     res
 }
