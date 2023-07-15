@@ -1,3 +1,4 @@
+#![deny(clippy::pedantic)]
 use std::{
     fs::File,
     io::{stdin, stdout, Read, Write},
@@ -62,9 +63,10 @@ fn main() -> Result<(), lexopt::Error> {
         return Ok(());
     }
 
-    if output.is_some() && use_stdout {
-        panic!("Both output and stdout are set. You must choose only one.\nAborting.")
-    }
+    assert!(
+        !(output.is_some() && use_stdout),
+        "Both output and stdout are set. You must choose only one.\nAborting."
+    );
 
     if use_stdin {
         let mut res = String::default();
@@ -74,11 +76,11 @@ fn main() -> Result<(), lexopt::Error> {
         let formatted = &format(&res, config);
         if let Some(output) = output {
             let mut file = File::options()
-                .create(true)
                 .write(true)
                 .truncate(true)
                 .open(output.to_str().unwrap())
-                .unwrap();
+                .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
+
             write!(file, "{}", formatted)
                 .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
         } else {
@@ -88,20 +90,35 @@ fn main() -> Result<(), lexopt::Error> {
         return Ok(());
     }
 
-    for path in paths {
+    assert!(
+        !(output.is_some() && paths.len() > 1),
+        "You specified multiple input files and --output but one output file cannot receive the result of many files.\nAborting."
+    );
+
+    for path in &paths {
         let mut res = String::new();
-        let mut file = File::options().read(true).open(&path).unwrap();
+        let mut file = File::options().read(true).open(path).unwrap();
         file.read_to_string(&mut res).expect("Couldn't read stdin");
         let res = format(&res, config);
         drop(file);
 
         if use_stdout {
-            println!("=== {:?} ===", &path);
+            println!("=== {:?} ===", path);
             stdout()
                 .write_all(res.as_bytes())
                 .expect("Couldn't write to stdout");
+        } else if let Some(output) = &output {
+            let mut file = File::options()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .open(output)
+                .unwrap();
+            file.write_all(res.as_bytes()).unwrap();
+            println!("file: {output:?} overwritten.");
         } else {
             let mut file = File::options()
+                .create(true)
                 .write(true)
                 .truncate(true)
                 .open(path.to_str().unwrap())
