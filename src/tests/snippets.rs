@@ -76,6 +76,11 @@ const TABLEX: &str = r#"#let is-tablex-dict(x) = (
 )
 "#;
 
+const TABLEX_COMMENTS: &str = r#"#let convert-length-to-pt(len,styles: none, page_size: none, frac_amount: none, frac_total: none
+) = { if ratio == none {  // 2em + 5pt  (doesn't contain 100% or something)
+measure(line(length: len), styles).width} else {  // 100% + 2em + 5pt  --> extract the "100%" part
+[  4  ]}}"#;
+
 const END_COMMENTS: &str = r#"#{
 right-expand += 4 / 2 // comment
 right-expand += 4 / 2 // comment
