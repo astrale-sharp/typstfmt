@@ -45,9 +45,10 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     }
     let res = match node.kind() {
         Binary => format_bin_left_assoc(node, &res, ctx),
+        Named | Keyed => format_named_args(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
         ContentBlock => content_blocks::format_content_blocks(node, &res, ctx),
-        Args | Params | Dict | Array => args::format_args(node, &res, ctx),
+        Args | Params | Dict | Array | Destructuring => args::format_args(node, &res, ctx),
         LetBinding => format_let_binding(node, &res, ctx),
         _ => format_default(node, &res, ctx),
     };
