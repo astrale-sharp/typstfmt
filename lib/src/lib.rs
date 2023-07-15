@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str!("../../README.md")]
 #![deny(clippy::all)]
 
 use itertools::Itertools;

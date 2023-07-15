@@ -1,11 +1,11 @@
-#![deny(clippy::pedantic)]
+// #![deny(clippy::pedantic)]
 use std::{
     fs::File,
     io::{stdin, stdout, Read, Write},
 };
 
 use lexopt::prelude::*;
-use typstfmt::{format, Config};
+use typstfmt_lib::{format, Config};
 
 const VERSION: &str = "0.0.1";
 const HELP: &str = r#"Format Typst code

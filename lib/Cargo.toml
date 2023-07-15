@@ -1,0 +1,26 @@
+[package]
+name = "typstfmt_lib"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+globmatch = "0.2.3"
+itertools = "0.10.5"
+regex = "1.7.3"
+toml = "0.7.3"
+tracing = { version = "0.1.37", features = ["attributes"] }
+typst = { git = "https://github.com/typst/typst.git" }
+unicode-segmentation = "1.10.1"
+similar-asserts = "1.4.2"
+
+[dev-dependencies]
+insta = "1.30.0"
+paste = "1.0.13"
+tracing-subscriber = "0.3.17"
