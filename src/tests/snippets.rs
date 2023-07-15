@@ -29,10 +29,13 @@ make_test!(
     ignore_ast
 );
 
-// todo
-// this is not passing since we'd like the last line to look like this:
-// `  expand: none, // some comment here`
 make_test!(param_comment, PARAMS_COMMENT);
+make_test!(
+    many_comments,
+    TABLEX_COMMENTS,
+    Config::default(),
+    ignore_ast
+);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -68,3 +71,14 @@ const TABLEX: &str = r#"#let is-tablex-dict(x) = (
       and "tablex-dict-type" in x
 )
 "#;
+
+const TABLEX_COMMENTS: &str = r#"#let convert-length-to-pt(
+  len,
+  styles: none, page_size: none, frac_amount: none, frac_total: none
+) = {
+ if ratio == none {  // 2em + 5pt  (doesn't contain 100% or something)
+ measure(line(length: len), styles).width
+ } else {  // 100% + 2em + 5pt  --> extract the "100%" part
+ [  4  ]
+ }
+}"#;

@@ -14,3 +14,6 @@ make_test!(
 make_test!(parenthesized, "#(auto,)");
 make_test!(ten_adds, &format!("#{{{}1}}", "1+".repeat(10)));
 make_test!(thirty_adds, &format!("#{{{}1}}", "1+".repeat(30)));
+make_test!(markup_block_spaced, "[ 4 ]");
+make_test!(markup_block_tight, "[4]");
+make_test!(markup_block_only_space, "[   ]");

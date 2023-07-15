@@ -81,6 +81,20 @@ pub(crate) fn format_code_blocks_breaking(
             LeftBrace => {
                 res.push_str(&format!("{s}\n{}", ctx.get_indent()));
                 ctx.just_spaced = true;
+                if let Some(next) = utils::get_next_ignoring(&node, &[Space]) {
+                    if [LineComment, BlockComment].contains(&next.kind()) {
+                        res.push_str(next.text());
+                        res.push('\n');
+                        res.push_str(&ctx.get_indent());
+                    }
+                }
+            }
+            LineComment | BlockComment => {
+                if node.prev_sibling_kind() != Some(LeftBrace) {
+                    ctx.push_raw_indent(s, &mut res);
+                } else {
+                    // this will be dealt with left brace.
+                }
             }
             RightBrace => {
                 ctx.push_in("\n", &mut res);
