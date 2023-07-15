@@ -78,8 +78,10 @@ impl Ctx {
                 continue;
             }
             self.push_raw_in("\n", result);
-            self.push_raw_in(&self.get_indent(), result);
-            self.push_raw_in(s, result)
+            self.push_raw_in(
+                format!("{}{}", self.get_indent(), s).trim_end_matches(' '),
+                result,
+            );
         }
     }
 
