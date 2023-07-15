@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#let convert-length-to-pt(len,styles: none, page_size: none, frac_amount: none, frac_total: none\\n) = { if ratio == none {  // 2em + 5pt  (doesn't contain 100% or something)\\nmeasure(line(length: len), styles).width} else {  // 100% + 2em + 5pt  --> extract the \\\"100%\\\" part\\n[  4  ]}}\"\n===\n#let convert-length-to-pt(len,styles: none, page_size: none, frac_amount: none, frac_total: none\n) = { if ratio == none {  // 2em + 5pt  (doesn't contain 100% or something)\nmeasure(line(length: len), styles).width} else {  // 100% + 2em + 5pt  --> extract the \"100%\" part\n[  4  ]}}\n===\nFORMATTED\n===\n#let convert-length-to-pt(\n  len,\n  styles: none,\n  page_size: none,\n  frac_amount: none,\n  frac_total: none,\n) = {\n  if ratio == none {\n    // 2em + 5pt  (doesn't contain 100% or something)\n    measure(line(length: len), styles).width\n  } else {\n    // 100% + 2em + 5pt  --> extract the \"100%\" part\n    [ 4 ]\n  }\n}"
+expression: formatted
+---
+"#let convert-length-to-pt(\n  len,\n  styles: none,\n  page_size: none,\n  frac_amount: none,\n  frac_total: none,\n) = {\n  if ratio == none {\n    // 2em + 5pt  (doesn't contain 100% or something)\n    measure(line(length: len), styles).width\n  } else {\n    // 100% + 2em + 5pt  --> extract the \"100%\" part\n    [ 4 ]\n  }\n}"

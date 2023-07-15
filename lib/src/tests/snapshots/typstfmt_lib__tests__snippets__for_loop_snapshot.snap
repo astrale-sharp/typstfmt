@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#for k in range(5) {\\n    repr(k) + \\\" \\\" \\n}\"\n===\n#for k in range(5) {\n    repr(k) + \" \" \n}\n===\nFORMATTED\n===\n#for k in range(5) {\n  repr(k) + \" \"\n}"
+expression: formatted
+---
+"#for k in range(5) {\n  repr(k) + \" \"\n}"

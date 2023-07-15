@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#let i = 0\\n#while true {\\n  i += 1\\n  if i > 15 { break }\\n  repr(i) + \\\" \\\"\\n}\"\n===\n#let i = 0\n#while true {\n  i += 1\n  if i > 15 { break }\n  repr(i) + \" \"\n}\n===\nFORMATTED\n===\n#let i = 0\n#while true {\n  i += 1\n  if i > 15 { break }\n  repr(i) + \" \"\n}"
+expression: formatted
+---
+"#let i = 0\n#while true {\n  i += 1\n  if i > 15 { break }\n  repr(i) + \" \"\n}"

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/code_block.rs
+description: "INPUT\n===\n\"#{a;b\\n}\"\n===\n#{a;b\n}\n===\nFORMATTED\n===\n#{\n  a;b\n}"
+expression: formatted
+---
+"#{\n  a;b\n}"

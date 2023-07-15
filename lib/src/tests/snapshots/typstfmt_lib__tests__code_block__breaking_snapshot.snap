@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/code_block.rs
+description: "INPUT\n===\n\"#{ super_loooooooooong variable }\"\n===\n#{ super_loooooooooong variable }\n===\nFORMATTED\n===\n#{\n  super_loooooooooong variable\n}"
+expression: formatted
+---
+"#{\n  super_loooooooooong variable\n}"
