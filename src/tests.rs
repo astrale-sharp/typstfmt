@@ -21,15 +21,15 @@ fn init() {
     let ainsi = std::env::var("NO_COLOR").is_err();
 
     let subscriber = FmtSubscriber::builder()
+        .pretty()
         .with_test_writer()
         .without_time()
-        .compact()
+        .with_line_number(true)
+        .with_file(true)
         .with_max_level(level)
         .with_ansi(ainsi)
         .finish();
-    let _ = tracing::subscriber::set_global_default(subscriber)
-        // .expect("setting tracing default failed")
-        ;
+    let _ = tracing::subscriber::set_global_default(subscriber);
 }
 
 /// This makes :
