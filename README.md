@@ -27,7 +27,7 @@ Currently, the output shouldn't be always trusted and isn't perfect but should b
 # Installing
 
 ```sh
-cargo install --git https://github.com/astrale-sharp/typst-fmt.git
+cargo install --git https://github.com/astrale-sharp/typstfmt.git
 ```
 
 This will put the compiled binary in `~/.cargo/bin/`. To use it without prefixing path to the binary you must add this directory to your `PATH`. You can check if it was already added with `echo "$PATH"`.

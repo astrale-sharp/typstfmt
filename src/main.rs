@@ -4,7 +4,7 @@ use std::{
 };
 
 use lexopt::prelude::*;
-use typst_fmt::{format, Config};
+use typstfmt::{format, Config};
 
 const VERSION: &str = "0.0.1";
 const HELP: &str = r#"Format Typst code
