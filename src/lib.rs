@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![deny(clippy::all)]
 
 use itertools::Itertools;
 use tracing::debug;
