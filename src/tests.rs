@@ -80,6 +80,7 @@ macro_rules! make_test {
 
             #[test]
             fn [<$test_name _ast>]() {
+                init();
                 let input = $input;
                 let formatted = format(input, $config);
                 assert!(tests::parses_the_same(&input, &formatted));
@@ -87,6 +88,7 @@ macro_rules! make_test {
 
             #[test]
             fn [<$test_name _double_format>]()  {
+                init();
                 let input = $input;
                 let format_once = format(input, $config);
                 let format_twice = format(&format_once, $config);

@@ -59,10 +59,14 @@ pub(crate) fn get_next_ignoring<'a>(
 }
 
 #[instrument(ret, skip_all)]
-pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
+pub(crate) fn next_is_ignoring(
+    node: &LinkedNode,
+    is: SyntaxKind,
+    ignoring: &[SyntaxKind],
+) -> bool {
     let n = get_next_ignoring(node, ignoring);
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
-    n.is_some_and(|n| n.kind() == is)
+    n.is_some_and(|n| is == n.kind())
 }
 
 pub(crate) fn max_line_length(s: &str) -> usize {
