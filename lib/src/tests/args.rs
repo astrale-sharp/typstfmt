@@ -38,13 +38,13 @@ make_test!(
 );
 
 make_test!(
-    parenthesized_comment,
-    PARENTHESIZED_COMMENT,
+    args_comment_end,
+    ARGS_COMMENT_END,
     Config::default(),
     ignore_ast
 );
 
-const PARENTHESIZED_COMMENT: &str = "#func(
+const ARGS_COMMENT_END: &str = "#func(
     ..v_or_hline,
     start: start,
     end: end,
