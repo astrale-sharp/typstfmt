@@ -75,6 +75,7 @@ pub(crate) fn format_args_breaking(
                 res.push_str(&ctx.get_indent());
                 if let Some(next) = utils::get_next_ignoring(&node, &[Space]) {
                     if [LineComment, BlockComment].contains(&next.kind()) {
+                        ctx.push_raw_in(" ", &mut res);
                         res.push_str(next.text());
                         res.push('\n');
                         res.push_str(&ctx.get_indent());
