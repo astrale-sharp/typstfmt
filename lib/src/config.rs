@@ -18,7 +18,7 @@ impl Default for Config {
 
 impl Config {
     pub fn from_toml(s: &str) -> Result<Self, String> {
-        toml::from_str(s).map_err(|e| format!("{e:?}"))
+        toml::from_str(s).map_err(|e| e.message().to_string())
     }
 
     pub fn default_toml() -> String {
