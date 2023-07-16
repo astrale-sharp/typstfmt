@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#{\\nright-expand += 4 / 2 // comment\\nright-expand += 4 / 2 // comment\\n}\"\n===\n#{\nright-expand += 4 / 2 // comment\nright-expand += 4 / 2 // comment\n}\n===\nFORMATTED\n===\n#{\n  right-expand += 4 / 2 // comment\n  right-expand += 4 / 2 // comment\n}"
+expression: formatted
+---
+"#{\n  right-expand += 4 / 2 // comment\n  right-expand += 4 / 2 // comment\n}"

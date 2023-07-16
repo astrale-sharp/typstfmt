@@ -91,6 +91,7 @@ pub(crate) fn format_code_blocks_breaking(
             }
             LineComment | BlockComment => {
                 if node.prev_sibling_kind() != Some(LeftBrace) {
+                    ctx.push_in(" ", &mut res);
                     ctx.push_raw_indent(s, &mut res);
                 } else {
                     // this will be dealt with left brace.

@@ -18,10 +18,11 @@ impl Ctx {
         }
     }
 
-    /// Trim spaces for Space nodes if they contain a linebreak.
-    /// avoids:
+    /// Pushes the string in the result avoiding:
     /// - putting two consecutive spaces.
     /// - putting more than two consecutive newlines.
+    ///
+    /// Won't work for indents.
     #[instrument(skip_all)]
     pub(crate) fn push_in(&mut self, s: &str, res: &mut String) {
         let s = if s.contains('\n') {
@@ -32,7 +33,7 @@ impl Ctx {
         for c in s.chars() {
             match c {
                 ' ' => {
-                    if self.just_spaced {
+                    if self.just_spaced || res.ends_with(' ') {
                         debug!("IGNORED space");
                     } else {
                         debug!("PUSHED SPACE");

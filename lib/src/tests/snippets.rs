@@ -39,7 +39,7 @@ make_test!(
 //TODO
 // the last line ends in `2// comment` instead of `2 // comment`
 // it's probably linked to the trim-line happening in push_raw_indent.
-// make_test!(end_comments, END_COMMENTS);
+make_test!(end_comments, END_COMMENTS);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
