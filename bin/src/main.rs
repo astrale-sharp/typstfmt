@@ -8,6 +8,7 @@ use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
 const VERSION: &str = "0.0.1";
+const CONFIG_PATH: &str = "typstfmt-config.toml";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] <file>...
@@ -21,6 +22,7 @@ Options:
                         be printed to stdout. 
         -v, --version   Prints the current version.
         -h, --help      Prints this help.
+        -C, --make-default-config   Create a default config file at typstfmt-config.toml
 "#;
 
 fn main() -> Result<(), lexopt::Error> {
@@ -29,7 +31,6 @@ fn main() -> Result<(), lexopt::Error> {
     let mut use_stdin = true;
     let mut use_stdout = false;
     let mut output = None;
-    let config = Config::default();
     while let Some(arg) = parser.next()? {
         match arg {
             Long("version") | Short('v') => {
@@ -38,6 +39,21 @@ fn main() -> Result<(), lexopt::Error> {
             }
             Long("help") | Short('h') => {
                 println!("{HELP}");
+                return Ok(());
+            }
+            Long("make-default-config") | Short('C') => {
+                let s = Config::default_toml();
+                let mut f = File::options()
+                    .create_new(true)
+                    .write(true)
+                    .open(CONFIG_PATH)
+                    .unwrap_or_else(|e| {
+                        panic!(
+                            "Couldn't create a new config file at {}.\nCaused by {}",
+                            CONFIG_PATH, e
+                        )
+                    });
+                f.write_all(s.as_bytes()).unwrap();
                 return Ok(());
             }
             Value(v) => {
@@ -57,6 +73,17 @@ fn main() -> Result<(), lexopt::Error> {
             }
         }
     }
+
+    let config = {
+        if let Ok(mut f) = File::options().read(true).open(CONFIG_PATH) {
+            let mut buf = String::default();
+            f.read_to_string(&mut buf).unwrap();
+            Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
+        } else {
+            Config::default()
+        }
+    };
+
     if paths.is_empty() && !use_stdin {
         println!("You specified no files to format. If you want to use stdin pass --stdin");
         println!("{HELP}");
@@ -127,6 +154,5 @@ fn main() -> Result<(), lexopt::Error> {
             println!("file: {path:?} overwritten.");
         }
     }
-
     Ok(())
 }

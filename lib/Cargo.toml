@@ -19,6 +19,7 @@ tracing = { version = "0.1.37", features = ["attributes"] }
 typst = { git = "https://github.com/typst/typst.git" }
 unicode-segmentation = "1.10.1"
 similar-asserts = "1.4.2"
+serde = { version = "1.0.171", features = ["serde_derive"] }
 
 [dev-dependencies]
 insta = "1.30.0"

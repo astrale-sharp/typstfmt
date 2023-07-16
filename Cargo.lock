@@ -1077,6 +1077,7 @@ dependencies = [
  "itertools",
  "paste",
  "regex",
+ "serde",
  "similar-asserts",
  "toml",
  "tracing",
