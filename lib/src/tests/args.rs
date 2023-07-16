@@ -36,3 +36,17 @@ make_test!(
     },
     ignore_ast
 );
+
+make_test!(
+    parenthesized_comment,
+    PARENTHESIZED_COMMENT,
+    Config::default(),
+    ignore_ast
+);
+
+const PARENTHESIZED_COMMENT: &str = "#func(
+    ..v_or_hline,
+    start: start,
+    end: end,
+    parent: v_or_hline  // the one that generated this
+)";

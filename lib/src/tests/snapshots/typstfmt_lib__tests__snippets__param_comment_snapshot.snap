@@ -1,6 +1,6 @@
 ---
 source: lib/src/tests/snippets.rs
-description: "INPUT\n===\n\"#let hlinex(\\n  stroke-expand: true,\\n  expand: none, // some comment here\\n) = ()\"\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()\n===\nFORMATTED\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none,\n  // some comment here\n) = ()"
+description: "INPUT\n===\n\"#let hlinex(\\n  stroke-expand: true,\\n  expand: none, // some comment here\\n) = ()\"\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()\n===\nFORMATTED\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()"
 expression: formatted
 ---
-"#let hlinex(\n  stroke-expand: true,\n  expand: none,\n  // some comment here\n) = ()"
+"#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()"

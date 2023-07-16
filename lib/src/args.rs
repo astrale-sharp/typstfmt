@@ -67,6 +67,7 @@ pub(crate) fn format_args_breaking(
     let mut res = String::new();
     let mut missing_trailing = false;
     for (s, node) in children.iter().zip(parent.children()) {
+        let is_last = utils::next_is_ignoring(&node, RightParen, &[Space]);
         match node.kind() {
             LeftParen => {
                 res.push_str(s);
@@ -89,44 +90,50 @@ pub(crate) fn format_args_breaking(
             }
             LineComment | BlockComment => {
                 // this will be dealt with in comma and leftParen.
+                // except
+                if is_last && missing_trailing {
+                    res.push_str(", ");
+                    ctx.push_raw_indent(s, &mut res);
+                    res.push('\n');
+                }
             }
             Space => {}
             // handles trailing comma
             // handles Line comment
-            //
             Comma => {
                 // print the last comma but don't indent
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
-                // will be false if trivia is in the way
-                let is_trailing = utils::next_is_ignoring(&node, RightParen, &[Space]);
+                let is_trailing =
+                    utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
+
+                let next = utils::get_next_ignoring(&node, &[Space]);
+                let next_is_comment = next
+                    .as_ref()
+                    .is_some_and(|n| [LineComment, BlockComment].contains(&n.kind()));
 
                 if is_last_comma && is_trailing {
                     // no indent
-                    assert!(s == ",");
                     ctx.push_raw_in(s, &mut res);
-                    if utils::next_is_ignoring(&node, RightParen, &[Space]) {}
+                    if next_is_comment {
+                        ctx.push_raw_in(" ", &mut res);
+                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
+                    }
                     ctx.push_raw_in("\n", &mut res);
                 } else {
-                    ctx.push_raw_in(&format!("{s}\n{}", ctx.get_indent()), &mut res);
-                    if let Some(next) = utils::get_next_ignoring(&node, &[Space]) {
-                        if [LineComment, BlockComment].contains(&next.kind()) {
-                            res.push_str(next.text());
-                            res.push('\n');
-                            let is_trailing = utils::next_is_ignoring(&next, RightParen, &[Space]);
-                            if !is_trailing {
-                                res.push_str(&ctx.get_indent());
-                            }
-                        }
-                    }
-
                     if is_last_comma && !is_trailing {
                         missing_trailing = true;
                     }
+                    res.push_str(s);
+                    if next_is_comment {
+                        ctx.push_raw_in(" ", &mut res);
+                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
+                    }
+                    res.push('\n');
+                    res.push_str(&ctx.get_indent());
                 }
             }
             _ => {
                 ctx.push_raw_indent(s, &mut res);
-                let is_last = utils::next_is_ignoring(&node, RightParen, &[Space]);
                 if is_last && missing_trailing {
                     ctx.push_raw_in(",\n", &mut res)
                 }
