@@ -2,6 +2,10 @@ use super::*;
 
 make_test!(call_func_empty, "#f()");
 make_test!(call_func_simple, "#f(1,2,3)");
+make_test!(parenthesized_not_array, "#(auto)");
+make_test!(array_not_parenthesized, "#(auto,)");
+make_test!(parenthesized_not_array_break, "#(\nauto)");
+make_test!(array_not_parenthesized_break, "#(\nauto,)");
 make_test!(
     call_func_long,
     "#f(1,this_is_absurdly_loooooooooong,3)",

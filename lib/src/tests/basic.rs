@@ -10,8 +10,6 @@ make_test!(
     content_block_spaced,
     "#[\n_Glaciers_ form an important part \nof the earth's climate system.]"
 );
-// todo, fix array formatting trailing comma
-make_test!(parenthesized, "#(auto,)");
 make_test!(ten_adds, &format!("#{{{}1}}", "1+".repeat(10)));
 make_test!(thirty_adds, &format!("#{{{}1}}", "1+".repeat(30)));
 make_test!(markup_block_spaced, "[ 4 ]");
