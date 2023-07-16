@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/basic.rs
+description: "INPUT\n===\n\"#(auto)\"\n===\n#(auto)\n===\nFORMATTED\n===\n#(auto)"
+expression: formatted
+---
+"#(auto)"
