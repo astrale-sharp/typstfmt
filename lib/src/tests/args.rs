@@ -48,6 +48,19 @@ make_test!(
     ignore_ast
 );
 
+make_test!(
+    parenth_comment_end,
+    "#(\ntrue// comment\n)",
+    Config::default(),
+    ignore_ast
+);
+make_test!(
+    func_comment_end,
+    "#f(\ntrue// comment\n)",
+    Config::default(),
+    ignore_ast
+);
+
 const ARGS_COMMENT_END: &str = "#func(
     ..v_or_hline,
     start: start,

@@ -65,7 +65,7 @@ pub(crate) fn format_args_breaking(
     ctx: &mut Ctx,
 ) -> String {
     let mut res = String::new();
-    let mut missing_trailing = false;
+    let mut missing_trailing = !(parent.kind() == Parenthesized);
     for (s, node) in children.iter().zip(parent.children()) {
         let is_last = utils::next_is_ignoring(&node, RightParen, &[Space]);
         match node.kind() {
@@ -83,6 +83,16 @@ pub(crate) fn format_args_breaking(
             }
             RightParen => {
                 if parent.kind() == Parenthesized {
+                    // lets check for comment!
+                    let prev = node.prev_sibling().unwrap();
+                    let next = utils::get_next_ignoring(&prev, &[Space]);
+                    let next_is_comment = next
+                        .as_ref()
+                        .is_some_and(|n| [LineComment, BlockComment].contains(&n.kind()));
+                    if next_is_comment {
+                        ctx.push_raw_in(" ", &mut res);
+                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
+                    }
                     // no trailing comma we don't have a newline!
                     res.push('\n');
                 }
@@ -101,6 +111,7 @@ pub(crate) fn format_args_breaking(
             // handles trailing comma
             // handles Line comment
             Comma => {
+                missing_trailing = false;
                 // print the last comma but don't indent
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
                 let is_trailing =
