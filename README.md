@@ -5,6 +5,7 @@ In progress formatter for the Typst language!
 - [Goals](#goals)
 - [State](#state)
 - [Installing](#installing)
+  - [Setting up a pre-commit hook](#setting-up-a-pre-commit-hook)
 - [Contributing](#contributing)
 - [Architecture](#architecture)
   - [Main logic](#main-logic)
@@ -41,29 +42,35 @@ export PATH="$HOME/.cargo/bin:$PATH"
 New instances of your shell (bash, zsh) will have an updated `PATH`.
 Or you can add this to your `.profile` or `.zshenv` to update your `PATH` when the OS is booted. This will require a restart of the machine.
 
+## Setting up a pre-commit hook
+
+You can set up a git [hook](https://pre-commit.com).
+
+Every `git commit`, will then format automatically every .typ file before committing.
+
+run:
+```sh
+echo "
+repos:
+  - repo: https://github.com/astrale-sharp/typstfmt
+    rev: 1c414de
+    hooks:
+      - id: typstfmt
+" > .pre-commit-config.yaml
+```
+to add a configured `.pre-commit-config.yaml` file.
+
+you should then run:
+```sh
+pre-commit install
+pre-commit autoupdate
+```
+
+And your set up is done!
+
 # Contributing
 - feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (at Astrale).
 - once discussed, you may open a PR, not before cause I'm a bit chaotic and this is wip so things change fast and I would hate it if you lost your time.
-
-# Pre-commit hook
-
-Refer <https://pre-commit.com>, add `.pre-commit-config.yaml`:
-
-```yaml
-repos:
-  - repo: https://github.com/astrale-sharp/typstfmt
-    rev: HEAD
-    hooks:
-      - id: typstfmt
-```
-
-Install pre-commit for this repository:
-
-```shell
-pre-commit install
-```
-
-Now every `git commit`, changed `*.typ` from last git commit will be formatted automatically.
 
 # Architecture
 ## Main logic
