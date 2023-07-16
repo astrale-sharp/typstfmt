@@ -1,5 +1,5 @@
 [workspace]
-members = ["lib","bin"]
+members = ["lib"]
 
 [workspace.package]
 version = "0.1.0"
@@ -11,3 +11,19 @@ readme = "README.md"
 repository = "https://github.com/astrale-sharp/typstfmt"
 license = "MIT OR Apache-2.0"
 categories = ["command-line-utilities", "development-tools"]
+
+[package]
+name = "typstfmt"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+description.workspace = true
+readme.workspace = true
+repository.workspace = true
+license.workspace = true
+categories.workspace = true
+
+[dependencies]
+typstfmt_lib = { path = "./lib" }
+lexopt = "0.3.0"
