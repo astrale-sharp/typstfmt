@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#{\\n  right-expand += 4 / 2 // comment\\n  right-expand += 4 / 2 // comment\\n  }\"\n===\n#{\n  right-expand += 4 / 2 // comment\n  right-expand += 4 / 2 // comment\n  }\n===\nFORMATTED\n===\n#{\n  right-expand += 4 / 2 // comment\n  right-expand += 4 / 2 // comment\n}"
+expression: formatted
+---
+"#{\n  right-expand += 4 / 2 // comment\n  right-expand += 4 / 2 // comment\n}"

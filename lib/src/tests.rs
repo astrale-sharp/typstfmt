@@ -52,6 +52,7 @@ macro_rules! make_test {
                 init();
                 let input = $input;
                 let formatted = format(input, $config);
+                println!("{:?}",parse(input));
                 insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
                     insta::assert_debug_snapshot!(formatted);
                 });
@@ -73,6 +74,7 @@ macro_rules! make_test {
                 init();
                 let input = $input;
                 let formatted = format(input, $config);
+                println!("AST: {:?}",parse(input));
                 insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
                     insta::assert_debug_snapshot!(formatted);
                 });
@@ -146,7 +148,6 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
 
 #[instrument(skip_all)]
 fn parses_the_same(s: &str, oth: &str) -> bool {
-    init();
     let parse1 = parse(s);
     let lkn = LinkedNode::new(&parse1);
     let parse2 = parse(oth);
@@ -167,3 +168,5 @@ mod args;
 
 #[cfg(test)]
 mod code_block;
+
+mod comments;

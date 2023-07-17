@@ -1,3 +1,5 @@
+use crate::utils::{get_next_ignoring, next_is_ignoring};
+
 use super::*;
 
 #[instrument(skip_all)]
@@ -81,20 +83,37 @@ pub(crate) fn format_code_blocks_breaking(
             LeftBrace => {
                 res.push_str(&format!("{s}\n{}", ctx.get_indent()));
                 ctx.just_spaced = true;
-                if let Some(next) = utils::get_next_ignoring(&node, &[Space]) {
-                    if [LineComment, BlockComment].contains(&next.kind()) {
-                        res.push_str(next.text());
-                        res.push('\n');
-                        res.push_str(&ctx.get_indent());
-                    }
-                }
             }
             LineComment | BlockComment => {
-                if node.prev_sibling_kind() != Some(LeftBrace) {
-                    ctx.push_in(" ", &mut res);
-                    ctx.push_raw_indent(s, &mut res);
+                if utils::prev_is_ignoring(&node, LineComment, &[Space])
+                    || utils::prev_is_ignoring(&node, BlockComment, &[Space])
+                {
+                    ctx.push_raw_in(s, &mut res);
+                    ctx.push_in("\n", &mut res);
                 } else {
-                    // this will be dealt with left brace.
+                    let prev = node.prev_sibling().unwrap();
+                    let mark = res.rfind(|x| x != ' ' && x != '\n').unwrap() + 1;
+                    let prev_maybe_space = get_next_ignoring(&prev, &[]);
+                    // go back before
+                    res = res[..mark].to_string();
+                    match prev_maybe_space {
+                        Some(space) if space.kind() == Space && space.text().contains('\n') => {
+                            res.push('\n');
+                            res.push_str(&ctx.get_indent()); 
+                            res.push_str(s.trim_start());
+                            ctx.just_spaced = true
+                        }
+                        _ => {
+                            res.push(' ');
+                            res.push_str(s);
+                            ctx.push_in("\n", &mut res);
+                            ctx.consec_new_line = 2;
+                        } 
+                    }
+                }
+
+                if !next_is_ignoring(&node, RightBrace, &[Space]) {
+                    ctx.push_raw_in(&ctx.get_indent(), &mut res);
                 }
             }
             RightBrace => {

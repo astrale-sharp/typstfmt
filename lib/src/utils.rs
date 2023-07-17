@@ -6,6 +6,15 @@ pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<Linked
     node.parent()?.children().nth(node.index() + 1)
 }
 
+/// like next sibling but doesn't skip trivia.
+pub(crate) fn prev_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
+    if node.index() == 0 {
+        return None
+    }
+    node.parent()?.children().nth(node.index() - 1)
+}
+
+
 /// find any child recursively that fits predicate
 #[instrument(ret, skip_all)]
 pub(crate) fn find_child<'a>(
@@ -62,12 +71,36 @@ pub(crate) fn get_next_ignoring<'a>(
     None
 }
 
+pub(crate) fn get_prev_ignoring<'a>(
+    node: &'a LinkedNode<'a>,
+    ignoring: &[SyntaxKind],
+) -> Option<LinkedNode<'a>> {
+    let mut prev = prev_sibling_or_trivia(node);
+    while let Some(prev_inner) = &prev {
+        let kind = prev_inner.kind();
+        if ignoring.contains(&kind) {
+            prev = prev_sibling_or_trivia(&prev_inner.clone());
+            continue;
+        }
+        return Some(prev_inner.clone());
+    }
+    None
+}
+
 #[instrument(ret, skip_all)]
 pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
     let n = get_next_ignoring(node, ignoring);
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
     n.is_some_and(|n| is == n.kind())
 }
+
+#[instrument(ret, skip_all)]
+pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
+    let n = get_prev_ignoring(node, ignoring);
+    debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
+    n.is_some_and(|n| is == n.kind())
+}
+
 
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()

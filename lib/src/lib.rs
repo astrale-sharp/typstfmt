@@ -92,6 +92,7 @@ pub(crate) fn format_named_args(parent: &LinkedNode, children: &[String], ctx: &
         match node.kind() {
             Colon => res.push_str(": "),
             Space => {}
+            LineComment | BlockComment => ctx.push_raw_in(s, &mut res),
             _ => {
                 ctx.push_raw_in(s, &mut res);
             }

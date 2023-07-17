@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#let hlinex(\\n  stroke-expand: true,\\n  expand: none, // some comment here\\n) = ()\"\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()\n===\nFORMATTED\n===\n#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()"
+expression: formatted
+---
+"#let hlinex(\n  stroke-expand: true,\n  expand: none, // some comment here\n) = ()"

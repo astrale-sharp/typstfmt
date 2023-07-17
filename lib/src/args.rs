@@ -1,8 +1,11 @@
+use crate::utils::{get_next_ignoring, next_is_ignoring};
+
 use super::*;
 
 #[instrument(skip_all)]
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-    if children.iter().any(|c| c.contains('\n')) {
+    if children.iter().any(|c| c.contains('\n'))
+    {
         return format_args_breaking(parent, children, ctx);
     }
 
@@ -66,46 +69,52 @@ pub(crate) fn format_args_breaking(
 ) -> String {
     let mut res = String::new();
     let mut missing_trailing = !(parent.kind() == Parenthesized);
+
     for (s, node) in children.iter().zip(parent.children()) {
-        let is_last = utils::next_is_ignoring(&node, RightParen, &[Space]);
+        let is_last =
+            utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
         match node.kind() {
             LeftParen => {
                 res.push_str(s);
                 res.push('\n');
                 res.push_str(&ctx.get_indent());
-                if let Some(next) = utils::get_next_ignoring(&node, &[Space]) {
-                    if [LineComment, BlockComment].contains(&next.kind()) {
-                        ctx.push_raw_in(" ", &mut res);
-                        res.push_str(next.text());
-                        res.push('\n');
-                        res.push_str(&ctx.get_indent());
-                    }
-                }
             }
             RightParen => {
                 if parent.kind() == Parenthesized {
-                    // lets check for comment!
-                    let prev = node.prev_sibling().unwrap();
-                    let next = utils::get_next_ignoring(&prev, &[Space]);
-                    let next_is_comment = next
-                        .as_ref()
-                        .is_some_and(|n| [LineComment, BlockComment].contains(&n.kind()));
-                    if next_is_comment {
-                        ctx.push_raw_in(" ", &mut res);
-                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
-                    }
                     // no trailing comma we don't have a newline!
-                    res.push('\n');
+                    ctx.push_in("\n", &mut res);
                 }
                 res.push_str(s);
             }
             LineComment | BlockComment => {
-                // this will be dealt with in comma and leftParen.
-                // except
-                if is_last && missing_trailing {
-                    res.push_str(", ");
-                    ctx.push_raw_indent(s, &mut res);
-                    res.push('\n');
+                if utils::prev_is_ignoring(&node, LineComment, &[Space])
+                    || utils::prev_is_ignoring(&node, BlockComment, &[Space])
+                {
+                    ctx.push_raw_in(s, &mut res);
+                    ctx.push_in("\n", &mut res);
+                } else {
+                    let prev = node.prev_sibling().unwrap();
+                    let mark = res.rfind(|x| x != ' ' && x != '\n').unwrap() + 1;
+                    let prev_maybe_space = get_next_ignoring(&prev, &[]);
+                    res = res[..mark].to_string();
+                    match prev_maybe_space {
+                        Some(space) if space.kind() == Space && space.text().contains('\n') => {
+                            res.push('\n');
+                            res.push_str(&ctx.get_indent()); 
+                            res.push_str(s);
+                        }
+                        _ => {
+                            res.push(' ');
+                            res.push_str(s);
+                            res.push('\n');
+                            ctx.consec_new_line = 2;
+                        } // same line I need to regen jump
+                    }
+                }
+
+                if !next_is_ignoring(&node, RightParen, &[Space]) {
+                    ctx.push_raw_in(&ctx.get_indent(), &mut res);
+                    ctx.just_spaced = true;
                 }
             }
             Space => {}
@@ -113,33 +122,19 @@ pub(crate) fn format_args_breaking(
             // handles Line comment
             Comma => {
                 missing_trailing = false;
-                // print the last comma but don't indent
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
                 let is_trailing =
                     utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
 
-                let next = utils::get_next_ignoring(&node, &[Space]);
-                let next_is_comment = next
-                    .as_ref()
-                    .is_some_and(|n| [LineComment, BlockComment].contains(&n.kind()));
-
                 if is_last_comma && is_trailing {
                     // no indent
                     ctx.push_raw_in(s, &mut res);
-                    if next_is_comment {
-                        ctx.push_raw_in(" ", &mut res);
-                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
-                    }
                     ctx.push_raw_in("\n", &mut res);
                 } else {
                     if is_last_comma && !is_trailing {
                         missing_trailing = true;
                     }
                     res.push_str(s);
-                    if next_is_comment {
-                        ctx.push_raw_in(" ", &mut res);
-                        ctx.push_raw_indent(next.unwrap().text(), &mut res);
-                    }
                     res.push('\n');
                     res.push_str(&ctx.get_indent());
                 }

@@ -62,14 +62,12 @@ impl Ctx {
     /// makes the context aware it missed info,
     /// should be called when pushing directly in result.
     pub(crate) fn push_raw_in(&mut self, s: &str, result: &mut String) {
-        debug!("PUSH_RAW: {s:?}");
         result.push_str(s);
         self.lost_context()
     }
 
     /// adds an indentation for each line the input except the first to match the current level of identation.
     pub(crate) fn push_raw_indent(&mut self, s: &str, result: &mut String) {
-        debug!("push::raw::indent");
         let mut is_first = true;
         for s in s.lines() {
             let s = s.trim_end();
