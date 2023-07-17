@@ -1,5 +1,3 @@
-*The crate was published with empty Typst to crates.io mostly to reserve the name for the typst dev if they wanted it later (and they can have the name anytime). This means that this formatter will likely change it's name (typfmt) at some point (or become the official one but I likely won't be the main dev then)*
-
 In progress formatter for the Typst language!
 
 - [Goals](#goals)
