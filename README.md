@@ -1,4 +1,4 @@
-In progress formatter for the Typst language!
+Basic formatter for the Typst language with a future!
 
 - [Goals](#goals)
 - [State](#state)
