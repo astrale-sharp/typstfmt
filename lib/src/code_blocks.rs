@@ -99,8 +99,9 @@ pub(crate) fn format_code_blocks_breaking(
                     match prev_maybe_space {
                         Some(space) if space.kind() == Space && space.text().contains('\n') => {
                             res.push('\n');
-                            res.push_str(&ctx.get_indent()); 
+                            res.push_str(&ctx.get_indent());
                             res.push_str(s.trim_start());
+                            ctx.push_in("\n", &mut res);
                             ctx.just_spaced = true
                         }
                         _ => {
@@ -108,7 +109,7 @@ pub(crate) fn format_code_blocks_breaking(
                             res.push_str(s);
                             ctx.push_in("\n", &mut res);
                             ctx.consec_new_line = 2;
-                        } 
+                        }
                     }
                 }
 

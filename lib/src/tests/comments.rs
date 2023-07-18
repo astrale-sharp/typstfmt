@@ -29,6 +29,8 @@ make_test!(
     ignore_ast
 );
 
+make_test!(code_comment, CODE_COMMENT, Config::default(), ignore_ast);
+
 make_test!(end_comments, END_COMMENTS);
 
 const PARAMS_COMMENT: &str = r#"#let hlinex(
@@ -59,3 +61,8 @@ const ARRAY_END_COMMENT: &str = r#"#(
     true,
     false // some other comment
 )"#;
+
+const CODE_COMMENT: &str = r#"#if col == auto {
+  // max cell width
+  let col_size = grid-get-column(grid, i)
+}"#;

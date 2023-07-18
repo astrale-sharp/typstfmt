@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#if col == auto {\\n  // max cell width\\n  let col_size = grid-get-column(grid, i)\\n}\"\n===\n#if col == auto {\n  // max cell width\n  let col_size = grid-get-column(grid, i)\n}\n===\nFORMATTED\n===\n#if col == auto {\n  // max cell width\n  let col_size = grid-get-column(grid, i)\n}"
+expression: formatted
+---
+"#if col == auto {\n  // max cell width\n  let col_size = grid-get-column(grid, i)\n}"

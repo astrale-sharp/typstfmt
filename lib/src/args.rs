@@ -4,8 +4,7 @@ use super::*;
 
 #[instrument(skip_all)]
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-    if children.iter().any(|c| c.contains('\n'))
-    {
+    if children.iter().any(|c| c.contains('\n')) {
         return format_args_breaking(parent, children, ctx);
     }
 
@@ -100,7 +99,7 @@ pub(crate) fn format_args_breaking(
                     match prev_maybe_space {
                         Some(space) if space.kind() == Space && space.text().contains('\n') => {
                             res.push('\n');
-                            res.push_str(&ctx.get_indent()); 
+                            res.push_str(&ctx.get_indent());
                             res.push_str(s);
                         }
                         _ => {

@@ -9,11 +9,10 @@ pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<Linked
 /// like next sibling but doesn't skip trivia.
 pub(crate) fn prev_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
     if node.index() == 0 {
-        return None
+        return None;
     }
     node.parent()?.children().nth(node.index() - 1)
 }
-
 
 /// find any child recursively that fits predicate
 #[instrument(ret, skip_all)]
@@ -100,7 +99,6 @@ pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[Sy
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
     n.is_some_and(|n| is == n.kind())
 }
-
 
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()

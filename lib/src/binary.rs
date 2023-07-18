@@ -12,11 +12,12 @@ pub(crate) fn format_bin_left_assoc(
     let res = format_bin_left_assoc_tight(parent, children, ctx);
 
     if parent.kind() == Parenthesized
-        && (crate::utils::max_line_length(&res) >= ctx.config.max_line_length
+        && (
+            crate::utils::max_line_length(&res) >= ctx.config.max_line_length
             // || parent
-                // .children()
-                // .any(|x| x.kind() == LineComment || x.kind() == BlockComment)
-            )
+            // .children()
+            // .any(|x| x.kind() == LineComment || x.kind() == BlockComment)
+        )
     {
         return format_bin_left_assoc_breaking(parent, children, ctx);
     }
@@ -76,7 +77,6 @@ pub(crate) fn format_bin_left_assoc_tight(
                 ctx.push_in("\n", &mut res);
                 ctx.push_raw_in(&ctx.get_indent(), &mut res);
                 ctx.just_spaced = true;
-
             }
             _ => {
                 ctx.push_raw_in(s, &mut res);
