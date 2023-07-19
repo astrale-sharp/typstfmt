@@ -5,10 +5,10 @@ use itertools::Itertools;
 use tracing::debug;
 use tracing::instrument;
 use tracing::warn;
-use typst::syntax::ast::BinOp;
-use typst::syntax::SyntaxKind;
-use typst::syntax::SyntaxKind::*;
-use typst::syntax::{parse, LinkedNode};
+use typst_syntax::ast::BinOp;
+use typst_syntax::SyntaxKind;
+use typst_syntax::SyntaxKind::*;
+use typst_syntax::{parse, LinkedNode};
 use Option::None;
 
 mod config;
