@@ -157,16 +157,12 @@ fn parses_the_same(s: &str, oth: &str) -> bool {
     tree_are_equal(&lkn, &lkn_oth)
 }
 
-#[cfg(test)]
 mod basic;
 
-#[cfg(test)]
 mod snippets;
 
-#[cfg(test)]
 mod args;
 
-#[cfg(test)]
 mod code_block;
 
 mod comments;
