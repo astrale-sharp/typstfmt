@@ -6,10 +6,10 @@ pub(crate) fn format_content_blocks(
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
-    if children.iter().any(|c| c.contains('\n')) {
-        debug!("tight");
-        return format_block_content_breaking(parent, children, ctx);
-    }
+    // if children.iter().any(|c| c.contains('\n')) {
+    //     debug!("tight");
+    //     return format_block_content_breaking(parent, children, ctx);
+    // }
     format_block_content_tight(parent, children, ctx)
 }
 
