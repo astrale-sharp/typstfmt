@@ -54,6 +54,7 @@ fn main() -> Result<(), lexopt::Error> {
                         )
                     });
                 f.write_all(s.as_bytes()).unwrap();
+                println!("Created config file at: {CONFIG_PATH}");
                 return Ok(());
             }
             Value(v) => {
