@@ -1,4 +1,4 @@
-for k in src/tests/snapshots/*
+for k in lib/src/tests/snapshots/*
 do
     cargo insta show $k
     echo "Press enter to continue"
