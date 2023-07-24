@@ -90,6 +90,10 @@ pub(crate) fn format_named_args(parent: &LinkedNode, children: &[String], ctx: &
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
+            Show | Set => {
+                ctx.push_raw_in(s, &mut res);
+                ctx.push_in(" ", &mut res);
+            }
             Colon => res.push_str(": "),
             Space => {}
             LineComment | BlockComment => ctx.push_raw_in(s, &mut res),
