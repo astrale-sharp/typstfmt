@@ -12,7 +12,7 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
     let number_of_args = parent
         .children()
         .filter_map(|node| {
-            if [Comma, Space, LeftParen, RightParen].contains(&node.kind()) {
+            if [Comma, Space, LeftParen, RightParen, LineComment, BlockComment].contains(&node.kind()) {
                 None
             } else {
                 Some(node)
