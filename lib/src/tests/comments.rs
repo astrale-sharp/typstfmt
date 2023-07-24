@@ -29,6 +29,8 @@ make_test!(
     ignore_ast
 );
 
+make_test!(block_comment, BLOCK_COMMENT);
+
 make_test!(code_comment, CODE_COMMENT, Config::default(), ignore_ast);
 
 make_test!(end_comments, END_COMMENTS);
@@ -65,4 +67,10 @@ const ARRAY_END_COMMENT: &str = r#"#(
 const CODE_COMMENT: &str = r#"#if col == auto {
   // max cell width
   let col_size = grid-get-column(grid, i)
+}"#;
+
+const BLOCK_COMMENT: &str = r#"#if is_last_row {
+  row_group_height -= row_gutter_dy
+  // one less gutter at the end
+
 }"#;

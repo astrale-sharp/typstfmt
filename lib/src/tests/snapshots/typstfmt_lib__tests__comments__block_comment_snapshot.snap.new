@@ -1,0 +1,7 @@
+---
+source: lib/src/tests/comments.rs
+assertion_line: 32
+description: "INPUT\n===\n\"#if is_last_row {\\n  row_group_height -= row_gutter_dy\\n  // one less gutter at the end\\n\\n}\"\n===\n#if is_last_row {\n  row_group_height -= row_gutter_dy\n  // one less gutter at the end\n\n}\n===\nFORMATTED\n===\n#if is_last_row {\n  row_group_height -= row_gutter_dy\n  // one less gutter at the end\n}"
+expression: formatted
+---
+"#if is_last_row {\n  row_group_height -= row_gutter_dy\n  // one less gutter at the end\n}"
