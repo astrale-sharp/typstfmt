@@ -7,6 +7,7 @@ Basic formatter for the Typst language with a future!
 - [Contributing](#contributing)
 - [Architecture](#architecture)
   - [Main logic](#main-logic)
+  - [Roadmap](#roadmap)
 - [Testing and visualizing](#testing-and-visualizing)
   - [Installing Insta](#installing-insta)
   - [Using insta here](#using-insta-here)
@@ -21,24 +22,13 @@ Basic formatter for the Typst language with a future!
 
 # State
 
-Currently, the output shouldn't be always trusted and isn't perfect but should be lossless.
+It's not always pretty, but it should be lossless (handling comment is hard)
 
 # Installing
 
 ```sh
 cargo install --git https://github.com/astrale-sharp/typstfmt.git
 ```
-
-This will put the compiled binary in `~/.cargo/bin/`. To use it without prefixing path to the binary you must add this directory to your `PATH`. You can check if it was already added with `echo "$PATH"`.
-
-If you haven't added `~/.cargo/bin` to you `PATH`, you should add next line in your `.bashrc`, `.zshrc` etc.:
-
-```sh
-export PATH="$HOME/.cargo/bin:$PATH"
-```
-
-New instances of your shell (bash, zsh) will have an updated `PATH`.
-Or you can add this to your `.profile` or `.zshenv` to update your `PATH` when the OS is booted. This will require a restart of the machine.
 
 ## Setting up a pre-commit hook
 
@@ -67,7 +57,7 @@ pre-commit autoupdate
 And your set up is done!
 
 # Contributing
-- feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (at Astrale).
+- feel free to open issue or discuss! I don't have github notifications so also feel free to go ping me on the typst discord server (@Astrale).
 - once discussed, you may open a PR, not before cause I'm a bit chaotic and this is wip so things change fast and I would hate it if you lost your time.
 
 # Architecture
@@ -80,13 +70,14 @@ It formats the children first (bottom up), the the parent decide what to do with
 
 Children have access to arbitrary context (they can know the kind of their parents, who are their siblings etc).
 
+## Roadmap
+
+Once the test suite is large enough and the formatting is satisfying, create an abstraction to make the codebase easier to work with.
 
 # Testing and visualizing
 
 ## Installing Insta
 We use insta! If you don't have it installed take a look [here](https://insta.rs/docs/cli/) (I advise installing with [cargo binstall](https://github.com/cargo-bins/cargo-binstall) since I have a small computer and don't like waiting for things to compile)
-
-one liner for cargo binstall : `curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash`
 
 then `cargo binstall cargo-insta`
 
