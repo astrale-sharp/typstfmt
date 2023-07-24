@@ -89,7 +89,10 @@ pub(crate) fn format_code_blocks_breaking(
                     || utils::prev_is_ignoring(&node, BlockComment, &[Space])
                 {
                     ctx.push_raw_in(s, &mut res);
-                    ctx.push_in("\n", &mut res);
+                    if !utils::next_is_ignoring(&node, RightBrace, &[Space]) {
+                        ctx.push_in("\n", &mut res);
+                        ctx.consec_new_line = 2;
+                    }
                 } else {
                     let prev = node.prev_sibling().unwrap();
                     let mark = res.rfind(|x| x != ' ' && x != '\n').unwrap() + 1;
@@ -101,6 +104,7 @@ pub(crate) fn format_code_blocks_breaking(
                             res.push('\n');
                             res.push_str(&ctx.get_indent());
                             res.push_str(s.trim_start());
+
                             if !utils::next_is_ignoring(&node, RightBrace, &[Space]) {
                                 ctx.push_in("\n", &mut res);
                                 ctx.consec_new_line = 2;

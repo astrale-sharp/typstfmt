@@ -30,6 +30,7 @@ make_test!(
 );
 
 make_test!(block_comment, BLOCK_COMMENT);
+make_test!(block_comment_nested, BLOCK_COMMENT_NESTED);
 
 make_test!(code_comment, CODE_COMMENT, Config::default(), ignore_ast);
 
@@ -73,4 +74,13 @@ const BLOCK_COMMENT: &str = r#"#if is_last_row {
   row_group_height -= row_gutter_dy
   // one less gutter at the end
 
+}"#;
+
+const BLOCK_COMMENT_NESTED: &str = r#"#for row in group-rows {
+  for cell_box in row {
+    // place the cell!
+    func()
+    // let box_h = measure(cell_box.box, styles).height
+    // tallest_box_h = calc.max(tallest_box_h, box_h)
+  }
 }"#;

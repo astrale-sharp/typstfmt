@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#for row in group-rows {\\n  for cell_box in row {\\n    // place the cell!\\n    func()\\n    // let box_h = measure(cell_box.box, styles).height\\n    // tallest_box_h = calc.max(tallest_box_h, box_h)\\n  }\\n}\"\n===\n#for row in group-rows {\n  for cell_box in row {\n    // place the cell!\n    func()\n    // let box_h = measure(cell_box.box, styles).height\n    // tallest_box_h = calc.max(tallest_box_h, box_h)\n  }\n}\n===\nFORMATTED\n===\n#for row in group-rows {\n  for cell_box in row {\n    // place the cell!\n    func()\n    // let box_h = measure(cell_box.box, styles).height\n    // tallest_box_h = calc.max(tallest_box_h, box_h)\n  }\n}"
+expression: formatted
+---
+"#for row in group-rows {\n  for cell_box in row {\n    // place the cell!\n    func()\n    // let box_h = measure(cell_box.box, styles).height\n    // tallest_box_h = calc.max(tallest_box_h, box_h)\n  }\n}"
