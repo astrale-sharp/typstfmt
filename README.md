@@ -66,7 +66,7 @@ And your set up is done!
 Since we're visiting a AST (which is a tree) we have a recursive function
 `visit(node: &LinkedNode, ctx: &mut Ctx)` that meets all the nodes in the tree.
 
-It formats the children first (bottom up), the the parent decide what to do with their children.
+It formats the children first (bottom up), then the parent decide what to do with their children.
 
 Children have access to arbitrary context (they can know the kind of their parents, who are their siblings etc).
 
