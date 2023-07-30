@@ -19,10 +19,11 @@ Basic formatter for the Typst language with a future!
 
 - Decent output under any circumstances, anything not decent should be reported as a bug!
 - Fast, Small, configurable and embeddable library and binary ! 
+- Good default (see [roadmap](#roadmap))
 
 # State
 
-It's not always pretty, but it should be lossless (handling comment is hard)
+It's not always pretty, it sometimes break the code in math mode, but it should be safe for code and markup.
 
 # Installing
 
@@ -73,6 +74,8 @@ Children have access to arbitrary context (they can know the kind of their paren
 ## Roadmap
 
 Once the test suite is large enough and the formatting is satisfying, create an abstraction to make the codebase easier to work with.
+
+One person cannot come with good default, This will first be configurable and then with experience and opinions from the community, default will be tuned.
 
 # Testing and visualizing
 

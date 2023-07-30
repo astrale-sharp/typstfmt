@@ -12,8 +12,7 @@ make_test!(
     Config {
         max_line_length: 1,
         ..Default::default()
-    },
-    ignore_ast
+    }
 );
 make_test!(
     call_func_long_trailing,
@@ -37,29 +36,13 @@ make_test!(
     Config {
         max_line_length: 1,
         ..Default::default()
-    },
-    ignore_ast
+    }
 );
 
-make_test!(
-    args_comment_end,
-    ARGS_COMMENT_END,
-    Config::default(),
-    ignore_ast
-);
+make_test!(args_comment_end, ARGS_COMMENT_END);
 
-make_test!(
-    parenth_comment_end,
-    "#(\ntrue// comment\n)",
-    Config::default(),
-    ignore_ast
-);
-make_test!(
-    func_comment_end,
-    "#f(\ntrue// comment\n)",
-    Config::default(),
-    ignore_ast
-);
+make_test!(parenth_comment_end, "#(\ntrue// comment\n)");
+make_test!(func_comment_end, "#f(\ntrue// comment\n)",);
 
 const ARGS_COMMENT_END: &str = "#func(
     ..v_or_hline,

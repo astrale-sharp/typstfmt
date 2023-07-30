@@ -4,11 +4,20 @@ use super::*;
 
 #[instrument(skip_all)]
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-    if children.iter().any(|c| c.contains('\n')) {
+    // check if any children is markup and contains a linebreak, if so, breaking
+    let mut res = vec![];
+    utils::find_children(&mut res, parent, &|c| {
+        c.parent_kind() == Some(Markup)
+            && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
+    });
+    if !res.is_empty() {
         return format_args_breaking(parent, children, ctx);
     }
 
-    let mut res = format_args_tight(parent, children, ctx);
+    if parent.children().any(|c| c.kind() == LineComment) {
+        return format_args_breaking(parent, children, ctx);
+    }
+
     let number_of_args = parent
         .children()
         .filter_map(|node| {
@@ -30,12 +39,12 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
         .count();
 
     if number_of_args <= 1 {
-        return res;
+        return format_args_tight(parent, children, ctx);
     }
 
+    let res = format_args_tight(parent, children, ctx);
     if utils::max_line_length(&res) >= ctx.config.max_line_length {
-        res = format_args_breaking(parent, children, ctx);
-        return res;
+        return format_args_breaking(parent, children, ctx);
     }
     res
 }

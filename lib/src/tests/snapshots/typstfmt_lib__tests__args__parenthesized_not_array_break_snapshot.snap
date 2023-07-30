@@ -1,6 +1,6 @@
 ---
 source: lib/src/tests/args.rs
-description: "INPUT\n===\n\"#(\\nauto)\"\n===\n#(\nauto)\n===\nFORMATTED\n===\n#(\n  auto\n)"
+description: "INPUT\n===\n\"#(\\nauto)\"\n===\n#(\nauto)\n===\nFORMATTED\n===\n#(auto)"
 expression: formatted
 ---
-"#(\n  auto\n)"
+"#(auto)"

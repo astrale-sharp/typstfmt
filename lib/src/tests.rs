@@ -41,33 +41,10 @@ fn init() {
 /// TODO : currently for the AST test, all Space and parbeak are skipped, maybe there is a better way.
 /// TODO : AST check when we had a trailing comma, find a way to allow it to be able to run test for these snippets too.
 macro_rules! make_test {
-    ($test_name:ident, $input:expr) => {
+    ($test_name:ident, $input:expr $(,)?) => {
         make_test!($test_name, $input, Config::default());
     };
-    //temporary hack
-    ($test_name:ident, $input:expr, $config:expr, ignore_ast) => {
-        paste! {
-            #[test]
-            fn [<$test_name _snapshot>]()  {
-                init();
-                let input = $input;
-                let formatted = format(input, $config);
-                println!("{:?}",parse(input));
-                insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
-                    insta::assert_debug_snapshot!(formatted);
-                });
-            }
-
-            #[test]
-            fn [<$test_name _double_format>]()  {
-                let input = $input;
-                let format_once = format(input, $config);
-                let format_twice = format(&format_once, $config);
-                similar_asserts::assert_eq!(format_once, format_twice);
-            }
-        }
-    };
-    ($test_name:ident, $input:expr, $config:expr) => {
+    ($test_name:ident, $input:expr, $config:expr $(,)?) => {
         paste! {
             #[test]
             fn [<$test_name _snapshot>]()  {
@@ -101,7 +78,7 @@ macro_rules! make_test {
 }
 
 fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
-    let is_space_or_parbreak = |x: &LinkedNode| [Space, Parbreak].contains(&x.kind());
+    let should_ignore = |x: &LinkedNode| [Space, Parbreak, Comma].contains(&x.kind());
 
     let node_kind = node.kind();
     let other_kind = other_node.kind();
@@ -110,7 +87,7 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
         return false;
     }
 
-    if (node.text() != other_node.text()) && !is_space_or_parbreak(node) {
+    if (node.text() != other_node.text()) && !should_ignore(node) {
         debug!(
             "kind ok {:?}\ntext differ:{:?}-{:?}",
             node.kind(),
@@ -120,13 +97,10 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
         return false;
     }
 
-    let fchildren = node
-        .children()
-        .filter(|x| !is_space_or_parbreak(x))
-        .collect_vec();
+    let fchildren = node.children().filter(|x| !should_ignore(x)).collect_vec();
     let fchildren_oth = other_node
         .children()
-        .filter(|x| !is_space_or_parbreak(x))
+        .filter(|x| !should_ignore(x))
         .collect_vec();
     if fchildren.len() != fchildren_oth.len() {
         debug!(
@@ -137,8 +111,8 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
     }
     if node
         .children()
-        .filter(|x| !is_space_or_parbreak(x))
-        .zip(other_node.children().filter(|x| !is_space_or_parbreak(x)))
+        .filter(|x| !should_ignore(x))
+        .zip(other_node.children().filter(|x| !should_ignore(x)))
         .any(|(c, oth)| !tree_are_equal(&c, &oth))
     {
         return false;
@@ -155,6 +129,12 @@ fn parses_the_same(s: &str, oth: &str) -> bool {
     debug!("{:?}", parse1);
     debug!("{:?}", parse2);
     tree_are_equal(&lkn, &lkn_oth)
+}
+
+#[test]
+fn comma_gets_ignored_in_comparison() {
+    assert!(parses_the_same("#f(1,2,)", "#f(1,2)"));
+    assert!(parses_the_same("#f(1,{g(1,2,3,)},)", "#f(1,{g(1,2,3)})"));
 }
 
 mod basic;
