@@ -1,23 +1,9 @@
-use crate::utils::{get_next_ignoring, next_is_ignoring};
-
 use super::*;
+use crate::utils::{get_next_ignoring, next_is_ignoring};
+use typst_syntax::ast::{self, Arg};
 
 #[instrument(skip_all)]
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-    // check if any children is markup and contains a linebreak, if so, breaking
-    let mut res = vec![];
-    utils::find_children(&mut res, parent, &|c| {
-        c.parent_kind() == Some(Markup)
-            && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
-    });
-    if !res.is_empty() {
-        return format_args_breaking(parent, children, ctx);
-    }
-
-    if parent.children().any(|c| c.kind() == LineComment) {
-        return format_args_breaking(parent, children, ctx);
-    }
-
     let number_of_args = parent
         .children()
         .filter_map(|node| {
@@ -37,6 +23,31 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
             }
         })
         .count();
+
+    if number_of_args >= 4 && parent.parent_kind() == Some(FuncCall) {
+        if let Some(func_call) = parent.parent().unwrap().cast::<ast::FuncCall>() {
+            if let ast::Expr::Ident(ident) = func_call.callee() {
+                if ["table", "tablex", "grid"].contains(&ident.as_str()) {
+                    // if comment, cancel
+                    return format_args_table(parent, func_call, children, ctx);
+                }
+            }
+        }
+    }
+
+    // check if any children is markup and contains a linebreak, if so, breaking
+    let mut res = vec![];
+    utils::find_children(&mut res, parent, &|c| {
+        c.parent_kind() == Some(Markup)
+            && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
+    });
+    if !res.is_empty() {
+        return format_args_breaking(parent, children, ctx);
+    }
+
+    if parent.children().any(|c| c.kind() == LineComment) {
+        return format_args_breaking(parent, children, ctx);
+    }
 
     if number_of_args <= 1 {
         return format_args_tight(parent, children, ctx);
@@ -76,6 +87,107 @@ pub(crate) fn format_args_tight(
             }
         }
     }
+    res
+}
+
+pub(crate) fn format_args_table(
+    parent: &LinkedNode<'_>,
+    func_call: ast::FuncCall,
+    children: &[String],
+    ctx: &mut Ctx,
+) -> String {
+    let named = func_call
+        .args()
+        .items()
+        .filter_map(|arg| {
+            if let Arg::Named(x) = arg {
+                Some(x)
+            } else {
+                None
+            }
+        })
+        .collect_vec();
+    let spread = func_call
+        .args()
+        .items()
+        .filter_map(|arg| {
+            if let Arg::Spread(x) = arg {
+                Some(x)
+            } else {
+                None
+            }
+        })
+        .collect_vec();
+    let pos = func_call
+        .args()
+        .items()
+        .filter_map(|arg| if let Arg::Pos(x) = arg { Some(x) } else { None })
+        .collect_vec();
+    // either we get it from parsing or we try to guess.
+    let col_size = {
+        named
+            .iter()
+            .find(|arg| arg.name().as_str() == "columns")
+            .and_then(|x| match x.expr() {
+                ast::Expr::Int(len) => Some(len.get() as _),
+                ast::Expr::Array(arr) => {
+                    if arr.items().any(|c| matches!(c, ast::ArrayItem::Spread(_))) {
+                        None
+                    } else {
+                        Some(arr.items().count())
+                    }
+                }
+                _ => None,
+            })
+    }
+    // guessing
+    .unwrap_or({
+        let arg_number = (pos.len() + spread.len()) as f64;
+        let arg_number = arg_number.sqrt();
+        arg_number.floor() as _
+    });
+
+    // print all the named
+    let mut res = String::new();
+    res.push('(');
+    res.push('\n');
+    res.push_str(&ctx.get_indent());
+    // push the named arguments
+    for (s, node) in children.iter().zip(parent.children()) {
+        if let Named = node.kind() {
+            ctx.push_raw_indent(s, &mut res);
+            ctx.push_raw_in(",", &mut res);
+        }
+    }
+    // push the rest
+    let rest = children
+        .iter()
+        .zip(parent.children())
+        .filter(|(s, n)| ![Comma, RightParen, Named, LeftParen].contains(&n.kind()))
+        .chunks(col_size);
+
+    let chunk_args = {
+        let mut res = vec![];
+        for chunk in rest.into_iter() {
+            let chunk = chunk.collect_vec();
+            res.push(chunk)
+        }
+        res
+    };
+    let max_size: Vec<usize> = {
+        for idx in 0.. {
+            todo!()
+        }
+        todo!()
+    };
+    // for (s, node) in children.iter().zip(parent.children()) {
+    //     match node.kind() {
+    //         Comma => {}
+    //         RightParen => {}
+    //         _ => (),
+    //     }
+    // }
+
     res
 }
 
