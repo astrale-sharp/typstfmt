@@ -1,39 +1,13 @@
 use super::*;
 
 make_test!(param_comment, PARAMS_COMMENT);
-make_test!(
-    many_comments,
-    TABLEX_COMMENTS,
-    Config::default(),
-    ignore_ast
-);
-
-make_test!(
-    parenth_comment,
-    PARENTH_COMMENT,
-    Config::default(),
-    ignore_ast
-);
-
-make_test!(
-    array_2comment,
-    ARRAY_2COMMENT,
-    Config::default(),
-    ignore_ast
-);
-
-make_test!(
-    array_end_comment,
-    ARRAY_END_COMMENT,
-    Config::default(),
-    ignore_ast
-);
-
+make_test!(many_comments, TABLEX_COMMENTS,);
+make_test!(parenth_comment, PARENTH_COMMENT,);
+make_test!(array_2comment, ARRAY_2COMMENT,);
+make_test!(array_end_comment, ARRAY_END_COMMENT,);
 make_test!(block_comment, BLOCK_COMMENT);
 make_test!(block_comment_nested, BLOCK_COMMENT_NESTED);
-
-make_test!(code_comment, CODE_COMMENT, Config::default(), ignore_ast);
-
+make_test!(code_comment, CODE_COMMENT);
 make_test!(end_comments, END_COMMENTS);
 
 const PARAMS_COMMENT: &str = r#"#let hlinex(

@@ -8,7 +8,6 @@ make_test!(
         max_line_length: 2,
         ..Default::default()
     },
-    ignore_ast
 );
 make_test!(
     code_func_break_nested,
@@ -17,17 +16,11 @@ make_test!(
         max_line_length: 2,
         ..Default::default()
     },
-    ignore_ast
 );
 make_test!(while_loop, WHILE_LOOP);
 make_test!(for_loop, FOR_LOOP);
 make_test!(official, OFFICIAL);
-make_test!(
-    let_closure_params_named,
-    TABLEX,
-    Config::default(),
-    ignore_ast
-);
+make_test!(let_closure_params_named, TABLEX,);
 make_test!(raw_text, RAW);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
