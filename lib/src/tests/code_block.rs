@@ -13,7 +13,7 @@ make_test!(
     breaking,
     "#{ super_loooooooooong variable }",
     Config {
-        ident_space: 2,
-        max_line_length: 5
+        max_line_length: 5,
+        ..Default::default()
     }
 );
