@@ -28,6 +28,7 @@ make_test!(
     Config::default(),
     ignore_ast
 );
+make_test!(raw_text, RAW);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -58,3 +59,13 @@ const TABLEX: &str = r#"#let is-tablex-dict(x) = (
       and "tablex-dict-type" in x
 )
 "#;
+
+const RAW: &str = r#"```
+fn main() {
+ println!(hello world);
+
+ let bob = 0;
+ if bob == {
+  println("bob is 0");
+ }
+}```"#;

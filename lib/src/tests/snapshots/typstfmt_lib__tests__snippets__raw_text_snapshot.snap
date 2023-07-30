@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"```\\nfn main() {\\n println!(hello world);\\n\\n let bob = 0;\\n if bob == {\\n  println(\\\"bob is 0\\\");\\n }\\n}```\"\n===\n```\nfn main() {\n println!(hello world);\n\n let bob = 0;\n if bob == {\n  println(\"bob is 0\");\n }\n}```\n===\nFORMATTED\n===\n```\nfn main() {\n println!(hello world);\n\n let bob = 0;\n if bob == {\n  println(\"bob is 0\");\n }\n}```"
+expression: formatted
+---
+"```\nfn main() {\n println!(hello world);\n\n let bob = 0;\n if bob == {\n  println(\"bob is 0\");\n }\n}```"
