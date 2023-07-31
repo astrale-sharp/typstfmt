@@ -4,6 +4,8 @@ use serde::Serialize;
 pub struct Config {
     pub ident_space: usize,
     pub max_line_length: usize,
+    /// If enabled, when breaking arguments, it will try to keep more on one line.
+    pub experimental_args_breaking_consecutive: bool
 }
 
 impl Default for Config {
@@ -12,6 +14,7 @@ impl Default for Config {
             // this being strictly > to 1 is assumed.
             ident_space: 2,
             max_line_length: 50,
+            experimental_args_breaking_consecutive: false,
         }
     }
 }

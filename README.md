@@ -25,6 +25,8 @@ Basic formatter for the Typst language with a future!
 
 It's not always pretty, it sometimes break the code in math mode, but it should be safe for code and markup.
 
+you can enable experimental features via the config file : `experimental_args_breaking_consecutive`
+
 # Installing
 
 ```sh

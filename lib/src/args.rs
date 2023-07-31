@@ -79,6 +79,8 @@ pub(crate) fn format_args_tight(
     res
 }
 
+/// this breaks line and adds indentation for items
+/// breakline if line max length is over the line or if items on one line >= 3
 pub(crate) fn format_args_breaking(
     parent: &LinkedNode<'_>,
     children: &[String],
@@ -86,6 +88,7 @@ pub(crate) fn format_args_breaking(
 ) -> String {
     let mut res = String::new();
     let mut missing_trailing = !(parent.kind() == Parenthesized);
+    let mut consecutive_items = 0;
 
     for (s, node) in children.iter().zip(parent.children()) {
         let is_last =
@@ -104,6 +107,7 @@ pub(crate) fn format_args_breaking(
                 res.push_str(s);
             }
             LineComment | BlockComment => {
+                consecutive_items = 0;
                 if utils::prev_is_ignoring(&node, LineComment, &[Space])
                     || utils::prev_is_ignoring(&node, BlockComment, &[Space])
                 {
@@ -151,9 +155,22 @@ pub(crate) fn format_args_breaking(
                     if is_last_comma && !is_trailing {
                         missing_trailing = true;
                     }
-                    res.push_str(s);
-                    res.push('\n');
-                    res.push_str(&ctx.get_indent());
+                    if !ctx.config.experimental_args_breaking_consecutive || consecutive_items >= 3
+                        || s.contains('\n')
+                        || res
+                            .lines()
+                            .last()
+                            .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= 10)
+                    {
+                        res.push_str(s);
+                        res.push('\n');
+                        res.push_str(&ctx.get_indent());
+                        consecutive_items = 0;
+                    } else {
+                        consecutive_items += 1;
+                        res.push_str(s);
+                        res.push(' ');
+                    }
                 }
             }
             _ => {
