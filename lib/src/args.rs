@@ -3,6 +3,7 @@ use crate::utils::{get_next_ignoring, next_is_ignoring};
 use super::*;
 
 #[instrument(skip_all)]
+/// format args using [format_args_tight] or [format_args_breaking] depending on the context.
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     // check if any children is markup and contains a linebreak, if so, breaking
     let mut res = vec![];
@@ -10,6 +11,7 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
         c.parent_kind() == Some(Markup)
             && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
     });
+
     if !res.is_empty() {
         return format_args_breaking(parent, children, ctx);
     }

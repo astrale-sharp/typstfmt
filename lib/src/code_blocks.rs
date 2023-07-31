@@ -1,8 +1,9 @@
+use super::*;
 use crate::utils::{get_next_ignoring, next_is_ignoring};
 
-use super::*;
-
 #[instrument(skip_all)]
+/// format code blocks using [format_code_blocks_breaking] or [format_code_blocks_tight]
+/// depending on the context.
 pub(crate) fn format_code_blocks(
     parent: &LinkedNode,
     children: &[String],
