@@ -51,7 +51,10 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
             args::format_args(node, &res, ctx)
         }
         LetBinding => format_let_binding(node, &res, ctx),
-        Raw | LineComment => node.text().to_string(),
+        Raw | BlockComment | LineComment => {
+            ctx.lost_context();
+            node.text().to_string()
+        }
         _ => format_default(node, &res, ctx),
     };
     if node.children().count() == 0 {
