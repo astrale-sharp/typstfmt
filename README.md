@@ -17,6 +17,7 @@ Basic formatter for the Typst language with a future!
       - [Tracing](#tracing)
       - [Fmttest (COMING SOON)](#fmttest-coming-soon)
 - [Thanks](#thanks)
+>>>>>>> 88f476a (fmttest promo)
 
 
 # Goals
