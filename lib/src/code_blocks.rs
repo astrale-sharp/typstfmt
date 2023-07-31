@@ -108,7 +108,7 @@ pub(crate) fn format_code_blocks_breaking(
                             if !utils::next_is_ignoring(&node, RightBrace, &[Space]) {
                                 ctx.push_in("\n", &mut res);
                                 ctx.consec_new_line = 2;
-                                ctx.just_spaced = true
+                                ctx.just_spaced = true;
                             }
                         }
                         _ => {

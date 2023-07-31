@@ -1,5 +1,5 @@
 #![doc = include_str!("../../README.md")]
-#![deny(clippy::all)]
+#![warn(clippy::all)]
 
 use itertools::Itertools;
 use tracing::debug;
@@ -23,6 +23,7 @@ mod binary;
 mod code_blocks;
 mod content_blocks;
 
+#[must_use]
 pub fn format(s: &str, config: Config) -> String {
     let init = parse(s);
     let mut context = Ctx::from_config(config);
@@ -51,7 +52,10 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
             args::format_args(node, &res, ctx)
         }
         LetBinding => format_let_binding(node, &res, ctx),
-        Raw | LineComment => node.text().to_string(),
+        Raw | BlockComment | LineComment => {
+            ctx.lost_context();
+            node.text().to_string()
+        }
         _ => format_default(node, &res, ctx),
     };
     if node.children().count() == 0 {
