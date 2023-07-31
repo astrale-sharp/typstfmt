@@ -37,6 +37,7 @@ Basic formatter for the Typst language with a future!
 
 It's not always pretty, it sometimes break the code in math mode, but it should be safe for code and markup.
 
+Using fmttester, checkout the generated file : TODO
 
 # Installing
 

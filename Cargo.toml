@@ -1,5 +1,5 @@
 [workspace]
-members = ["lib"]
+members = ["lib","fmttester"]
 resolver = "2"
 
 [workspace.package]
