@@ -45,7 +45,7 @@ impl Ctx {
                     if self.consec_new_line <= 1 {
                         debug!("PUSHED NEWLINE");
                         self.consec_new_line += 1;
-                        res.push('\n')
+                        res.push('\n');
                     } else {
                         debug!("IGNORED newline");
                     }
@@ -63,7 +63,7 @@ impl Ctx {
     /// should be called when pushing directly in result.
     pub(crate) fn push_raw_in(&mut self, s: &str, result: &mut String) {
         result.push_str(s);
-        self.lost_context()
+        self.lost_context();
     }
 
     /// adds an indentation for each line the input except the first to match the current level of identation.

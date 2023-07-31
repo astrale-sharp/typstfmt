@@ -23,6 +23,7 @@ mod binary;
 mod code_blocks;
 mod content_blocks;
 
+#[must_use]
 pub fn format(s: &str, config: Config) -> String {
     let init = parse(s);
     let mut context = Ctx::from_config(config);

@@ -6,9 +6,9 @@ use tracing_subscriber::FmtSubscriber;
 ///
 /// Reads different environment variable.
 ///
-/// - NOLOG: don't log anything
-/// - DEBUG: set the logging level to DEBUG
-/// - NO_COLOR: don't put ainsi colors in the output.
+/// - `NOLOG`: don't log anything
+/// - `DEBUG`: set the logging level to DEBUG
+/// - `NO_COLOR`: don't put ainsi colors in the output.
 fn init() {
     if std::env::var("NOLOG").is_ok() {
         return;

@@ -63,7 +63,7 @@ pub(crate) fn format_args_tight(
                     // not putting the comma in would result in a parenthesized expression, not an array
                     // "(a,) != (a)"
                     if node.parent_kind() == Some(Array) {
-                        ctx.push_raw_in(",", &mut res)
+                        ctx.push_raw_in(",", &mut res);
                     }
                     // don't print
                 } else {
@@ -159,7 +159,7 @@ pub(crate) fn format_args_breaking(
             _ => {
                 ctx.push_raw_indent(s, &mut res);
                 if is_last && missing_trailing {
-                    ctx.push_raw_in(",\n", &mut res)
+                    ctx.push_raw_in(",\n", &mut res);
                 }
             }
         }
