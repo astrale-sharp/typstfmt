@@ -155,7 +155,8 @@ pub(crate) fn format_args_breaking(
                     if is_last_comma && !is_trailing {
                         missing_trailing = true;
                     }
-                    if !ctx.config.experimental_args_breaking_consecutive || consecutive_items >= 3
+                    if !ctx.config.experimental_args_breaking_consecutive
+                        || consecutive_items >= 3
                         || s.contains('\n')
                         || res
                             .lines()

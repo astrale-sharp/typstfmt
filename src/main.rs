@@ -1,4 +1,3 @@
-// #![deny(clippy::pedantic)]
 use std::{
     fs::File,
     io::{stdin, stdout, Read, Write},

@@ -5,7 +5,7 @@ pub struct Config {
     pub ident_space: usize,
     pub max_line_length: usize,
     /// If enabled, when breaking arguments, it will try to keep more on one line.
-    pub experimental_args_breaking_consecutive: bool
+    pub experimental_args_breaking_consecutive: bool,
 }
 
 impl Default for Config {

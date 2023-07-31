@@ -1,6 +1,7 @@
 Basic formatter for the Typst language with a future!
 
 - [Goals](#goals)
+- [Features](#features)
 - [State](#state)
 - [Installing](#installing)
   - [Setting up a pre-commit hook](#setting-up-a-pre-commit-hook)
@@ -21,11 +22,20 @@ Basic formatter for the Typst language with a future!
 - Fast, Small, configurable and embeddable library and binary ! 
 - Good default (see [roadmap](#roadmap))
 
+
+# Features
+
+- config files
+- you can enable experimental features via the config file : `experimental_args_breaking_consecutive`
+
 # State
 
 It's not always pretty, it sometimes break the code in math mode, but it should be safe for code and markup.
 
-you can enable experimental features via the config file : `experimental_args_breaking_consecutive`
+
+
+
+
 
 # Installing
 
