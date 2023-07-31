@@ -14,6 +14,8 @@ Basic formatter for the Typst language with a future!
   - [Using insta here](#using-insta-here)
     - [Can I see it in action?](#can-i-see-it-in-action)
     - [Is that all I have to help me test?](#is-that-all-i-have-to-help-me-test)
+      - [Tracing](#tracing)
+      - [Fmttest (COMING SOON)](#fmttest-coming-soon)
 
 
 # Goals
@@ -31,10 +33,6 @@ Basic formatter for the Typst language with a future!
 # State
 
 It's not always pretty, it sometimes break the code in math mode, but it should be safe for code and markup.
-
-
-
-
 
 
 # Installing
@@ -104,6 +102,8 @@ to see how it currently formats all the snippets
 + run `show_all.sh`
 
 ### Is that all I have to help me test?
+
+#### Tracing
 Of course not! We have tracing enabled during tests!
 
 If you're contributing tests you should add a test case under `src/tests` for instance: `make_test!(call_func_empty, "#f()");`
@@ -113,3 +113,8 @@ then running your tests: `cargo test && cargo insta review`
 if the info log isn't enough, run `DEBUG=true cargo test`.
 if you wish to pipe to a file run `NO_COLOR=true cargo test`
 you may also set the `NOLOG` env variable if you wish to disable logging entirely.
+
+#### Fmttest (COMING SOON)
+
+On the fmttest branch, you can see the skeleton of a program that will automate finding which range broke my typst file when formatting.
+
