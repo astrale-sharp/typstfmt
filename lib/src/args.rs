@@ -120,6 +120,7 @@ pub(crate) fn format_args_breaking(
                     let mark = res.rfind(|x| x != ' ' && x != '\n').unwrap() + 1;
                     let prev_maybe_space = get_next_ignoring(&prev, &[]);
                     res = res[..mark].to_string();
+
                     match prev_maybe_space {
                         Some(space) if space.kind() == Space && space.text().contains('\n') => {
                             res.push('\n');
@@ -129,10 +130,10 @@ pub(crate) fn format_args_breaking(
                         _ => {
                             res.push(' ');
                             res.push_str(s);
-                            res.push('\n');
-                            ctx.consec_new_line = 2;
-                        } // same line I need to regen jump
+                        }
                     }
+                    res.push('\n');
+                    ctx.consec_new_line = 2;
                 }
 
                 if !next_is_ignoring(&node, RightParen, &[Space]) {

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#table(\\n  // Comment\\n  fill: value,\\n  [*Pros*],)\\n\"\n===\n#table(\n  // Comment\n  fill: value,\n  [*Pros*],)\n\n===\nFORMATTED\n===\n#table(\n  // Comment\n  fill: value,\n  [*Pros*],\n)\n"
+expression: formatted
+---
+"#table(\n  // Comment\n  fill: value,\n  [*Pros*],\n)\n"

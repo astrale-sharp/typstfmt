@@ -9,7 +9,7 @@ make_test!(block_comment, BLOCK_COMMENT);
 make_test!(block_comment_nested, BLOCK_COMMENT_NESTED);
 make_test!(code_comment, CODE_COMMENT);
 make_test!(end_comments, END_COMMENTS);
-// make_test!(todo, TODO);
+make_test!(start_with_comment, START_WITH_COMMENT);
 
 const PARAMS_COMMENT: &str = r#"#let hlinex(
   stroke-expand: true,
@@ -60,9 +60,8 @@ const BLOCK_COMMENT_NESTED: &str = r#"#for row in group-rows {
   }
 }"#;
 
-const TODO: &str = r#"#table(
-  // This feels scuffed somehow
-  fill: (col, row) => if col == 0 and row == 0 { green } else if col == 1 and row == 0 { red },
-  columns: (1fr, 1fr),
+const START_WITH_COMMENT: &str = r#"#table(
+  // Comment
+  fill: value,
   [*Pros*],)
 "#;
