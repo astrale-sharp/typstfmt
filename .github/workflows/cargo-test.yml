@@ -3,13 +3,15 @@ name: Run cargo test
 on: [push, pull_request]
 
 jobs:
-  run_test_cases:
-    name: Run all test cases
+  test:
+    name: runs all tests
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-      - name: "cargo test"
-        uses: Kristories/cargo-test@v1.0.0
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
         with:
-          manifest-path: './Cargo.toml'
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --workspace
