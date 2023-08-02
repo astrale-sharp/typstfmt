@@ -1,7 +1,7 @@
 use super::*;
-use paste::paste;
 use tracing::Level;
 use tracing_subscriber::FmtSubscriber;
+
 /// Enables logging.
 ///
 /// Reads different environment variable.
@@ -45,9 +45,11 @@ macro_rules! make_test {
         make_test!($test_name, $input, Config::default());
     };
     ($test_name:ident, $input:expr, $config:expr $(,)?) => {
-        paste! {
+        mod $test_name {
+            use super::*;
+
             #[test]
-            fn [<$test_name _snapshot>]()  {
+            fn snapshot()  {
                 init();
                 let input = $input;
                 let formatted = format(input, $config);
@@ -58,7 +60,7 @@ macro_rules! make_test {
             }
 
             #[test]
-            fn [<$test_name _ast>]() {
+            fn ast() {
                 init();
                 let input = $input;
                 let formatted = format(input, $config);
@@ -66,7 +68,7 @@ macro_rules! make_test {
             }
 
             #[test]
-            fn [<$test_name _double_format>]()  {
+            fn double_format()  {
                 init();
                 let input = $input;
                 let format_once = format(input, $config);
