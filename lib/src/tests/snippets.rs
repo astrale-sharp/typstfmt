@@ -22,6 +22,7 @@ make_test!(for_loop, FOR_LOOP);
 make_test!(official, OFFICIAL);
 make_test!(let_closure_params_named, TABLEX,);
 make_test!(raw_text, RAW);
+make_test!(tabs, TABS);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -62,3 +63,11 @@ fn main() {
   println("bob is 0");
  }
 }```"#;
+
+const TABS: &str = r#"
+#{
+	{
+    v(0pt)
+		v(0pt)
+	}
+}"#;

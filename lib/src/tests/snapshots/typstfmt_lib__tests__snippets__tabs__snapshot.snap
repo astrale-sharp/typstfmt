@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"\\n#{\\n\\t{\\n    v(0pt)\\n\\t\\tv(0pt)\\n\\t}\\n}\"\n===\n\n#{\n\t{\n    v(0pt)\n\t\tv(0pt)\n\t}\n}\n===\nFORMATTED\n===\n\n#{\n  {\n    v(0pt)\n    v(0pt)\n  }\n}"
+expression: formatted
+---
+"\n#{\n  {\n    v(0pt)\n    v(0pt)\n  }\n}"
