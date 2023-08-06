@@ -3,6 +3,7 @@ use std::{
     io::{stdin, stdout, Read, Write},
     os::fd::AsFd,
     path::Path,
+    process::Command,
     thread,
 };
 
@@ -76,31 +77,29 @@ enum Verdict {
 
 /// compiles a file with typst, formats a copy and compiles it.
 /// If it doesn't compile or outputs a different pdf, errors.
-fn deal_with_file(mut file: File, path: std::ffi::OsString) -> Diagnostic {
-    use std::process::Command;
+fn deal_with_file(mut initial_file: File, path: &Path) -> Diagnostic {
     // call typst c on the file, ignore if
     let mut initial_compilation = tempfile::NamedTempFile::new()
         .unwrap_or_else(|_| panic!("couldn't create a tempfile while dealing with {path:?}"));
     let mut formatted_compilation = tempfile::NamedTempFile::new()
         .unwrap_or_else(|_| panic!("couldn't create a tempfile while dealing with {path:?}"));
 
-    let mut command = Command::new("typst");
-    let command = command
-        .arg("compile")
-        .arg(&path)
-        .arg(initial_compilation.path());
+    let mut command = compile(&path, &initial_compilation);
+
     if command.status().is_err() {
         return Diagnostic {
-            file_name: path,
+            file_name: path.into(),
             verdict: Verdict::Ignore("Original file cannot be compiled".to_string()),
         };
     }
     let mut formatted_file = tempfile::NamedTempFile::new()
         .unwrap_or_else(|_| panic!("couldn't read tempfile while dealing with {path:?}"));
-    let mut buf = String::new();
-    let Ok(_) = file.read_to_string(&mut buf) else {return Diagnostic{ file_name: path, verdict: Verdict::Ignore("Original file coudn't be read".to_string()) };};
+    let mut initial_file_text = String::new();
+    let Ok(_) = initial_file.read_to_string(&mut initial_file_text) else {return Diagnostic{ file_name: path.into(), verdict: Verdict::Ignore("Original file coudn't be read".to_string()) };};
+
+    let formatted_file_text = typstfmt_lib::format(&initial_file_text, Config::default());
     formatted_file
-        .write_all(typstfmt_lib::format(&buf, Config::default()).as_bytes())
+        .write_all(formatted_file_text.as_bytes())
         .unwrap_or_else(|_| panic!("couldn't read tempfile while dealing with {path:?}"));
 
     let mut original_content = vec![];
@@ -108,13 +107,42 @@ fn deal_with_file(mut file: File, path: std::ffi::OsString) -> Diagnostic {
         .read_to_end(&mut original_content)
         .unwrap_or_else(|_| panic!("couldn't read tempfile while dealing with {path:?}"));
 
+    let mut command = compile(formatted_file.path(), &formatted_compilation);
+
+
     let mut status_is_err = true;
+
     let mut verdict = None;
+    let diff = similar::TextDiff::from_lines(&initial_file_text, &formatted_file_text);
+
+    let old_slices = diff.old_slices().into_iter().collect::<Vec<_>>();
+    let new_slices = diff.new_slices().into_iter().collect::<Vec<_>>();
+    assert!(old_slices.len() == new_slices.len());
+    let mut min_diff = 0;
+    let mut max_diff = old_slices.len();
+
     while status_is_err {
+        // apply changes in range to get formatted text
+        // compile formatted version.
+        // compare text
+        // adjust range
+        // no change? break
+        let mut current_text = old_slices.clone();
+        for idx in min_diff..(max_diff + min_diff) / 2 {
+            current_text[idx] = new_slices[idx]
+        }
+        let current_text = {
+            let mut buf = String::new();
+            for s in current_text {
+                buf.push_str(s);
+            }
+            buf
+        };
+
         let mut command = Command::new("typst");
         let command = command
             .arg("compile")
-            .arg(&path)
+            .arg(formatted_file.path())
             .arg(formatted_compilation.path());
 
         // compare outputs
@@ -143,4 +171,29 @@ fn deal_with_file(mut file: File, path: std::ffi::OsString) -> Diagnostic {
     }
 
     todo!()
+}
+
+fn compile<'a>(
+    path: &'a Path,
+    result: &'a tempfile::NamedTempFile,
+) -> &'a mut Command {
+    let mut command = Command::new("typst");
+    let command = command.arg("compile").arg(path).arg(result.path());
+    command
+}
+
+#[test]
+fn feature() {
+    let old = "a1b1c1d1e1f1g\na1b1c1\nabc".to_string();
+    let new = "abcdefg\nabc\nabc".to_string();
+    let diff = similar::TextDiff::from_lines(&old, &new);
+    dbg!(diff.old_slices());
+    dbg!(diff.new_slices());
+    let changes = diff.iter_all_changes();
+
+    for change in changes {
+        // println!("{:?}",change.as_str());
+        println!("{:?}", change);
+        // println!("{:?}-{:?}",change.old_index(),change.new_index());
+    }
 }

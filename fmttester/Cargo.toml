@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 lexopt = "0.3.0"
+similar = "2.2.1"
 tempfile = "3.7.0"
 typstfmt_lib = {path = "../lib/"}

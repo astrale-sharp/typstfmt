@@ -148,6 +148,7 @@ name = "fmttester"
 version = "0.1.0"
 dependencies = [
  "lexopt",
+ "similar",
  "tempfile",
  "typstfmt_lib",
 ]
