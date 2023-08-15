@@ -17,3 +17,4 @@ make_test!(
         ..Default::default()
     }
 );
+make_test!(breaking_with_comments, "#{\n//some comment\n}");
