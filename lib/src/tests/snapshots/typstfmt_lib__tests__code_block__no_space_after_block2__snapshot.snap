@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/code_block.rs
+description: "INPUT\n===\n\"#{//\\n}   \\n\\ncontent\"\n===\n#{//\n}   \n\ncontent\n===\nFORMATTED\n===\n#{ //\n}\n\ncontent"
+expression: formatted
+---
+"#{ //\n}\n\ncontent"

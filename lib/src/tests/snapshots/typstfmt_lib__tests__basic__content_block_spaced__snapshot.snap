@@ -1,6 +1,6 @@
 ---
 source: lib/src/tests/basic.rs
-description: "INPUT\n===\n\"#[\\n_Glaciers_ form an important part \\nof the earth's climate system.]\"\n===\n#[\n_Glaciers_ form an important part \nof the earth's climate system.]\n===\nFORMATTED\n===\n#[\n_Glaciers_ form an important part \nof the earth's climate system.]"
+description: "INPUT\n===\n\"#[\\n_Glaciers_ form an important part \\nof the earth's climate system.]\"\n===\n#[\n_Glaciers_ form an important part \nof the earth's climate system.]\n===\nFORMATTED\n===\n#[\n_Glaciers_ form an important part\nof the earth's climate system.]"
 expression: formatted
 ---
-"#[\n_Glaciers_ form an important part \nof the earth's climate system.]"
+"#[\n_Glaciers_ form an important part\nof the earth's climate system.]"

@@ -142,5 +142,6 @@ pub(crate) fn format_code_blocks_breaking(
             }
         }
     }
+    ctx.lost_context();
     res
 }

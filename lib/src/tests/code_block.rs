@@ -18,3 +18,7 @@ make_test!(
     }
 );
 make_test!(breaking_with_comments, "#{\n//some comment\n}");
+make_test!(breaks_good_comments, "#{\n//some comment\n}");
+make_test!(no_space_after_block, "#{//\n}    \ncontent");
+make_test!(no_space_after_block2, "#{//\n}   \n\ncontent");
+make_test!(breakline_after_block, "#{//\n}\n\ncontent");
