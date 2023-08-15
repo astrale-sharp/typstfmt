@@ -27,6 +27,8 @@ Basic formatter for the Typst language with a future!
 
 # Features
 
+- Good defaults.
+- Config files : run `typstfmt --make-default-config` to create a typstfmt.toml file that you can customize!
 - Disable the formatting by surrounding code with `// typstfmt::off` and `typstfmt::on`
 
 
