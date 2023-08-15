@@ -31,7 +31,11 @@ pub fn format(s: &str, config: Config) -> String {
     let init = parse(s);
     let mut context = Ctx::from_config(config);
     let root = LinkedNode::new(&init);
-    visit(&root, &mut context)
+    let s = visit(&root, &mut context);
+    regex::Regex::new("( )+\n")
+        .unwrap()
+        .replace_all(&s, "\n")
+        .to_string()
 }
 
 /// This is recursively called on the AST, the formatting is bottom up,
