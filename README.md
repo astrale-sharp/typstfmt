@@ -27,8 +27,8 @@ Basic formatter for the Typst language with a future!
 
 # Features
 
-- config files
-- you can enable experimental features via the config file : `experimental_args_breaking_consecutive`
+- Disable the formatting by surrounding code with `// typstfmt::off` and `typstfmt::on`
+
 
 # State
 

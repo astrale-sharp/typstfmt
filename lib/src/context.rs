@@ -5,6 +5,7 @@ pub(crate) struct Ctx {
     pub(crate) config: Config,
     pub(crate) just_spaced: bool,
     pub(crate) consec_new_line: i32,
+    pub(crate) off: bool,
 }
 
 /// you may push into your own buffer using this to ensure you push considering context

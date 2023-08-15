@@ -23,6 +23,7 @@ make_test!(official, OFFICIAL);
 make_test!(let_closure_params_named, TABLEX,);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
+make_test!(on_off, ON_OFF);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -71,3 +72,9 @@ const TABS: &str = r#"
 		v(0pt)
 	}
 }"#;
+
+const ON_OFF: &str = r#"// typstfmt::off
+#{{4}}
+// typstfmt::on
+#{{4}}
+"#;
