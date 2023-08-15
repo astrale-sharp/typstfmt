@@ -17,7 +17,7 @@ itertools = "0.10.5"
 regex = "1.7.3"
 toml = "0.7.3"
 tracing = { version = "0.1.37", features = ["attributes"] }
-typst-syntax = { git = "https://github.com/typst/typst.git" }
+typst-syntax = { git = "https://github.com/typst/typst.git", tag = "v0.7.0" }
 unicode-segmentation = "1.10.1"
 serde = { version = "1.0.171", features = ["serde_derive"] }
 
