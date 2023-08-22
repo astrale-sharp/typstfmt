@@ -26,7 +26,7 @@ mod content_blocks;
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
     //replace tabs
-    let s = &s.replace("\t", &" ".repeat(config.ident_space));
+    let s = &s.replace('\t', &" ".repeat(config.ident_space));
 
     let init = parse(s);
     let mut context = Ctx::from_config(config);
@@ -51,26 +51,8 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         res.push(child_fmt);
     }
     let res = match node.kind() {
-        LineComment => {
-            ctx.lost_context();
-            if node.text().contains("typstfmt::off") {
-                ctx.off = true;
-            } else if node.text().contains("typstfmt::on") {
-                ctx.off = false;
-            } else if node.text().contains("typstfmt::") {
-                warn!("your comment contains `typstfmt::` not followed by `on` or `off`, did you make a typo?");
-            }
-
-            node.text().to_string()
-        }
-        _ if ctx.off => {
-            let mut buf = String::new();
-            ctx.push_raw_in(node.text(), &mut buf);
-            for s in res {
-                ctx.push_raw_in(&s, &mut buf);
-            }
-            buf
-        }
+        LineComment => format_comment_handling_disable(node, &res, ctx),
+        _ if ctx.off => no_format(node, &res, ctx),
         Binary => binary::format_bin_left_assoc(node, &res, ctx),
         Named | Keyed => format_named_args(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
@@ -109,6 +91,15 @@ fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> Stri
         ctx.push_raw_in(s, &mut res);
     }
     res
+}
+
+fn no_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
+    let mut buf = String::new();
+    ctx.push_raw_in(parent.text(), &mut buf);
+    for s in children {
+        ctx.push_raw_in(s, &mut buf);
+    }
+    buf
 }
 
 #[instrument(skip_all, ret)]
@@ -152,6 +143,23 @@ pub(crate) fn format_let_binding(
         }
     }
     res
+}
+
+fn format_comment_handling_disable(parent: &LinkedNode, _: &[String], ctx: &mut Ctx) -> String {
+    ctx.lost_context();
+    if parent.text().contains("typstfmt::off") {
+        ctx.off = true;
+    } else if parent.text().contains("typstfmt::on") {
+        ctx.off = false;
+    } else if parent.text().contains("typstfmt::") {
+        warn!("your comment contains `typstfmt::` not followed by `on` or `off`, did you make a typo?");
+    }
+    parent.text().to_string()
+}
+
+
+    }
+    buf
 }
 
 #[cfg(test)]
