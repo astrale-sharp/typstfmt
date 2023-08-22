@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"\\n- 000\\n\\n 001\\n 002\\n  // not broken by comment\\n\\n - 010\\n  011\\n  012\\n\\n 003\\n-   10 not too spaced\\ncontent\\n\"\n===\n\n- 000\n\n 001\n 002\n  // not broken by comment\n\n - 010\n  011\n  012\n\n 003\n-   10 not too spaced\ncontent\n\n===\nFORMATTED\n===\n\n- 000\n\n  001\n  002\n  // not broken by comment\n\n  - 010\n    011\n    012\n\n  003\n- 10 not too spaced\ncontent\n"
+expression: formatted
+---
+"\n- 000\n\n  001\n  002\n  // not broken by comment\n\n  - 010\n    011\n    012\n\n  003\n- 10 not too spaced\ncontent\n"

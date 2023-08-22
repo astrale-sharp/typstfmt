@@ -55,6 +55,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         _ if ctx.off => no_format(node, &res, ctx),
         Binary => binary::format_bin_left_assoc(node, &res, ctx),
         Named | Keyed => format_named_args(node, &res, ctx),
+        ListItem | EnumItem => format_list_enum(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
         ContentBlock => content_blocks::format_content_blocks(node, &res, ctx),
         Args | Params | Dict | Array | Destructuring | Parenthesized => {
@@ -157,9 +158,20 @@ fn format_comment_handling_disable(parent: &LinkedNode, _: &[String], ctx: &mut 
     parent.text().to_string()
 }
 
-
+fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
+    let mut res = String::new();
+    for (s, node) in children.iter().zip(parent.children()) {
+        match node.kind() {
+            EnumMarker | ListMarker => {
+                ctx.push_raw_in(node.text(), &mut res);
+                ctx.push_in(" ", &mut res);
+            }
+            _ => {
+                ctx.push_raw_indent(s, &mut res);
+            }
+        }
     }
-    buf
+    res
 }
 
 #[cfg(test)]

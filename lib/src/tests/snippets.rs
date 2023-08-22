@@ -24,6 +24,9 @@ make_test!(let_closure_params_named, TABLEX,);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
+make_test!(list, LIST);
+make_test!(enumeration, &LIST.replace("-", "+"));
+
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -77,4 +80,20 @@ const ON_OFF: &str = r#"// typstfmt::off
 #{{4}}
 // typstfmt::on
 #{{4}}
+"#;
+
+const LIST: &str = r#"
+- 000
+
+ 001
+ 002
+  // not broken by comment
+
+ - 010
+  011
+  012
+
+ 003
+-   10 not too spaced
+content
 "#;
