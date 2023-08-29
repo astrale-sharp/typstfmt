@@ -85,22 +85,22 @@ impl Ctx {
         }
     }
 
-    pub(crate) fn push_in_indent(&mut self, s: &str, result: &mut String) {
-        let mut is_first = true;
-        for s in s.lines() {
-            let s = s.trim_end();
-            if is_first {
-                is_first = false;
-                self.push_in(s, result);
-                continue;
-            }
-            self.push_in("\n", result);
-            self.push_in(
-                format!("{}{}", self.get_indent(), s).trim_end_matches(' '),
-                result,
-            );
-        }
-    }
+    // pub(crate) fn push_in_indent(&mut self, s: &str, result: &mut String) {
+    //     let mut is_first = true;
+    //     for s in s.lines() {
+    //         let s = s.trim_end();
+    //         if is_first {
+    //             is_first = false;
+    //             self.push_in(s, result);
+    //             continue;
+    //         }
+    //         self.push_in("\n", result);
+    //         self.push_in(
+    //             format!("{}{}", self.get_indent(), s).trim_end_matches(' '),
+    //             result,
+    //         );
+    //     }
+    // }
 
     /// must be called when you cannot keep track of what you pushed
     /// so that context doesn't refuse your next pushes for no reasons.
