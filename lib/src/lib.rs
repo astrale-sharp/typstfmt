@@ -63,6 +63,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
             args::format_args(node, &res, ctx)
         }
         LetBinding => format_let_binding(node, &res, ctx),
+        Conditional => conditional_format(node, &res, ctx),
         Raw | BlockComment => {
             ctx.lost_context();
             node.text().to_string()
@@ -100,6 +101,30 @@ fn no_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String 
     ctx.push_raw_in(parent.text(), &mut res);
     for s in children {
         ctx.push_raw_in(s, &mut res);
+    }
+    res
+}
+
+fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
+    let mut res = String::new();
+    ctx.push_raw_in(parent.text(), &mut res);
+    for (s, node) in children.iter().zip(parent.children()) {
+        match node.kind() {
+            Space => {}
+            If => {
+                ctx.push_raw_in(s, &mut res);
+                ctx.push_raw_in(" ", &mut res);
+            }
+            CodeBlock => {
+                ctx.push_raw_in(" ", &mut res);
+                ctx.push_raw_in(s, &mut res);
+            }
+            Else => {
+                ctx.push_raw_in(" ", &mut res);
+                ctx.push_raw_in(s, &mut res);
+            }
+            _ => ctx.push_raw_in(s, &mut res),
+        }
     }
     res
 }
@@ -177,3 +202,8 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
 
 #[cfg(test)]
 mod tests;
+
+#[test]
+fn feature() {
+    dbg!(parse("#if true {} else {}"));
+}

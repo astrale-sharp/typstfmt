@@ -17,3 +17,12 @@ make_test!(markup_block_too_spaced, "[  4  ]");
 make_test!(markup_block_tight, "[4]");
 make_test!(markup_block_only_space, "[   ]");
 make_test!(just, "#let page_turned = page not in header_pages");
+make_test!(short_if_else, "#if true{}else {}");
+make_test!(
+    long_if_else,
+    "#if long_condition {
+    some_code()
+some_var
+    some-stuff(a,b)
+}    else {}"
+);
