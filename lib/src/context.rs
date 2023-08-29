@@ -67,7 +67,7 @@ impl Ctx {
         self.lost_context();
     }
 
-    /// adds an indentation for each line the input except the first to match the current level of identation.
+    /// adds an indentation for each line the input except the first to match the current level of indentation.
     pub(crate) fn push_raw_indent(&mut self, s: &str, result: &mut String) {
         let mut is_first = true;
         for s in s.lines() {
@@ -111,6 +111,6 @@ impl Ctx {
 
     /// returns an indent using config to get it's length.
     pub(crate) fn get_indent(&self) -> String {
-        " ".repeat(self.config.ident_space)
+        " ".repeat(self.config.indent_space)
     }
 }
