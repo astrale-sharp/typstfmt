@@ -79,8 +79,10 @@ macro_rules! make_test {
     };
 }
 
+// allowing modifying trailing comma's, text in markup, space everywhere
+// todo, check adding all text from one tree and another equal the same text.
 fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
-    let should_ignore = |x: &LinkedNode| [Space, Parbreak, Comma].contains(&x.kind());
+    let should_ignore = |x: &LinkedNode| [Space, Parbreak, Comma, Text].contains(&x.kind());
 
     let node_kind = node.kind();
     let other_kind = other_node.kind();

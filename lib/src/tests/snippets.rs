@@ -25,7 +25,8 @@ make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
 make_test!(list, LIST);
-make_test!(enumeration, &LIST.replace("-", "+"));
+make_test!(enumeration, &LIST.replace('-', "+"));
+make_test!(line_wrapping, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 

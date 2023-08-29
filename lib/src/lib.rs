@@ -21,7 +21,7 @@ mod utils;
 mod args;
 mod binary;
 mod code_blocks;
-mod content_blocks;
+mod markup;
 
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
@@ -57,7 +57,8 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         Named | Keyed => format_named_args(node, &res, ctx),
         ListItem | EnumItem => format_list_enum(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
-        ContentBlock => content_blocks::format_content_blocks(node, &res, ctx),
+        Markup => markup::format_markup(node, &res, ctx),
+        ContentBlock => markup::format_content_blocks(node, &res, ctx),
         Args | Params | Dict | Array | Destructuring | Parenthesized => {
             args::format_args(node, &res, ctx)
         }
@@ -95,12 +96,12 @@ fn format_default(node: &LinkedNode, children: &[String], ctx: &mut Ctx) -> Stri
 }
 
 fn no_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
-    let mut buf = String::new();
-    ctx.push_raw_in(parent.text(), &mut buf);
+    let mut res = String::new();
+    ctx.push_raw_in(parent.text(), &mut res);
     for s in children {
-        ctx.push_raw_in(s, &mut buf);
+        ctx.push_raw_in(s, &mut res);
     }
-    buf
+    res
 }
 
 #[instrument(skip_all, ret)]

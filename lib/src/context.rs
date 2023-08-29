@@ -25,7 +25,7 @@ impl Ctx {
     ///
     /// Won't work for indents.
     #[instrument(skip_all)]
-    pub(crate) fn push_in(&mut self, s: &str, res: &mut String) {
+    pub(crate) fn push_in(&mut self, s: &str, result: &mut String) {
         let s = if s.contains('\n') {
             s.trim_end_matches(' ')
         } else {
@@ -34,26 +34,26 @@ impl Ctx {
         for c in s.chars() {
             match c {
                 ' ' => {
-                    if self.just_spaced || res.ends_with(' ') {
+                    if self.just_spaced || result.ends_with(' ') {
                         debug!("IGNORED space");
                     } else {
                         debug!("PUSHED SPACE");
                         self.just_spaced = true;
-                        res.push(' ');
+                        result.push(' ');
                     }
                 }
                 '\n' => {
                     if self.consec_new_line <= 1 {
                         debug!("PUSHED NEWLINE");
                         self.consec_new_line += 1;
-                        res.push('\n');
+                        result.push('\n');
                     } else {
                         debug!("IGNORED newline");
                     }
                 }
                 _ => {
                     // debug!("PUSHED {c}");
-                    res.push(c);
+                    result.push(c);
                     self.lost_context();
                 }
             }
@@ -84,6 +84,23 @@ impl Ctx {
             );
         }
     }
+
+    // pub(crate) fn push_in_indent(&mut self, s: &str, result: &mut String) {
+    //     let mut is_first = true;
+    //     for s in s.lines() {
+    //         let s = s.trim_end();
+    //         if is_first {
+    //             is_first = false;
+    //             self.push_in(s, result);
+    //             continue;
+    //         }
+    //         self.push_in("\n", result);
+    //         self.push_in(
+    //             format!("{}{}", self.get_indent(), s).trim_end_matches(' '),
+    //             result,
+    //         );
+    //     }
+    // }
 
     /// must be called when you cannot keep track of what you pushed
     /// so that context doesn't refuse your next pushes for no reasons.
