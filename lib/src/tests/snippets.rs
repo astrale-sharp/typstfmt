@@ -26,7 +26,7 @@ make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
 make_test!(list, LIST);
 make_test!(enumeration, &LIST.replace('-', "+"));
-make_test!(line_wrapping, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
+make_test!(line_wrapping, "Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
@@ -84,16 +84,16 @@ const ON_OFF: &str = r#"// typstfmt::off
 
 const LIST: &str = r#"
 - 000
-
- 001
- 002
-  // not broken by comment
-
+ some text 
+ badly broken for no _reason_ which is a @very long line and should be broken up in at least three bits in my opinion.
+// not broken by comments
  - 010
-  011
-  012
+  - 011
+  - 012
+   inner content
 
- 003
--   10 not too spaced
-content
+- 003
+-     10 not too spaced
+  inner content
+outer content
 "#;

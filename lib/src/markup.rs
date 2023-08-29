@@ -41,6 +41,8 @@ pub(crate) fn format_content_blocks(
 pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
     let mut skip_until = None;
+    let parent_is_list = [Some(EnumItem), Some(ListItem)].contains(&parent.parent_kind());
+
     for (idx, (s, node)) in children.iter().zip(parent.children()).enumerate() {
         match node.kind() {
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
@@ -60,30 +62,34 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                 }
             }
             Text => {
-                // todo, hack for enum and lists
-                if [Some(EnumItem), Some(ListItem)].contains(&parent.parent_kind()) {
-                    ctx.push_raw_in(s, &mut res);
-                    continue;
-                }
-
-                // We eat all the following nodes if they're Space, Text, Emph or Strong, then we format ourselves breaking or spacing.
+                // We eat all the following nodes if they're in `[Space, Text, Emph, Strong, Label, Ref]`
+                // then we format ourselves breaking or spacing.
                 skip_until = Some(idx);
                 let mut this = node;
                 let mut add = s.to_string();
                 loop {
                     let next = utils::find_next(&this, &|_| true);
-                    if !next
-                        .as_ref()
-                        .is_some_and(|next| [Space, Text, Emph, Strong].contains(&next.kind()))
-                    {
-                        break;
+                    match next.as_ref() {
+                        Some(next) => {
+                            if ![Space, Text, Emph, Strong, Label, Ref].contains(&next.kind()) {
+                                break;
+                            }
+                            if next.kind() == Space
+                                && [EnumItem, ListItem]
+                                    .map(Some)
+                                    .contains(&next.next_sibling_kind())
+                            {
+                                break;
+                            }
+                        }
+                        None => break,
                     }
+
                     *skip_until.as_mut().unwrap() += 1;
                     this = next.unwrap();
                     match this.kind() {
                         Space => add.push(' '),
-                        Text => add.push_str(this.text()),
-                        _ => unreachable!(),
+                        _ => add.push_str(&children[skip_until.unwrap()]),
                     }
                 }
                 let split = add.split(' ').filter(|x| !x.is_empty()).collect_vec();
@@ -110,6 +116,10 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     || [Some(Text), Some(SmartQuote)].contains(&this.next_sibling_kind())
                 {
                     res = res[..res.len() - 1].to_string();
+                }
+
+                if parent_is_list && this.next_sibling_kind().is_none() {
+                    res.push('\n');
                 }
             }
             _ => {
