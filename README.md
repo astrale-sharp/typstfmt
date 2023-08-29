@@ -16,6 +16,7 @@ Basic formatter for the Typst language with a future!
     - [Is that all I have to help me test?](#is-that-all-i-have-to-help-me-test)
       - [Tracing](#tracing)
       - [Fmttest (COMING SOON)](#fmttest-coming-soon)
+- [Thanks](#thanks)
 
 
 # Goals
@@ -120,3 +121,7 @@ you may also set the `NOLOG` env variable if you wish to disable logging entirel
 
 On the fmttest branch, you can see the skeleton of a program that will automate finding which range broke my typst file when formatting.
 
+
+# Thanks
+
+@Andrew15-5, for the many suggestions, issues and feedback
