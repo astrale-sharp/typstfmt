@@ -122,11 +122,29 @@ fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -
             Else => {
                 ctx.push_raw_in(" ", &mut res);
                 ctx.push_raw_in(s, &mut res);
+                if node.next_sibling_kind() == Some(Conditional) {
+                    ctx.push_raw_in(" ", &mut res);
+                }
             }
             _ => ctx.push_raw_in(s, &mut res),
         }
     }
     res
+}
+
+#[test]
+fn featurse() {
+    dbg!(parse(
+        r#"#let _slides-cover(mode, body) = {
+        if mode == "invisible" {
+          hide(body)
+        } else if mode == "transparent" {
+          text(gray.lighten(50%), body)
+        } else {
+          panic("Illegal cover mode: " + mode)
+        }
+      }"#
+    ));
 }
 
 #[instrument(skip_all, ret)]
@@ -202,8 +220,3 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
 
 #[cfg(test)]
 mod tests;
-
-#[test]
-fn feature() {
-    dbg!(parse("#if true {} else {}"));
-}

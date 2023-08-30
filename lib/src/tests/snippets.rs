@@ -27,6 +27,18 @@ make_test!(on_off, ON_OFF);
 make_test!(list, LIST);
 make_test!(enumeration, &LIST.replace('-', "+"));
 make_test!(line_wrapping, "Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
+make_test!(
+    elseif,
+    r#"#let _slides-cover(mode, body) = {
+  if mode == "invisible" {
+    hide(body)
+  } else if mode == "transparent" {
+    text(gray.lighten(50%), body)
+  } else {
+    panic("Illegal cover mode: " + mode)
+  }
+}"#
+);
 
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
