@@ -71,9 +71,9 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         _ => format_default(node, &res, ctx),
     };
     if node.children().count() == 0 {
-        debug!("visiting token {:?}", node.kind());
+        debug!("TOKEN : {:?}", node.kind());
     } else {
-        debug!("visiting parent: {:?}", node.kind());
+        debug!("PARENT: {:?}", node.kind());
     }
     res
 }
