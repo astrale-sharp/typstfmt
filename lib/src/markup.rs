@@ -14,8 +14,8 @@ pub(crate) fn format_content_blocks(
     let first_space = markup.as_untyped().children().next();
     let spaced = first_space.is_some_and(|x| x.kind() == Space);
 
-    for (s, c) in children.iter().zip(parent.children()) {
-        match c.kind() {
+    for (s, child) in children.iter().zip(parent.children()) {
+        match child.kind() {
             RightBracket if spaced => {
                 let space_type = if first_space.unwrap().text().contains('\n') {
                     '\n'
