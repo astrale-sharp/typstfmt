@@ -115,7 +115,7 @@ fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -
                 ctx.push_raw_in(s, &mut res);
                 ctx.push_raw_in(" ", &mut res);
             }
-            CodeBlock => {
+            CodeBlock | ContentBlock => {
                 ctx.push_raw_in(" ", &mut res);
                 ctx.push_raw_in(s, &mut res);
             }

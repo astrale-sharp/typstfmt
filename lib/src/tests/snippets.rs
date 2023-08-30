@@ -40,6 +40,13 @@ make_test!(
 }"#
 );
 
+make_test!(
+    ifblock,
+    "#if k > 0 [
+  #k / #n
+]"
+);
+
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
 }"#;
