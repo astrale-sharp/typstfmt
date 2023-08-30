@@ -22,7 +22,7 @@ impl Ctx {
     /// Pushes the string in the result avoiding:
     /// - putting two consecutive spaces.
     /// - putting more than two consecutive newlines.
-    ///
+    /// - trims the string if it DOES contain a newline.
     /// Won't work for indents.
     #[instrument(skip_all)]
     pub(crate) fn push_in(&mut self, s: &str, result: &mut String) {
@@ -71,7 +71,6 @@ impl Ctx {
     pub(crate) fn push_raw_indent(&mut self, s: &str, result: &mut String) {
         let mut is_first = true;
         for s in s.lines() {
-            let s = s.trim_end();
             if is_first {
                 is_first = false;
                 self.push_raw_in(s, result);

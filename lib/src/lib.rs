@@ -193,7 +193,6 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
         match node.kind() {
             EnumMarker | ListMarker => {
                 ctx.push_raw_in(node.text(), &mut res);
-                ctx.push_in(" ", &mut res);
             }
             _ => {
                 ctx.push_raw_indent(s, &mut res);
