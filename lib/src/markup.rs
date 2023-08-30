@@ -57,6 +57,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     || idx == children.len()
                     || [Some(Text), Some(Parbreak)].contains(&node.next_sibling_kind())
                     || ![Some(Text), Some(Parbreak)].contains(&node.prev_sibling_kind())
+                    || node.prev_sibling_kind() == Some(Linebreak)
                 {
                     ctx.push_raw_in(s, &mut res);
                 }

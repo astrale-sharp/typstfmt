@@ -39,6 +39,7 @@ make_test!(
   }
 }"#
 );
+// make_test!(slash_space, r"#[\ ]");
 
 make_test!(
     ifblock,
