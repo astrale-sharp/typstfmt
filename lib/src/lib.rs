@@ -132,21 +132,6 @@ fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -
     res
 }
 
-#[test]
-fn featurse() {
-    dbg!(parse(
-        r#"#let _slides-cover(mode, body) = {
-        if mode == "invisible" {
-          hide(body)
-        } else if mode == "transparent" {
-          text(gray.lighten(50%), body)
-        } else {
-          panic("Illegal cover mode: " + mode)
-        }
-      }"#
-    ));
-}
-
 #[instrument(skip_all, ret)]
 pub(crate) fn format_named_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
