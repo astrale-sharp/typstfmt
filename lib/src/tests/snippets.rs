@@ -41,6 +41,10 @@ make_test!(
 );
 make_test!(slash_space, r"#[\ ]");
 
+// TODO: wait for parser fix
+//    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$
+// vs $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt.)$
+
 make_test!(
     ifblock,
     "#if k > 0 [
