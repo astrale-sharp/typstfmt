@@ -28,6 +28,7 @@ make_test!(list, LIST);
 make_test!(enumeration, &LIST.replace('-', "+"));
 make_test!(list2, &TERMS.replace('/', "-"));
 make_test!(enums, &TERMS.replace('/', "+"));
+make_test!(terms, TERMS);
 make_test!(line_wrapping, "Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
 make_test!(
     elseif,

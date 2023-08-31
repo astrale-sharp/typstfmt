@@ -49,12 +49,6 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
         match node.kind() {
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
             Space => {
-                // todo, hack to get enums and lists to work
-                // if [Some(EnumItem), Some(ListItem), Some(TermItem)].contains(&parent.parent_kind()) {
-                //     ctx.push_raw_in(s, &mut res);
-                //     continue;
-                // }
-
                 if idx == 0
                     || idx == children.len()
                     || node.prev_sibling_kind() == Some(Linebreak)
@@ -97,33 +91,33 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                         _ => add.push_str(&children[skip_until.unwrap()]),
                     }
                 }
-                let split = add.split(' ').filter(|x| !x.is_empty()).collect_vec();
-                for word in split.iter() {
+                let add = add.split(' ').filter(|x| !x.is_empty()).collect_vec();
+                for word in add.iter() {
                     if utils::max_line_length(word)
-                        + 1 // the space we're adding
-                        + utils::max_line_length(res.lines().last().unwrap_or(""))
+                    + 1 // the space we're adding
+                    + utils::max_line_length(res.split('\n').last().unwrap_or(""))
                         <= ctx.config.max_line_length
                     {
-                        res.push_str(word);
-                        res.push(' ');
+                        ctx.push_raw_in(word, &mut res);
+                        ctx.push_in(" ", &mut res);
                     } else {
                         if res.ends_with(' ') {
                             res = res[..res.len() - 1].to_string();
                         }
-                        res.push('\n');
-                        res.push_str(word);
-                        res.push(' ');
+                        ctx.push_in("\n", &mut res);
+                        ctx.push_raw_in(word, &mut res);
+                        ctx.push_in(" ", &mut res);
                     }
                 }
                 // we don't want to end with a space nor to see `don 't`
-                if res.ends_with(' ') && this.next_sibling().is_none()
+                if (res.ends_with(' ') || res.ends_with('\n')) && this.next_sibling().is_none()
                     || [Some(Text), Some(SmartQuote)].contains(&this.next_sibling_kind())
                 {
                     res = res[..res.len() - 1].to_string();
                 }
 
                 if parent_is_list && this.next_sibling_kind().is_none() {
-                    res.push('\n');
+                    ctx.push_in("\n", &mut res);
                 }
             }
             _ => {
