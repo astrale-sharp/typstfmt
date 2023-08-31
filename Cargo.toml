@@ -3,11 +3,11 @@ members = ["lib"]
 resolver = "2"
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 authors = ["Astrale <ash4567@outlook.fr>"]
 rust-version = "1.56"
-description = "A soon to be formatter for the typst lang"
+description = "A formatter for Typst-lang with a future!"
 readme = "README.md"
 repository = "https://github.com/astrale-sharp/typstfmt"
 license = "MIT OR Apache-2.0"

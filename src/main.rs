@@ -8,7 +8,7 @@ use std::{
 use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
-const VERSION: &str = "0.2.0#578fabc";
+const VERSION: &str = "0.2.1#1817538";
 const CONFIG_PATH: &str = "typstfmt-config.toml";
 const HELP: &str = r#"Format Typst code
 
