@@ -55,7 +55,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         _ if ctx.off => no_format(node, &res, ctx),
         Binary => binary::format_bin_left_assoc(node, &res, ctx),
         Named | Keyed => format_named_args(node, &res, ctx),
-        ListItem | EnumItem => format_list_enum(node, &res, ctx),
+        ListItem | EnumItem | TermItem => format_list_enum(node, &res, ctx),
         CodeBlock => code_blocks::format_code_blocks(node, &res, ctx),
         Markup => markup::format_markup(node, &res, ctx),
         ContentBlock => markup::format_content_blocks(node, &res, ctx),
@@ -191,7 +191,7 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            EnumMarker | ListMarker => {
+            EnumMarker | ListMarker | TermMarker => {
                 ctx.push_raw_in(node.text(), &mut res);
             }
             _ => {

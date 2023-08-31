@@ -41,24 +41,27 @@ pub(crate) fn format_content_blocks(
 pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
     let mut skip_until = None;
-    let parent_is_list = [Some(EnumItem), Some(ListItem)].contains(&parent.parent_kind());
+    let parent_is_list = [EnumItem, ListItem, TermItem]
+        .map(Some)
+        .contains(&parent.parent_kind());
 
     for (idx, (s, node)) in children.iter().zip(parent.children()).enumerate() {
         match node.kind() {
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
             Space => {
                 // todo, hack to get enums and lists to work
-                if [Some(EnumItem), Some(ListItem)].contains(&parent.parent_kind()) {
-                    ctx.push_raw_in(s, &mut res);
-                    continue;
-                }
+                // if [Some(EnumItem), Some(ListItem), Some(TermItem)].contains(&parent.parent_kind()) {
+                //     ctx.push_raw_in(s, &mut res);
+                //     continue;
+                // }
 
                 if idx == 0
                     || idx == children.len()
                     || node.prev_sibling_kind() == Some(Linebreak)
                     || [Some(Text), Some(Parbreak)].contains(&node.next_sibling_kind())
                     || ![Some(Text), Some(Parbreak)].contains(&node.prev_sibling_kind())
-                    || [Some(EnumItem), Some(ListItem)].contains(&node.next_sibling_kind())
+                    || [Some(EnumItem), Some(ListItem), Some(TermItem)]
+                        .contains(&node.next_sibling_kind())
                 {
                     ctx.push_raw_in(s, &mut res);
                 }
@@ -77,7 +80,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                 break;
                             }
                             if next.kind() == Space
-                                && [EnumItem, ListItem]
+                                && [EnumItem, ListItem, TermItem]
                                     .map(Some)
                                     .contains(&next.next_sibling_kind())
                             {

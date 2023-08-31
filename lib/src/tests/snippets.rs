@@ -26,6 +26,8 @@ make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
 make_test!(list, LIST);
 make_test!(enumeration, &LIST.replace('-', "+"));
+make_test!(list2, &TERMS.replace('/', "-"));
+make_test!(enums, &TERMS.replace('/', "+"));
 make_test!(line_wrapping, "Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
 make_test!(
     elseif,
@@ -137,3 +139,9 @@ const LIST: &str = r#"
   inner content
 outer content
 "#;
+
+const TERMS: &str = "content before
+/ Ligature: A merged glyph.
+/ Kerning: A spacing adjustment
+  between two adjacent letters.
+content after";
