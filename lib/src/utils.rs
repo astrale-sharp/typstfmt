@@ -39,20 +39,20 @@ pub(crate) fn find_child<'a>(
 }
 
 /// find all children recursively that fits predicate
-pub(crate) fn find_children<'a>(
-    res: &mut Vec<LinkedNode<'a>>,
-    node: &LinkedNode<'a>,
-    predicate: &impl Fn(&LinkedNode) -> bool,
-) {
-    for child in node.children() {
-        if predicate(&child) {
-            debug!("predicate accepted");
-            res.push(child);
-        } else {
-            find_children(res, &child, predicate);
-        }
-    }
-}
+// pub(crate) fn find_children<'a>(
+//     res: &mut Vec<LinkedNode<'a>>,
+//     node: &LinkedNode<'a>,
+//     predicate: &impl Fn(&LinkedNode) -> bool,
+// ) {
+//     for child in node.children() {
+//         if predicate(&child) {
+//             debug!("predicate accepted");
+//             res.push(child);
+//         } else {
+//             find_children(res, &child, predicate);
+//         }
+//     }
+// }
 
 #[instrument(ret, skip_all)]
 pub(crate) fn find_next<'a>(

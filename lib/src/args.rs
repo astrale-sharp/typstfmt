@@ -4,17 +4,19 @@ use super::*;
 
 #[instrument(skip_all)]
 /// format args using [format_args_tight] or [format_args_breaking] depending on the context.
+/// - if number of args is 0 or 1, format tight. (see TODO: why plus 7)
+/// - if line gets above max_length - 7 in tight mode, format breaking.
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     // check if any children is markup and contains a linebreak, if so, breaking
-    let mut res = vec![];
-    utils::find_children(&mut res, parent, &|c| {
-        c.parent_kind() == Some(Markup)
-            && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
-    });
+    // let mut res = vec![];
+    // utils::find_children(&mut res, parent, &|c| {
+    //     c.parent_kind() == Some(Markup)
+    //         && (c.kind() == Parbreak || (c.kind() == Space) && c.text().contains('\n'))
+    // });
 
-    if !res.is_empty() {
-        return format_args_breaking(parent, children, ctx);
-    }
+    // if !res.is_empty() {
+    //     return format_args_breaking(parent, children, ctx);
+    // }
 
     if parent.children().any(|c| c.kind() == LineComment) {
         return format_args_breaking(parent, children, ctx);
@@ -45,7 +47,13 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
     }
 
     let res = format_args_tight(parent, children, ctx);
-    if utils::max_line_length(&res) >= ctx.config.max_line_length {
+    // TODO: why plus 7
+    // why plus 7? if you remove it you'll notice the official example
+    // fails, since the inner line is broken before reaching the limit,
+    // it's difficult to have a condition like "if one of my child had
+    // to break in order to not go over the max_len, break" So I had to
+    // resort to this hack. A more meaningful approach is desired.
+    if utils::max_line_length(&res) + 7 >= ctx.config.max_line_length {
         return format_args_breaking(parent, children, ctx);
     }
     res
