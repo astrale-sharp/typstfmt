@@ -60,6 +60,14 @@ make_test!(
 - thing 3."
 );
 
+make_test!(
+    one_long_content_arg,
+    "#very-long-long-long-long-long-function-name(
+  [Lorem ipsum dolor sit amet, consectetur
+  adipiscing elit, sed do eiusmod tempor]
+)"
+);
+
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
 }"#;

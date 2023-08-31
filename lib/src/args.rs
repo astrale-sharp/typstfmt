@@ -4,8 +4,8 @@ use super::*;
 
 #[instrument(skip_all)]
 /// format args using [format_args_tight] or [format_args_breaking] depending on the context.
-/// - if number of args is 0 or 1, format tight. (see TODO: why plus 7)
-/// - if line gets above max_length - 7 in tight mode, format breaking.
+/// - if number of args is 0, format tight.
+/// - if line gets above max_length - 7 in tight mode, format breaking. (see TODO: why plus 7)
 pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     // check if any children is markup and contains a linebreak, if so, breaking
     // let mut res = vec![];
@@ -42,7 +42,7 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
         })
         .count();
 
-    if number_of_args <= 1 {
+    if number_of_args == 0 {
         return format_args_tight(parent, children, ctx);
     }
 
