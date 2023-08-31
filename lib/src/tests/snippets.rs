@@ -52,6 +52,14 @@ make_test!(
 ]"
 );
 
+make_test!(
+    text_then_list,
+    "We have next things:
+- thing 1;
+- thing 2;
+- thing 3."
+);
+
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
 }"#;

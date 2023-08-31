@@ -55,9 +55,10 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
 
                 if idx == 0
                     || idx == children.len()
+                    || node.prev_sibling_kind() == Some(Linebreak)
                     || [Some(Text), Some(Parbreak)].contains(&node.next_sibling_kind())
                     || ![Some(Text), Some(Parbreak)].contains(&node.prev_sibling_kind())
-                    || node.prev_sibling_kind() == Some(Linebreak)
+                    || [Some(EnumItem), Some(ListItem)].contains(&node.next_sibling_kind())
                 {
                     ctx.push_raw_in(s, &mut res);
                 }
@@ -111,7 +112,6 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                         res.push(' ');
                     }
                 }
-
                 // we don't want to end with a space nor to see `don 't`
                 if res.ends_with(' ') && this.next_sibling().is_none()
                     || [Some(Text), Some(SmartQuote)].contains(&this.next_sibling_kind())
