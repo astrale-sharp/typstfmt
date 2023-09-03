@@ -8,8 +8,7 @@ use std::{
 use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
-const REF_MASTER: &str = include_str!("../.git/refs/heads/master");
-const VERSION: &str = "0.2.1";
+const VERSION: &str = env!("TYPSTFMT_VERSION");
 const CONFIG_PATH: &str = "typstfmt-config.toml";
 const HELP: &str = r#"Format Typst code
 
@@ -36,8 +35,7 @@ fn main() -> Result<(), lexopt::Error> {
     while let Some(arg) = parser.next()? {
         match arg {
             Long("version") | Short('v') => {
-                let refm: String = REF_MASTER.chars().take(7).collect();
-                println!("version: {VERSION}#{refm}");
+                println!("version: {VERSION}");
                 return Ok(());
             }
             Long("help") | Short('h') => {
