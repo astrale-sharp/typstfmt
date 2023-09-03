@@ -78,14 +78,14 @@ pub(crate) fn format_args_tight(
                 let is_trailing =
                     utils::next_is_ignoring(&node, RightParen, &[Space, BlockComment]);
 
-                missing_trailing = is_last_comma && !is_trailing;
+                missing_trailing =
+                    (is_last_comma && !is_trailing) && !(is_last_comma && is_trailing);
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     // not putting the comma in would result in a parenthesized expression, not an array
                     // "(a,) != (a)"
                     if parent.kind() == Array || parent.kind() == Destructuring {
                         ctx.push_raw_in(",", &mut res);
                     }
-                    // don't print
                 } else {
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_in(" ", &mut res);
@@ -102,15 +102,15 @@ pub(crate) fn format_args_tight(
     res
 }
 
-/// this breaks line and adds indentation for items
-/// breakline if line max length is over the line or if items on one line >= 3
 pub(crate) fn format_args_breaking(
     parent: &LinkedNode<'_>,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
     let mut res = String::new();
-    let mut missing_trailing = !(parent.kind() == Parenthesized);
+
+    let mut missing_trailing_comma = !(parent.kind() == Parenthesized);
+    // only used with experimental flag in config for now
     let mut consecutive_items = 0;
 
     for (s, node) in children.iter().zip(parent.children()) {
@@ -118,16 +118,16 @@ pub(crate) fn format_args_breaking(
             utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
         match node.kind() {
             LeftParen => {
-                res.push_str(s);
-                res.push('\n');
-                res.push_str(&ctx.get_indent());
+                ctx.push_raw_in(s, &mut res);
+                ctx.push_raw_in("\n", &mut res);
+                ctx.push_raw_in(&ctx.get_indent(), &mut res);
             }
             RightParen => {
                 if parent.kind() == Parenthesized {
                     // no trailing comma we don't have a newline!
                     ctx.push_in("\n", &mut res);
                 }
-                res.push_str(s);
+                ctx.push_raw_in(s, &mut res);
             }
             LineComment | BlockComment => {
                 consecutive_items = 0;
@@ -144,16 +144,16 @@ pub(crate) fn format_args_breaking(
 
                     match prev_maybe_space {
                         Some(space) if space.kind() == Space && space.text().contains('\n') => {
-                            res.push('\n');
-                            res.push_str(&ctx.get_indent());
-                            res.push_str(s);
+                            ctx.push_raw_in("\n", &mut res);
+                            ctx.push_raw_in(&ctx.get_indent(), &mut res);
+                            ctx.push_raw_in(s, &mut res);
                         }
                         _ => {
-                            res.push(' ');
-                            res.push_str(s);
+                            ctx.push_raw_in(" ", &mut res);
+                            ctx.push_raw_in(s, &mut res);
                         }
                     }
-                    res.push('\n');
+                    ctx.push_raw_in("\n", &mut res);
                     ctx.consec_new_line = 2;
                 }
 
@@ -166,19 +166,17 @@ pub(crate) fn format_args_breaking(
             // handles trailing comma
             // handles Line comment
             Comma => {
-                missing_trailing = false;
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
                 let is_trailing =
                     utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
+                missing_trailing_comma =
+                    (is_last_comma && !is_trailing) && !(is_last_comma && is_trailing);
 
                 if is_last_comma && is_trailing {
                     // no indent
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in("\n", &mut res);
                 } else {
-                    if is_last_comma && !is_trailing {
-                        missing_trailing = true;
-                    }
                     if !ctx.config.experimental_args_breaking_consecutive
                         || consecutive_items >= 3
                         || s.contains('\n')
@@ -187,20 +185,21 @@ pub(crate) fn format_args_breaking(
                             .last()
                             .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= 10)
                     {
-                        res.push_str(s);
-                        res.push('\n');
-                        res.push_str(&ctx.get_indent());
+                        ctx.push_raw_in(s, &mut res);
+                        ctx.push_raw_in("\n", &mut res);
+                        ctx.push_raw_in(&ctx.get_indent(), &mut res);
+
                         consecutive_items = 0;
                     } else {
                         consecutive_items += 1;
-                        res.push_str(s);
-                        res.push(' ');
+                        ctx.push_raw_in(s, &mut res);
+                        ctx.push_raw_in(" ", &mut res);
                     }
                 }
             }
             _ => {
                 ctx.push_raw_indent(s, &mut res);
-                if is_last && missing_trailing {
+                if is_last && missing_trailing_comma {
                     ctx.push_raw_in(",\n", &mut res);
                 }
             }
