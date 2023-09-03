@@ -65,14 +65,24 @@ pub(crate) fn format_args_tight(
     ctx: &mut Ctx,
 ) -> String {
     let mut res = String::new();
+    let mut missing_trailing = parent.kind() == Destructuring;
+
     for (s, node) in children.iter().zip(parent.children()) {
+        let is_last =
+            utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
+
         match node.kind() {
             Space => {}
             Comma => {
+                let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
+                let is_trailing =
+                    utils::next_is_ignoring(&node, RightParen, &[Space, BlockComment]);
+
+                missing_trailing = is_last_comma && !is_trailing;
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     // not putting the comma in would result in a parenthesized expression, not an array
                     // "(a,) != (a)"
-                    if node.parent_kind() == Some(Array) {
+                    if parent.kind() == Array || parent.kind() == Destructuring {
                         ctx.push_raw_in(",", &mut res);
                     }
                     // don't print
@@ -83,6 +93,9 @@ pub(crate) fn format_args_tight(
             }
             _ => {
                 ctx.push_raw_in(s, &mut res);
+                if is_last && missing_trailing && parent.kind() == Destructuring {
+                    ctx.push_raw_in(",", &mut res);
+                }
             }
         }
     }

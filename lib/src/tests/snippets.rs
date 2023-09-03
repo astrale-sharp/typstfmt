@@ -71,6 +71,12 @@ make_test!(
 )"
 );
 
+make_test!(
+    param,
+    "#let func((a,)) = {
+}"
+);
+
 const FOR_LOOP: &str = r#"#for k in range(5) {
     repr(k) + " " 
 }"#;
