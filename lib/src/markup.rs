@@ -52,9 +52,14 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                 if idx == 0
                     || idx == children.len()
                     || node.prev_sibling_kind() == Some(Linebreak)
-                    || [Some(Text), Some(Parbreak)].contains(&node.next_sibling_kind())
-                    || ![Some(Text), Some(Parbreak)].contains(&node.prev_sibling_kind())
-                    || [Some(EnumItem), Some(ListItem), Some(TermItem)]
+                    || [Text, Parbreak, SmartQuote]
+                        .map(Some)
+                        .contains(&node.next_sibling_kind())
+                    || ![Text, Parbreak]
+                        .map(Some)
+                        .contains(&node.prev_sibling_kind())
+                    || [EnumItem, ListItem, TermItem]
+                        .map(Some)
                         .contains(&node.next_sibling_kind())
                 {
                     ctx.push_raw_in(s, &mut res);
@@ -74,7 +79,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                 break;
                             }
                             if next.kind() == Space
-                                && [EnumItem, ListItem, TermItem]
+                                && [EnumItem, ListItem, TermItem, SmartQuote]
                                     .map(Some)
                                     .contains(&next.next_sibling_kind())
                             {

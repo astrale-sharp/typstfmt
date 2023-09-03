@@ -26,3 +26,4 @@ make_test!(
 - thing 2;
 - thing 3."
 );
+make_test!(bug_quote_space, r#"don't "text" "text"#);
