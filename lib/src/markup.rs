@@ -52,7 +52,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                 if idx == 0
                     || idx == children.len()
                     || node.prev_sibling_kind() == Some(Linebreak)
-                    || [Text, Parbreak, SmartQuote]
+                    || [Text, Parbreak, SmartQuote, Hashtag]
                         .map(Some)
                         .contains(&node.next_sibling_kind())
                     || ![Text, Parbreak]
@@ -79,7 +79,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                 break;
                             }
                             if next.kind() == Space
-                                && [EnumItem, ListItem, TermItem, SmartQuote]
+                                && [EnumItem, ListItem, TermItem, SmartQuote, Hashtag]
                                     .map(Some)
                                     .contains(&next.next_sibling_kind())
                             {
@@ -115,7 +115,8 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     }
                 }
                 // we don't want to end with a space nor to see `don 't`
-                if (res.ends_with(' ') || res.ends_with('\n')) && this.next_sibling().is_none()
+                if (res.ends_with(' ') || res.ends_with('\n'))
+                    && (this.next_sibling().is_none() || this.next_sibling_kind() == Some(Hashtag))
                     || [Some(Text), Some(SmartQuote)].contains(&this.next_sibling_kind())
                 {
                     res = res[..res.len() - 1].to_string();

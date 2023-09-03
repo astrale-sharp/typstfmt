@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"a#lorem(2)b c d\"\n===\na#lorem(2)b c d\n===\nFORMATTED\n===\na#lorem(2)b c d"
+expression: formatted
+---
+"a#lorem(2)b c d"

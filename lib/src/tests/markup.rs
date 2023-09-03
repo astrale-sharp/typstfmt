@@ -27,3 +27,4 @@ make_test!(
 - thing 3."
 );
 make_test!(bug_quote_space, r#"don't "text" "text"#);
+make_test!(bug_space_around_inline_code, "a#lorem(2)b c d");

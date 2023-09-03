@@ -141,10 +141,10 @@ fn comma_gets_ignored_in_comparison() {
     assert!(parses_the_same("#f(1,{g(1,2,3,)},)", "#f(1,{g(1,2,3)})"));
 }
 
-mod params;
 mod code_block;
 mod comments;
 mod conditionals;
 mod lists;
 mod markup;
+mod params;
 mod snippets;
