@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/params.rs
+description: "INPUT\n===\n\"#f(\\ntrue// comment\\n)\"\n===\n#f(\ntrue// comment\n)\n===\nFORMATTED\n===\n#f(\n  true, // comment\n)"
+expression: formatted
+---
+"#f(\n  true, // comment\n)"

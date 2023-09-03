@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#let ident=variable\"\n===\n#let ident=variable\n===\nFORMATTED\n===\n#let ident = variable"
+expression: formatted
+---
+"#let ident = variable"

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"[  4  ]\"\n===\n[  4  ]\n===\nFORMATTED\n===\n[ 4 ]"
+expression: formatted
+---
+"[ 4 ]"

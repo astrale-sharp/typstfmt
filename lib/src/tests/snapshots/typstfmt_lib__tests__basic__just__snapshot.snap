@@ -1,6 +1,0 @@
----
-source: lib/src/tests/basic.rs
-description: "INPUT\n===\n\"#let page_turned = page not in header_pages\"\n===\n#let page_turned = page not in header_pages\n===\nFORMATTED\n===\n#let page_turned = page not in header_pages"
-expression: formatted
----
-"#let page_turned = page not in header_pages"

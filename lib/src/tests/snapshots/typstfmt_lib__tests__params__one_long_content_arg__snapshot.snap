@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/params.rs
+description: "INPUT\n===\n\"#very-long-long-long-long-long-function-name(\\n  [Lorem ipsum dolor sit amet, consectetur\\n  adipiscing elit, sed do eiusmod tempor]\\n)\"\n===\n#very-long-long-long-long-long-function-name(\n  [Lorem ipsum dolor sit amet, consectetur\n  adipiscing elit, sed do eiusmod tempor]\n)\n===\nFORMATTED\n===\n#very-long-long-long-long-long-function-name(\n  [Lorem ipsum dolor sit amet, consectetur adipiscing\n    elit, sed do eiusmod tempor],\n)"
+expression: formatted
+---
+"#very-long-long-long-long-long-function-name(\n  [Lorem ipsum dolor sit amet, consectetur adipiscing\n    elit, sed do eiusmod tempor],\n)"

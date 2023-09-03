@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/conditionals.rs
+description: "INPUT\n===\n\"#if true{}else {}\"\n===\n#if true{}else {}\n===\nFORMATTED\n===\n#if true {} else {}"
+expression: formatted
+---
+"#if true {} else {}"

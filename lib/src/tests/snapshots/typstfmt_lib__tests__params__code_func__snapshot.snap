@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/params.rs
+description: "INPUT\n===\n\"#{f(1,2,3)}\"\n===\n#{f(1,2,3)}\n===\nFORMATTED\n===\n#{ f(1, 2, 3) }"
+expression: formatted
+---
+"#{ f(1, 2, 3) }"

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/conditionals.rs
+description: "INPUT\n===\n\"#let _slides-cover(mode, body) = {\\n  if mode == \\\"invisible\\\" {\\n    hide(body)\\n  } else if mode == \\\"transparent\\\" {\\n    text(gray.lighten(50%), body)\\n  } else {\\n    panic(\\\"Illegal cover mode: \\\" + mode)\\n  }\\n}\"\n===\n#let _slides-cover(mode, body) = {\n  if mode == \"invisible\" {\n    hide(body)\n  } else if mode == \"transparent\" {\n    text(gray.lighten(50%), body)\n  } else {\n    panic(\"Illegal cover mode: \" + mode)\n  }\n}\n===\nFORMATTED\n===\n#let _slides-cover(mode, body) = {\n  if mode == \"invisible\" {\n    hide(body)\n  } else if mode == \"transparent\" {\n    text(gray.lighten(50%), body)\n  } else {\n    panic(\"Illegal cover mode: \" + mode)\n  }\n}"
+expression: formatted
+---
+"#let _slides-cover(mode, body) = {\n  if mode == \"invisible\" {\n    hide(body)\n  } else if mode == \"transparent\" {\n    text(gray.lighten(50%), body)\n  } else {\n    panic(\"Illegal cover mode: \" + mode)\n  }\n}"

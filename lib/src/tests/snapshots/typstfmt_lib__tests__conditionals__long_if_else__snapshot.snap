@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/conditionals.rs
+description: "INPUT\n===\n\"#if long_condition {\\n    some_code()\\nsome_var\\n    some-stuff(a,b)\\n}    else {}\"\n===\n#if long_condition {\n    some_code()\nsome_var\n    some-stuff(a,b)\n}    else {}\n===\nFORMATTED\n===\n#if long_condition {\n  some_code()\n  some_var\n  some-stuff(a, b)\n} else {}"
+expression: formatted
+---
+"#if long_condition {\n  some_code()\n  some_var\n  some-stuff(a, b)\n} else {}"

@@ -10,6 +10,15 @@ make_test!(block_comment_nested, BLOCK_COMMENT_NESTED);
 make_test!(code_comment, CODE_COMMENT);
 make_test!(end_comments, END_COMMENTS);
 make_test!(start_with_comment, START_WITH_COMMENT);
+make_test!(
+    args_comment_end,
+    "#func(
+  ..v_or_hline,
+  start: start,
+  end: end,
+  parent: v_or_hline  // the one that generated this
+)"
+);
 
 const PARAMS_COMMENT: &str = r#"#let hlinex(
   stroke-expand: true,

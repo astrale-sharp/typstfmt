@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/params.rs
+description: "INPUT\n===\n\"#let is-tablex-dict(x) = (\\n  type(x) == \\\"dictionary\\\"\\n      and \\\"tablex-dict-type\\\" in x\\n)\\n\"\n===\n#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\"\n      and \"tablex-dict-type\" in x\n)\n\n===\nFORMATTED\n===\n#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\" and \"tablex-dict-type\" in x\n)\n"
+expression: formatted
+---
+"#let is-tablex-dict(x) = (\n  type(x) == \"dictionary\" and \"tablex-dict-type\" in x\n)\n"

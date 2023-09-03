@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"We have next things:\\n- thing 1;\\n- thing 2;\\n- thing 3.\"\n===\nWe have next things:\n- thing 1;\n- thing 2;\n- thing 3.\n===\nFORMATTED\n===\nWe have next things:\n- thing 1;\n- thing 2;\n- thing 3."
+expression: formatted
+---
+"We have next things:\n- thing 1;\n- thing 2;\n- thing 3."

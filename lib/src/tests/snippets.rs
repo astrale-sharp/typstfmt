@@ -1,92 +1,34 @@
 use super::*;
 
-make_test!(code_func, "#{f(1,2,3)}");
+make_test!(let_stmt_unchanged, "#let ident = variable");
+make_test!(let_stmt_period_terminated, "#let ident = variable;");
+make_test!(let_stmt_no_spacing, "#let ident=variable");
+make_test!(ten_adds, &format!("#{{{}1}}", "1+".repeat(10)));
+make_test!(thirty_adds, &format!("#{{{}1}}", "1+".repeat(30)));
+make_test!(not_in, "#let page_turned = page not in header_pages");
 make_test!(
-    code_func_break,
-    "#{f(1,2,3)}",
-    Config {
-        max_line_length: 2,
-        ..Default::default()
-    },
-);
-make_test!(
-    code_func_break_nested,
-    "#{{f(1,2,3)}}",
-    Config {
-        max_line_length: 2,
-        ..Default::default()
-    },
-);
-make_test!(while_loop, WHILE_LOOP);
-make_test!(for_loop, FOR_LOOP);
-make_test!(official, OFFICIAL);
-make_test!(let_closure_params_named, TABLEX,);
-make_test!(raw_text, RAW);
-make_test!(tabs, TABS);
-make_test!(on_off, ON_OFF);
-make_test!(list, LIST);
-make_test!(enumeration, &LIST.replace('-', "+"));
-make_test!(list2, &TERMS.replace('/', "-"));
-make_test!(enums, &TERMS.replace('/', "+"));
-make_test!(terms, TERMS);
-make_test!(line_wrapping, "Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.");
-make_test!(
-    elseif,
-    r#"#let _slides-cover(mode, body) = {
-  if mode == "invisible" {
-    hide(body)
-  } else if mode == "transparent" {
-    text(gray.lighten(50%), body)
-  } else {
-    panic("Illegal cover mode: " + mode)
-  }
-}"#
-);
-make_test!(slash_space, r"#[\ ]");
-
-// TODO: wait for parser fix
-//    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$
-// vs $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt.)$
-
-make_test!(
-    ifblock,
-    "#if k > 0 [
-  #k / #n
-]"
-);
-
-make_test!(
-    text_then_list,
-    "We have next things:
-- thing 1;
-- thing 2;
-- thing 3."
-);
-
-make_test!(
-    one_long_content_arg,
-    "#very-long-long-long-long-long-function-name(
-  [Lorem ipsum dolor sit amet, consectetur
-  adipiscing elit, sed do eiusmod tempor]
-)"
-);
-
-make_test!(
-    param,
-    "#let func((a,)) = {
-}"
-);
-
-const FOR_LOOP: &str = r#"#for k in range(5) {
-    repr(k) + " " 
-}"#;
-
-const WHILE_LOOP: &str = r#"#let i = 0
+    while_loop,
+    r#"#let i = 0
 #while true {
   i += 1
   if i > 15 { break }
   repr(i) + " "
-}"#;
+}"#
+);
+make_test!(
+    for_loop,
+    r#"#for k in range(5) {
+  repr(k) + " " 
+}"#
+);
+make_test!(official, OFFICIAL);
+make_test!(raw_text, RAW);
+make_test!(tabs, TABS);
+make_test!(on_off, ON_OFF);
+
+// TODO: wait for parser fix
+//    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$
+// vs $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt.)$
 
 const OFFICIAL: &str = r#"Glaciers as the one shown in
 @glaciers will cease to exist if
@@ -99,13 +41,6 @@ we don't take action soon!
     of the earth's climate system.
   ],
 ) <glaciers>"#;
-
-// this is taken from tablex by Pg Biel whom we love.
-const TABLEX: &str = r#"#let is-tablex-dict(x) = (
-  type(x) == "dictionary"
-      and "tablex-dict-type" in x
-)
-"#;
 
 const RAW: &str = r#"```
 fn main() {
@@ -130,25 +65,3 @@ const ON_OFF: &str = r#"// typstfmt::off
 // typstfmt::on
 #{{4}}
 "#;
-
-const LIST: &str = r#"
-- 000
- some text 
- badly broken for no _reason_ which is a @very long line and should be broken up in at least three bits in my opinion.
-// not broken by comments
- - 010
-  - 011
-  - 012
-   inner content
-
-- 003
--     10 not too spaced
-  inner content
-outer content
-"#;
-
-const TERMS: &str = "content before
-/ Ligature: A merged glyph.
-/ Kerning: A spacing adjustment
-  between two adjacent letters.
-content after";

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/lists.rs
+description: "INPUT\n===\n\"content before\\n/ Ligature: A merged glyph.\\n/ Kerning: A spacing adjustment\\n  between two adjacent letters.\\ncontent after\"\n===\ncontent before\n/ Ligature: A merged glyph.\n/ Kerning: A spacing adjustment\n  between two adjacent letters.\ncontent after\n===\nFORMATTED\n===\ncontent before\n/ Ligature: A merged glyph.\n/ Kerning: A spacing adjustment between two adjacent letters.\ncontent after"
+expression: formatted
+---
+"content before\n/ Ligature: A merged glyph.\n/ Kerning: A spacing adjustment between two adjacent letters.\ncontent after"

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/comments.rs
+description: "INPUT\n===\n\"#func(\\n  ..v_or_hline,\\n  start: start,\\n  end: end,\\n  parent: v_or_hline  // the one that generated this\\n)\"\n===\n#func(\n  ..v_or_hline,\n  start: start,\n  end: end,\n  parent: v_or_hline  // the one that generated this\n)\n===\nFORMATTED\n===\n#func(\n  ..v_or_hline,\n  start: start,\n  end: end,\n  parent: v_or_hline, // the one that generated this\n)"
+expression: formatted
+---
+"#func(\n  ..v_or_hline,\n  start: start,\n  end: end,\n  parent: v_or_hline, // the one that generated this\n)"
