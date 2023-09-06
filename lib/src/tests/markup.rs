@@ -28,3 +28,8 @@ make_test!(
 );
 make_test!(bug_quote_space, r#"don't "text" "text"#);
 make_test!(bug_space_around_inline_code, "a#lorem(2)b c d");
+// TODO: before or at 49b62e8 this shouldn't pass the ast test but it does.
+make_test!(
+    dont_break_heading,
+    "= my loong loong loong loong loong loong loong loong loong loong loong loong heading"
+);

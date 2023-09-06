@@ -102,6 +102,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     + 1 // the space we're adding
                     + utils::max_line_length(res.split('\n').last().unwrap_or(""))
                         <= ctx.config.max_line_length
+                        || (parent.parent_kind() == Some(Heading)) // we can't break in headings, it would break the ast
                     {
                         ctx.push_raw_in(word, &mut res);
                         ctx.push_in(" ", &mut res);
