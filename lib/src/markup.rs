@@ -14,8 +14,9 @@ pub(crate) fn format_content_blocks(
     let first_space = markup.as_untyped().children().next();
     let spaced = first_space.is_some_and(|x| x.kind() == Space);
 
-    for (s, child) in children.iter().zip(parent.children()) {
-        match child.kind() {
+    for (s, node) in children.iter().zip(parent.children()) {
+        match node.kind() {
+            _ if ctx.off => res.push_str(node.text()),
             RightBracket if spaced => {
                 let space_type = if first_space.unwrap().text().contains('\n') {
                     '\n'
@@ -47,6 +48,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
 
     for (idx, (s, node)) in children.iter().zip(parent.children()).enumerate() {
         match node.kind() {
+            _ if ctx.off => res.push_str(node.text()), // todo, interaction with line below?
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
             Space => {
                 if idx == 0
@@ -102,7 +104,8 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     + 1 // the space we're adding
                     + utils::max_line_length(res.split('\n').last().unwrap_or(""))
                         <= ctx.config.max_line_length
-                        || (parent.parent_kind() == Some(Heading)) // we can't break in headings, it would break the ast
+                        || (parent.parent_kind() == Some(Heading))
+                    // we can't break in headings, it would break the ast
                     {
                         ctx.push_raw_in(word, &mut res);
                         ctx.push_in(" ", &mut res);

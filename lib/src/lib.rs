@@ -110,6 +110,7 @@ fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -
     ctx.push_raw_in(parent.text(), &mut res);
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
+            _ if ctx.off => res.push_str(node.text()),
             Space => {}
             If => {
                 ctx.push_raw_in(s, &mut res);
@@ -137,6 +138,7 @@ pub(crate) fn format_named_args(parent: &LinkedNode, children: &[String], ctx: &
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
+            _ if ctx.off => res.push_str(node.text()),
             Show | Set => {
                 ctx.push_raw_in(s, &mut res);
                 ctx.push_in(" ", &mut res);
@@ -161,6 +163,7 @@ pub(crate) fn format_let_binding(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
+            _ if ctx.off => res.push_str(node.text()),
             Eq => {
                 ctx.push_in(" ", &mut res);
                 ctx.push_in(s, &mut res);
@@ -191,6 +194,7 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
+            _ if ctx.off => res.push_str(node.text()),
             EnumMarker | ListMarker | TermMarker => {
                 ctx.push_raw_in(node.text(), &mut res);
             }
