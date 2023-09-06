@@ -105,6 +105,16 @@ fn no_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String 
     res
 }
 
+fn deep_no_format(parent: &LinkedNode) -> String {
+    let mut res: Vec<String> = vec![];
+    for child in parent.children() {
+        let child_fmt = deep_no_format(&child);
+        res.push(child_fmt);
+    }
+    let res = no_format(parent, &res, &mut Ctx::default());
+    res
+}
+
 fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
     ctx.push_raw_in(parent.text(), &mut res);

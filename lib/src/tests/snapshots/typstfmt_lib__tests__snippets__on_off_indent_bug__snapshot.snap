@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"#let template(doc) = {\\n  //typstfmt::off\\n  let         a      =    \\\"\\\"\\n  //typstfmt::on\\n  doc\\n}\"\n===\n#let template(doc) = {\n  //typstfmt::off\n  let         a      =    \"\"\n  //typstfmt::on\n  doc\n}\n===\nFORMATTED\n===\n#let template(doc) = {\n  //typstfmt::off\n  let         a      =    \"\"\n  //typstfmt::on\n  doc\n}"
+expression: formatted
+---
+"#let template(doc) = {\n  //typstfmt::off\n  let         a      =    \"\"\n  //typstfmt::on\n  doc\n}"

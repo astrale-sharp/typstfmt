@@ -21,6 +21,16 @@ make_test!(
   repr(k) + " " 
 }"#
 );
+
+make_test!(
+    on_off_indent_bug,
+    r#"#let template(doc) = {
+  //typstfmt::off
+  let         a      =    ""
+  //typstfmt::on
+  doc
+}"#
+);
 make_test!(official, OFFICIAL);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);

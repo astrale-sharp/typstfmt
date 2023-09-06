@@ -87,12 +87,17 @@ pub(crate) fn format_code_blocks_breaking(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             LeftBrace => {
                 res.push_str(&format!("{s}\n{}", ctx.get_indent()));
                 ctx.just_spaced = true;
             }
             LineComment | BlockComment => {
+                let buf = format_comment_handling_disable(&node, &[], ctx);
+                if ctx.off {
+                    ctx.push_raw_in(&buf, &mut res);
+                    continue;
+                }
                 if utils::prev_is_ignoring(&node, LineComment, &[Space])
                     || utils::prev_is_ignoring(&node, BlockComment, &[Space])
                 {
