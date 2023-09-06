@@ -111,8 +111,7 @@ fn deep_no_format(parent: &LinkedNode) -> String {
         let child_fmt = deep_no_format(&child);
         res.push(child_fmt);
     }
-    let res = no_format(parent, &res, &mut Ctx::default());
-    res
+    no_format(parent, &res, &mut Ctx::default())
 }
 
 fn conditional_format(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {

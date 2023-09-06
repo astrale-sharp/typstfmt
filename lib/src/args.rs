@@ -79,8 +79,7 @@ pub(crate) fn format_args_tight(
                 let is_trailing =
                     utils::next_is_ignoring(&node, RightParen, &[Space, BlockComment]);
 
-                missing_trailing =
-                    (is_last_comma && !is_trailing) && !(is_last_comma && is_trailing);
+                missing_trailing = is_last_comma && !is_trailing;
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     // not putting the comma in would result in a parenthesized expression, not an array
                     // "(a,) != (a)"
@@ -171,32 +170,29 @@ pub(crate) fn format_args_breaking(
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
                 let is_trailing =
                     utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
-                missing_trailing_comma =
-                    (is_last_comma && !is_trailing) && !(is_last_comma && is_trailing);
+                missing_trailing_comma = is_last_comma && !is_trailing;
 
                 if is_last_comma && is_trailing {
                     // no indent
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in("\n", &mut res);
-                } else {
-                    if !ctx.config.experimental_args_breaking_consecutive
-                        || consecutive_items >= 3
-                        || s.contains('\n')
-                        || res
-                            .lines()
-                            .last()
-                            .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= 10)
-                    {
-                        ctx.push_raw_in(s, &mut res);
-                        ctx.push_raw_in("\n", &mut res);
-                        ctx.push_raw_in(&ctx.get_indent(), &mut res);
+                } else if !ctx.config.experimental_args_breaking_consecutive
+                    || consecutive_items >= 3
+                    || s.contains('\n')
+                    || res
+                        .lines()
+                        .last()
+                        .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= 10)
+                {
+                    ctx.push_raw_in(s, &mut res);
+                    ctx.push_raw_in("\n", &mut res);
+                    ctx.push_raw_in(&ctx.get_indent(), &mut res);
 
-                        consecutive_items = 0;
-                    } else {
-                        consecutive_items += 1;
-                        ctx.push_raw_in(s, &mut res);
-                        ctx.push_raw_in(" ", &mut res);
-                    }
+                    consecutive_items = 0;
+                } else {
+                    consecutive_items += 1;
+                    ctx.push_raw_in(s, &mut res);
+                    ctx.push_raw_in(" ", &mut res);
                 }
             }
             _ => {
