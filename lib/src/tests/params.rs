@@ -86,3 +86,5 @@ make_test!(
   adipiscing elit, sed do eiusmod tempor]
 )"
 );
+make_test!(x,"#f()[ 
+    love live Lorem ipsum dolor sit amet, consectetur ]");

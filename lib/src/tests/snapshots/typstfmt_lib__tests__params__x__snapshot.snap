@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/params.rs
+description: "INPUT\n===\n\"#f()[ \\n    love live Lorem ipsum dolor sit amet, consectetur ]\"\n===\n#f()[ \n    love live Lorem ipsum dolor sit amet, consectetur ]\n===\nFORMATTED\n===\n#f()[\n  love live Lorem ipsum dolor sit amet, consectetur\n][\n  love live Lorem ipsum dolor sit amet, consectetur\n]"
+expression: formatted
+---
+"#f()[\n  love live Lorem ipsum dolor sit amet, consectetur\n][\n  love live Lorem ipsum dolor sit amet, consectetur\n]"

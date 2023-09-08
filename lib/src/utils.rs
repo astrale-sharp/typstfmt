@@ -2,11 +2,13 @@ use super::*;
 use unicode_segmentation::UnicodeSegmentation;
 
 /// like next sibling but doesn't skip trivia.
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
     node.parent()?.children().nth(node.index() + 1)
 }
 
 /// like next sibling but doesn't skip trivia.
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn prev_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
     if node.index() == 0 {
         return None;
@@ -15,7 +17,7 @@ pub(crate) fn prev_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<Linked
 }
 
 /// find any child recursively that fits predicate
-#[instrument(ret, skip_all)]
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn find_child<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
@@ -54,7 +56,14 @@ pub(crate) fn find_child<'a>(
 //     }
 // }
 
-#[instrument(ret, skip_all)]
+#[instrument(skip_all, level = "debug")]
+pub(crate) fn eat_space(res: &mut String) {
+    while res.ends_with('\n') || res.ends_with(' ') {
+        res.replace_range(res.len() - 1..res.len(), "");
+    }
+}
+
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn find_next<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
@@ -69,7 +78,7 @@ pub(crate) fn find_next<'a>(
     None
 }
 
-#[instrument(ret, skip_all)]
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn get_next_ignoring<'a>(
     node: &'a LinkedNode<'a>,
     ignoring: &[SyntaxKind],
@@ -86,6 +95,7 @@ pub(crate) fn get_next_ignoring<'a>(
     None
 }
 
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn get_prev_ignoring<'a>(
     node: &'a LinkedNode<'a>,
     ignoring: &[SyntaxKind],
@@ -102,23 +112,44 @@ pub(crate) fn get_prev_ignoring<'a>(
     None
 }
 
-#[instrument(ret, skip_all)]
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
     let n = get_next_ignoring(node, ignoring);
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
     n.is_some_and(|n| is == n.kind())
 }
 
-#[instrument(ret, skip_all)]
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
     let n = get_prev_ignoring(node, ignoring);
     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
     n.is_some_and(|n| is == n.kind())
 }
 
+#[instrument(ret, skip_all, level = "debug")]
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()
         .map(|l| l.trim().graphemes(true).count())
         .max()
         .unwrap_or(0)
+}
+
+#[instrument(ret, skip_all, level = "debug")]
+pub(crate) fn last_line_length(s: &str) -> usize {
+    s.split('\n')
+        .last()
+        .unwrap_or("")
+        .trim_start()
+        .graphemes(true)
+        .count()
+}
+
+#[instrument(ret, skip_all, level = "debug")]
+pub(crate) fn first_line_length(s: &str) -> usize {
+    s.split('\n')
+        .next()
+        .unwrap_or("")
+        .trim_start()
+        .graphemes(true)
+        .count()
 }

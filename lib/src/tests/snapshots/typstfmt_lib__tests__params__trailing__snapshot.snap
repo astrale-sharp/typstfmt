@@ -1,6 +1,6 @@
 ---
 source: lib/src/tests/params.rs
-description: "INPUT\n===\n\"#f()[\\n    something\\n    ]\"\n===\n#f()[\n    something\n    ]\n===\nFORMATTED\n===\n#f()[\n  something\n]"
+description: "INPUT\n===\n\"#f()[\\n    something\\n    ]\"\n===\n#f()[\n    something\n    ]\n===\nFORMATTED\n===\n#f()[\n  something\n][\n  something\n]"
 expression: formatted
 ---
-"#f()[\n  something\n]"
+"#f()[\n  something\n][\n  something\n]"

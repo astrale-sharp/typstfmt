@@ -28,9 +28,8 @@ pub(crate) fn format_content_blocks(
                     ' '
                 };
                 if !res.ends_with(space_type) {
-                    while res.ends_with('\n') || res.ends_with(' ') {
-                        res.replace_range(res.len() - 1..res.len(), "");
-                    }
+                    // todo
+                    utils::eat_space(&mut res);
                     res.push(space_type);
                 }
                 ctx.push_raw_in(s, &mut res)
@@ -52,7 +51,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
 
     for (idx, (s, node)) in children.iter().zip(parent.children()).enumerate() {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()), // todo, interaction with line below?
+            _ if ctx.off => res.push_str(&deep_no_format(parent)), // todo, interaction with line below?
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
             LineComment | BlockComment => {
                 let buf = format_comment_handling_disable(&node, &[], ctx);
