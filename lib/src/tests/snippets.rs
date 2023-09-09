@@ -31,6 +31,17 @@ make_test!(
   doc
 }"#
 );
+
+make_test!(
+    on_off_indent_func,
+    "#figure({
+  some-code({
+    // typstfmt::off
+    // typstfmt::on
+    })
+  })"
+);
+
 make_test!(official, OFFICIAL);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);

@@ -72,7 +72,7 @@ pub(crate) fn format_args_tight(
             utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
 
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             Space => {}
             Comma => {
                 let is_last_comma = utils::find_next(&node, &|x| x.kind() == Comma).is_none();
@@ -117,7 +117,7 @@ pub(crate) fn format_args_breaking(
         let is_last =
             utils::next_is_ignoring(&node, RightParen, &[Space, LineComment, BlockComment]);
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             LeftParen => {
                 ctx.push_raw_in(s, &mut res);
                 ctx.push_raw_in("\n", &mut res);

@@ -50,7 +50,7 @@ pub(crate) fn format_code_blocks_tight(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             LeftBrace => {
                 let code = node.next_sibling().unwrap();
                 assert!(code.kind() == Code);

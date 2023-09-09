@@ -172,7 +172,7 @@ pub(crate) fn format_let_binding(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             Eq => {
                 ctx.push_in(" ", &mut res);
                 ctx.push_in(s, &mut res);
@@ -203,7 +203,7 @@ fn format_list_enum(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> 
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             EnumMarker | ListMarker | TermMarker => {
                 ctx.push_raw_in(node.text(), &mut res);
             }

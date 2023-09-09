@@ -1,0 +1,7 @@
+---
+source: lib/src/tests/snippets.rs
+assertion_line: 35
+description: "INPUT\n===\n\"#figure({\\n  some-code({\\n    // typstfmt::off\\n    // typstfmt::on\\n    })\\n  })\"\n===\n#figure({\n  some-code({\n    // typstfmt::off\n    // typstfmt::on\n    })\n  })\n===\nFORMATTED\n===\n#figure({\nsome-code({\n  // typstfmt::off\n    // typstfmt::on\n    })\n  })"
+expression: formatted
+---
+"#figure({\nsome-code({\n  // typstfmt::off\n    // typstfmt::on\n    })\n  })"

@@ -34,7 +34,7 @@ pub(crate) fn format_bin_left_assoc_breaking(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             x if BinOp::from_kind(x).is_some() => {
                 ctx.push_in("\n", &mut res);
                 ctx.push_raw_indent(s, &mut res);
@@ -61,8 +61,7 @@ pub(crate) fn format_bin_left_assoc_tight(
     let mut res = String::new();
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()),
-
+            _ if ctx.off => res.push_str(&deep_no_format(&node)),
             x if BinOp::from_kind(x).is_some() => {
                 ctx.push_in(" ", &mut res);
                 ctx.push_raw_in(s, &mut res);
