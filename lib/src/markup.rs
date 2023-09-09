@@ -17,6 +17,10 @@ pub(crate) fn format_content_blocks(
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
             _ if ctx.off => res.push_str(node.text()),
+            LineComment | BlockComment => {
+                let buf = format_comment_handling_disable(&node, &[], ctx);
+                ctx.push_raw_in(&buf, &mut res);
+            }
             RightBracket if spaced => {
                 let space_type = if first_space.unwrap().text().contains('\n') {
                     '\n'
@@ -48,8 +52,23 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
 
     for (idx, (s, node)) in children.iter().zip(parent.children()).enumerate() {
         match node.kind() {
-            _ if ctx.off => res.push_str(node.text()), // todo, interaction with line below?
+            _ if ctx.off => res.push_str(&deep_no_format(&node)), // todo, interaction with line below?
             _ if skip_until.is_some_and(|skip| idx <= skip) => {}
+            LineComment | BlockComment => {
+                let buf = format_comment_handling_disable(&node, &[], ctx);
+                if ctx.off
+                    && [Space, Parbreak]
+                        .map(Some)
+                        .contains(&utils::get_prev_ignoring(&node, &[]).map(|x| x.kind()))
+                {
+                    let s = utils::get_prev_ignoring(&node, &[])
+                        .map(|x| x.text().to_string())
+                        .unwrap_or_default();
+                    let s = s.split('\n').last().unwrap_or_default();
+                    ctx.push_raw_in(s, &mut res);
+                }
+                ctx.push_raw_in(&buf, &mut res);
+            }
             Space => {
                 if idx == 0
                     || idx == children.len()
