@@ -33,3 +33,10 @@ make_test!(
     dont_break_heading,
     "= my loong loong loong loong loong loong loong loong loong loong loong loong heading"
 );
+make_test!(backticks, "`Makefile`.");
+make_test!(math, "$$.");
+make_test!(escape, "C\\#");
+make_test!(
+    dont_break_smartquote,
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420"
+);

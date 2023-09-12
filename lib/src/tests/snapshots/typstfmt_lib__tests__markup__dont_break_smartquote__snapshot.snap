@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420\"\n===\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420\n===\nFORMATTED\n===\naaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420"
+expression: formatted
+---
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420"

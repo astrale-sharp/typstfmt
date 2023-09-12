@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"C\\\\#\"\n===\nC\\#\n===\nFORMATTED\n===\nC\\#"
+expression: formatted
+---
+"C\\#"

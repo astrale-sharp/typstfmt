@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/markup.rs
+description: "INPUT\n===\n\"`Makefile`.\"\n===\n`Makefile`.\n===\nFORMATTED\n===\n`Makefile`."
+expression: formatted
+---
+"`Makefile`."
