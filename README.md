@@ -124,4 +124,6 @@ On the fmttest branch, you can see the skeleton of a program that will automate 
 
 # Thanks
 
+@arnaudgolfouse, for the discussion, designs and the precious friendship
+@laurmaedje, @reknih and the typst community for the good vibes, the interesting talks, the support and ofc, typst.
 @Andrew15-5, for the many suggestions, issues and feedback
