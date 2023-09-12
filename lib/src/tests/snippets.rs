@@ -35,6 +35,15 @@ make_test!(official, OFFICIAL);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
+test_eq!(
+    line_wrap_off,
+    "a very very very very very very very very very very very very very long line",
+    Config {
+        line_wrap: false,
+        max_line_length: 50,
+        ..Default::default()
+    }
+);
 
 // TODO: wait for parser fix
 //    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$

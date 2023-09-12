@@ -69,6 +69,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
             Space => {
                 ctx.push_raw_in(s, &mut res);
             }
+            Text if !ctx.config.line_wrap => ctx.push_raw_in(s, &mut res),
             Text => {
                 // We eat all the following nodes if they're in `[Space, Text, Emph, Strong, Label, Ref]`
                 // then we format ourselves breaking or spacing.
@@ -114,13 +115,12 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                 }
                 let add = add
                     .split_ascii_whitespace()
-                    .into_iter()
                     .filter(|&x| !x.is_empty())
                     .collect_vec();
                 for (j, word) in add.iter().enumerate() {
                     ctx.push_raw_in(word, &mut res);
                     if let Some(next_word) = add.get(j + 1) {
-                        if utils::first_line_length(&next_word)
+                        if utils::first_line_length(next_word)
                         + 1 // the space we're adding
                         + utils::last_line_length(&res)
                             <= ctx.config.max_line_length
