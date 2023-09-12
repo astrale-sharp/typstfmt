@@ -1,6 +1,6 @@
 ---
 source: lib/src/tests/markup.rs
-description: "INPUT\n===\n\"Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.\"\n===\nLorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.\n===\nFORMATTED\n===\nLorem _ipsum_ dolor sit amet, _consectetur_\nadipiscing elit, sed do eiusmod tempor incididunt\nut labore."
+description: "INPUT\n===\n\"Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.\"\n===\nLorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod tempor incididunt ut labore.\n===\nFORMATTED\n===\nLorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod\ntempor incididunt ut labore."
 expression: formatted
 ---
-"Lorem _ipsum_ dolor sit amet, _consectetur_\nadipiscing elit, sed do eiusmod tempor incididunt\nut labore."
+"Lorem _ipsum_ dolor sit amet, _consectetur_ adipiscing elit, sed do eiusmod\ntempor incididunt ut labore."

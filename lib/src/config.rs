@@ -13,7 +13,7 @@ impl Default for Config {
         Self {
             // this being strictly > to 1 is assumed.
             indent_space: 2,
-            max_line_length: 50,
+            max_line_length: 80,
             experimental_args_breaking_consecutive: false,
         }
     }
