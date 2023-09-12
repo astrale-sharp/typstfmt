@@ -1,5 +1,5 @@
 use super::*;
-make_test!(empty, "#{}");
+test_eq!(empty, "#{}");
 make_test!(empty_two, "#{ }");
 make_test!(empty_three, "#{  }");
 make_test!(empty_four, "#{   }");

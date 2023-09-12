@@ -79,6 +79,25 @@ macro_rules! make_test {
     };
 }
 
+/// Tests formatting the snippets doesn't change it.
+macro_rules! test_eq {
+    ($test_name:ident, $input:expr $(,)?) => {
+        test_eq!($test_name, $input, Config::default());
+    };
+    ($test_name:ident, $input:expr, $config:expr $(,)?) => {
+        mod $test_name {
+            use super::*;
+
+            #[test]
+            fn test_eq() {
+                init();
+                let format_once = format($input, $config);
+                similar_asserts::assert_eq!($input, format_once);
+            }
+        }
+    };
+}
+
 // allowing modifying trailing comma's, text in markup, space everywhere
 // todo, check adding all text from one tree and another equal the same text.
 fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {

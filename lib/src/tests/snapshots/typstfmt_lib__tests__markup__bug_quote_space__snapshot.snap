@@ -1,6 +1,0 @@
----
-source: lib/src/tests/markup.rs
-description: "INPUT\n===\n\"don't \\\"text\\\" \\\"text\"\n===\ndon't \"text\" \"text\n===\nFORMATTED\n===\ndon't \"text\" \"text"
-expression: formatted
----
-"don't \"text\" \"text"

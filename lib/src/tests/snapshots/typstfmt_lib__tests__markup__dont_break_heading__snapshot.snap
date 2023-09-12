@@ -1,6 +1,0 @@
----
-source: lib/src/tests/markup.rs
-description: "INPUT\n===\n\"= my loong loong loong loong loong loong loong loong loong loong loong loong heading\"\n===\n= my loong loong loong loong loong loong loong loong loong loong loong loong heading\n===\nFORMATTED\n===\n= my loong loong loong loong loong loong loong loong loong loong loong loong heading"
-expression: formatted
----
-"= my loong loong loong loong loong loong loong loong loong loong loong loong heading"

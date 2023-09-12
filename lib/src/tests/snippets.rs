@@ -1,11 +1,11 @@
 use super::*;
 
-make_test!(let_stmt_unchanged, "#let ident = variable");
-make_test!(let_stmt_period_terminated, "#let ident = variable;");
+test_eq!(let_stmt, "#let ident = variable");
+test_eq!(let_stmt_period_terminated, "#let ident = variable;");
 make_test!(let_stmt_no_spacing, "#let ident=variable");
 make_test!(ten_adds, &format!("#{{{}1}}", "1+".repeat(10)));
 make_test!(thirty_adds, &format!("#{{{}1}}", "1+".repeat(30)));
-make_test!(not_in, "#let page_turned = page not in header_pages");
+test_eq!(not_in, "#let page_turned = page not in header_pages");
 make_test!(
     while_loop,
     r#"#let i = 0
