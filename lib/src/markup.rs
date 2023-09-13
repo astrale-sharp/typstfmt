@@ -67,6 +67,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                 ctx.push_raw_in(&buf, &mut res);
             }
             Space => {
+                // careful, s has already been formatted.
                 ctx.push_raw_in(s, &mut res);
             }
             Text if !ctx.config.line_wrap => ctx.push_raw_in(s, &mut res),
@@ -96,9 +97,11 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                     SmartQuote,
                                     Hashtag,
                                     Conditional,
+                                    Equation,
                                 ]
                                 .map(Some)
                                 .contains(&next.next_sibling_kind())
+                            // || next.next_sibling_kind().is_none()
                             {
                                 break;
                             }

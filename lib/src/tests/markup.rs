@@ -40,3 +40,4 @@ test_eq!(
     dont_break_smartquote,
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420"
 );
+test_eq!(equation_spaced, "aaa $ a b c $ bbb");
