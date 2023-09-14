@@ -1,5 +1,4 @@
 use crate::utils::{get_next_ignoring, next_is_ignoring};
-
 use super::*;
 
 #[instrument(skip_all)]

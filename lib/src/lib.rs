@@ -18,7 +18,7 @@ use context::Ctx;
 
 mod utils;
 
-mod args;
+mod params;
 mod binary;
 mod code_blocks;
 mod markup;
@@ -60,7 +60,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
         Markup => markup::format_markup(node, &res, ctx),
         ContentBlock => markup::format_content_blocks(node, &res, ctx),
         Args | Params | Dict | Array | Destructuring | Parenthesized => {
-            args::format_args(node, &res, ctx)
+            params::format_args(node, &res, ctx)
         }
         LetBinding => format_let_binding(node, &res, ctx),
         Conditional => conditional_format(node, &res, ctx),
