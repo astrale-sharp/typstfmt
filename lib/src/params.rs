@@ -1,5 +1,7 @@
-use crate::utils::{get_next_ignoring, next_is_ignoring};
+use typst_syntax::ast::AstNode;
+
 use super::*;
+use crate::utils::{get_next_ignoring, next_is_ignoring};
 
 #[instrument(skip_all)]
 /// format args using [format_args_tight] or [format_args_breaking] depending on the context.
@@ -64,7 +66,9 @@ pub(crate) fn format_args_tight(
     ctx: &mut Ctx,
 ) -> String {
     let mut res = String::new();
-    let mut missing_trailing = parent.kind() == Destructuring;
+    let is_destruct_and_one_arg = typst_syntax::ast::Destructuring::from_untyped(parent)
+        .is_some_and(|x| x.bindings().count() == 1);
+    let mut missing_trailing = is_destruct_and_one_arg;
 
     for (s, node) in children.iter().zip(parent.children()) {
         let is_last =
@@ -82,7 +86,7 @@ pub(crate) fn format_args_tight(
                 if utils::next_is_ignoring(&node, RightParen, &[Space]) {
                     // not putting the comma in would result in a parenthesized expression, not an array
                     // "(a,) != (a)"
-                    if parent.kind() == Array || parent.kind() == Destructuring {
+                    if parent.kind() == Array || is_destruct_and_one_arg {
                         ctx.push_raw_in(",", &mut res);
                     }
                 } else {
@@ -92,7 +96,7 @@ pub(crate) fn format_args_tight(
             }
             _ => {
                 ctx.push_raw_in(s, &mut res);
-                if is_last && missing_trailing && parent.kind() == Destructuring {
+                if is_last && missing_trailing && is_destruct_and_one_arg {
                     ctx.push_raw_in(",", &mut res);
                 }
             }
