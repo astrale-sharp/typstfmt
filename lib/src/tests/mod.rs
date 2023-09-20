@@ -62,6 +62,7 @@ macro_rules! make_test {
             #[test]
             fn ast() {
                 init();
+                println!("AST: {:?}",parse($input));
                 let input = $input;
                 let formatted = format(input, $config);
                 assert!(tests::parses_the_same(&input, &formatted));
@@ -70,6 +71,7 @@ macro_rules! make_test {
             #[test]
             fn double_format()  {
                 init();
+                println!("AST: {:?}",parse($input));
                 let input = $input;
                 let format_once = format(input, $config);
                 let format_twice = format(&format_once, $config);
@@ -91,6 +93,7 @@ macro_rules! test_eq {
             #[test]
             fn test_eq() {
                 init();
+                println!("AST: {:?}", parse($input));
                 let format_once = format($input, $config);
                 similar_asserts::assert_eq!($input, format_once);
             }

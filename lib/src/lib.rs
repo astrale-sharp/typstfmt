@@ -18,10 +18,10 @@ use context::Ctx;
 
 mod utils;
 
-mod params;
 mod binary;
 mod code_blocks;
 mod markup;
+mod params;
 
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {

@@ -98,27 +98,29 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                     Hashtag,
                                     Conditional,
                                     Equation,
+                                    Emph,
                                 ]
                                 .map(Some)
                                 .contains(&next.next_sibling_kind())
-                            // || next.next_sibling_kind().is_none()
                             {
                                 break;
                             }
                         }
-                        None => break,
+                        None => {
+                            break;
+                        }
                     }
 
                     *skip_until.as_mut().unwrap() += 1;
                     this = next.unwrap();
                     match this {
-                        ref x if x.kind() == Space && !x.text().is_empty() => add.push(' '),
+                        ref x if x.kind() == Space => add.push(' '),
                         _ => add.push_str(&children[skip_until.unwrap()]),
                     }
                 }
                 let add = add
-                    .split_ascii_whitespace()
-                    .filter(|&x| !x.is_empty())
+                    .split(' ')
+                    .filter(|&x| !x.is_empty() || (parent.parent_kind() == Some(ContentBlock)))
                     .collect_vec();
                 for (j, word) in add.iter().enumerate() {
                     ctx.push_raw_in(word, &mut res);
@@ -134,6 +136,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                             ctx.push_raw_in("\n", &mut res);
                         }
                     }
+                    // ctx.push_raw_in("SsS", &mut res);
                 }
             }
             _ => {

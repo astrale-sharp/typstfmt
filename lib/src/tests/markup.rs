@@ -41,3 +41,5 @@ test_eq!(
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa69'420"
 );
 test_eq!(equation_spaced, "aaa $ a b c $ bbb");
+test_eq!(last_space_conserved, "#[. ]");
+make_test!(last_space_conserved_as_space, "#[.\n]");

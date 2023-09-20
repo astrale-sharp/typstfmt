@@ -70,7 +70,7 @@ impl Ctx {
     /// adds an indentation for each line the input except the first to match the current level of indentation.
     pub(crate) fn push_raw_indent(&mut self, s: &str, result: &mut String) {
         let mut is_first = true;
-        for s in s.lines() {
+        for s in s.split('\n') {
             if is_first {
                 is_first = false;
                 self.push_raw_in(s, result);

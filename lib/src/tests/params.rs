@@ -68,7 +68,7 @@ make_test!(
     "#let func((a,)) = {
 }"
 );
-test_eq!(destructuring_no_trailing,"#let (a, b) = (1, 2)");
+test_eq!(destructuring_no_trailing, "#let (a, b) = (1, 2)");
 // this is taken from tablex by Pg Biel whom we love.
 make_test!(
     let_closure_params_named,
