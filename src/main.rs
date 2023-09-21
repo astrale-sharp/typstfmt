@@ -13,9 +13,9 @@ const VERSION: &str = env!("TYPSTFMT_VERSION");
 const CONFIG_PATH: &str = "typstfmt-config.toml";
 const HELP: &str = r#"Format Typst code
 
-usage: typstfmt [options] <file>...
+usage: typstfmt [options] [file]...
 
-'-' can be used for stdin.
+If no file is specified, stdin will be used.
 Files will be overwritten unless --output is passed.
 
 Options:
@@ -27,35 +27,39 @@ Options:
         -C, --make-default-config   Create a default config file at typstfmt-config.toml
 "#;
 
-enum Input {
+enum Inputs {
     Stdin,
-    File(OsString),
+    Files(Vec<OsString>),
 }
 
-impl Input {
-    fn read(&self) -> String {
+struct Input {
+    name: String,
+    content: String,
+}
+
+impl Inputs {
+    fn read(&self) -> Box<dyn Iterator<Item = Input> + '_> {
         match self {
-            Input::Stdin => {
-                let mut input_buf = String::default();
+            Inputs::Stdin => {
+                let mut input_buf = String::new();
                 stdin()
                     .read_to_string(&mut input_buf)
                     .expect("Couldn't read stdin.");
-                input_buf
+                Box::new(std::iter::once(Input {
+                    name: "stdin".to_owned(),
+                    content: input_buf,
+                }))
             }
-            Input::File(path) => {
+            Inputs::Files(paths) => Box::new(paths.iter().map(|path| {
                 let mut input_buf = String::new();
                 let mut file = File::options().read(true).open(path).unwrap();
                 file.read_to_string(&mut input_buf)
                     .expect("Couldn't read stdin");
-                input_buf
-            }
-        }
-    }
-
-    fn name(&self) -> String {
-        match self {
-            Input::Stdin => "input".to_owned(),
-            Input::File(p) => p.to_string_lossy().into_owned(),
+                Input {
+                    name: path.to_string_lossy().into_owned(),
+                    content: input_buf,
+                }
+            })),
         }
     }
 }
@@ -68,38 +72,31 @@ enum Output {
 }
 
 impl Output {
-    fn write(&self, input: &Input, input_buf: &str, formatted: &str) -> Result<(), ()> {
+    fn write(&self, input: &Input, formatted: &str) -> Result<(), ()> {
         match self {
-            Output::None => match input {
-                Input::Stdin => {
-                    // default to stdout
-                    stdout()
-                        .write_all(formatted.as_bytes())
-                        .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
-                }
-                Input::File(path) => {
-                    let mut file = File::options()
-                        .create(true)
-                        .write(true)
-                        .truncate(true)
-                        .open(path.to_str().unwrap())
-                        .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
-                    file.write_all(formatted.as_bytes()).unwrap();
-                    println!("file: {path:?} overwritten.");
-                }
-            },
+            Output::None => {
+                // this is not stdout by the check after parsing the arguments that sets the output
+                // to stdout rather than none for stdin.
+                let path = &input.name;
+                let mut file = File::options()
+                    .create(true)
+                    .write(true)
+                    .truncate(true)
+                    .open(path)
+                    .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
+                file.write_all(formatted.as_bytes()).unwrap();
+                println!("file: {path:?} overwritten.");
+            }
             Output::Check => {
-                if input_buf != formatted {
-                    println!("{} needs formatting.", input.name());
+                if input.content != formatted {
+                    println!("{} needs formatting.", input.name);
                     return Err(());
                 } else {
-                    println!("{} is already formatted.", input.name());
+                    println!("{} is already formatted.", input.name);
                 }
             }
             Output::Stdout => {
-                if let Input::File(path) = input {
-                    println!("=== {:?} ===", path);
-                }
+                println!("=== {:?} ===", input.name);
                 stdout()
                     .write_all(formatted.as_bytes())
                     .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
@@ -121,7 +118,7 @@ impl Output {
 
 fn main() -> Result<(), lexopt::Error> {
     let mut parser = lexopt::Parser::from_env();
-    let mut inputs = vec![];
+    let mut inputs = Inputs::Stdin;
     let mut output = Output::None;
     while let Some(arg) = parser.next()? {
         match arg {
@@ -150,11 +147,13 @@ fn main() -> Result<(), lexopt::Error> {
                 return Ok(());
             }
             Value(v) => {
-                inputs.push(if v == "-" {
-                    Input::Stdin
-                } else {
-                    Input::File(v)
-                });
+                inputs = match inputs {
+                    Inputs::Stdin => Inputs::Files(vec![v]),
+                    Inputs::Files(mut files) => {
+                        files.push(v);
+                        Inputs::Files(files)
+                    }
+                };
             }
             Long("output") | Short('o') => {
                 let value = parser.value()?;
@@ -175,6 +174,10 @@ fn main() -> Result<(), lexopt::Error> {
         }
     }
 
+    if matches!(inputs, Inputs::Stdin) && matches!(output, Output::None) {
+        output = Output::Stdout;
+    }
+
     let config = {
         if let Ok(mut f) = File::options().read(true).open(CONFIG_PATH) {
             let mut buf = String::default();
@@ -185,24 +188,22 @@ fn main() -> Result<(), lexopt::Error> {
         }
     };
 
-    if inputs.is_empty() {
-        println!("You specified no files to format.");
-        println!("{HELP}");
-        return Ok(());
-    }
-
     let mut exit_status = 0;
 
-    assert!(
-        !(matches!(output, Output::File(_)) && inputs.len() > 1),
-        "You specified multiple inputs and --output but one output file cannot receive the result of many files.\nAborting."
+    match &inputs {
+        Inputs::Stdin => {}
+        Inputs::Files(paths) => {
+            assert!(
+                !(matches!(output, Output::File(_)) && paths.len() > 1),
+                "You specified multiple inputs and --output but one output file cannot receive the result of many files.\nAborting."
     );
+        }
+    }
 
-    for input in &inputs {
-        let input_buf = input.read();
-        let formatted = format(&input_buf, config);
+    for input in inputs.read() {
+        let formatted = format(&input.content, config);
 
-        match output.write(input, &input_buf, &formatted) {
+        match output.write(&input, &formatted) {
             Ok(()) => {}
             Err(()) => {
                 exit_status = 1;
