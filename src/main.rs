@@ -70,8 +70,14 @@ enum Output {
 impl Output {
     fn write(&self, input: &Input, input_buf: &str, formatted: &str) -> Result<(), ()> {
         match self {
-            Output::None => {
-                if let Input::File(path) = input {
+            Output::None => match input {
+                Input::Stdin => {
+                    // default to stdout
+                    stdout()
+                        .write_all(formatted.as_bytes())
+                        .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+                }
+                Input::File(path) => {
                     let mut file = File::options()
                         .create(true)
                         .write(true)
@@ -81,7 +87,7 @@ impl Output {
                     file.write_all(formatted.as_bytes()).unwrap();
                     println!("file: {path:?} overwritten.");
                 }
-            }
+            },
             Output::Check => {
                 if input_buf != formatted {
                     println!("{} needs formatting.", input.name());
