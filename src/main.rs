@@ -110,7 +110,7 @@ impl Output {
                     .create(true)
                     .write(true)
                     .truncate(true)
-                    .open(output.to_str().unwrap())
+                    .open(output.to_string_lossy().into_owned())
                     .unwrap_or_else(|err| panic!("Couldn't create output file: {output:?}: {err}"));
 
                 file.write_all(formatted.as_bytes())
