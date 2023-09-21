@@ -144,9 +144,8 @@ fn main() -> Result<(), lexopt::Error> {
                     .unwrap_or_else(|e| {
                         panic!("Couldn't create a new config file at {CONFIG_PATH}.\nCaused by {e}")
                     });
-                f.write_all(s.as_bytes()).unwrap_or_else(|err| {
-                    panic!("Failed to write to file {CONFIG_PATH:?}: {err}")
-                });
+                f.write_all(s.as_bytes())
+                    .unwrap_or_else(|err| panic!("Failed to write to file {CONFIG_PATH:?}: {err}"));
                 println!("Created config file at: {CONFIG_PATH}");
                 return Ok(());
             }
@@ -185,9 +184,8 @@ fn main() -> Result<(), lexopt::Error> {
     let config = {
         if let Ok(mut f) = File::options().read(true).open(CONFIG_PATH) {
             let mut buf = String::default();
-            f.read_to_string(&mut buf).unwrap_or_else(|err| {
-                panic!("Failed to read config file {CONFIG_PATH:?}: {err}")
-            });
+            f.read_to_string(&mut buf)
+                .unwrap_or_else(|err| panic!("Failed to read config file {CONFIG_PATH:?}: {err}"));
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
             Config::default()
