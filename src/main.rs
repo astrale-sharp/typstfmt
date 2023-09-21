@@ -27,6 +27,39 @@ Options:
         -C, --make-default-config   Create a default config file at typstfmt-config.toml
 "#;
 
+enum Input {
+    Stdin,
+    File(OsString),
+}
+
+impl Input {
+    fn read(&self) -> String {
+        match self {
+            Input::Stdin => {
+                let mut input_buf = String::default();
+                stdin()
+                    .read_to_string(&mut input_buf)
+                    .expect("Couldn't read stdin.");
+                input_buf
+            }
+            Input::File(path) => {
+                let mut input_buf = String::new();
+                let mut file = File::options().read(true).open(path).unwrap();
+                file.read_to_string(&mut input_buf)
+                    .expect("Couldn't read stdin");
+                input_buf
+            }
+        }
+    }
+
+    fn name(&self) -> String {
+        match self {
+            Input::Stdin => "input".to_owned(),
+            Input::File(p) => p.to_string_lossy().into_owned(),
+        }
+    }
+}
+
 enum Output {
     None,
     Check,
@@ -34,10 +67,55 @@ enum Output {
     File(OsString),
 }
 
+impl Output {
+    fn write(&self, input: &Input, input_buf: &str, formatted: &str) -> Result<(), ()> {
+        match self {
+            Output::None => {
+                if let Input::File(path) = input {
+                    let mut file = File::options()
+                        .create(true)
+                        .write(true)
+                        .truncate(true)
+                        .open(path.to_str().unwrap())
+                        .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
+                    file.write_all(formatted.as_bytes()).unwrap();
+                    println!("file: {path:?} overwritten.");
+                }
+            }
+            Output::Check => {
+                if input_buf != formatted {
+                    println!("{} needs formatting.", input.name());
+                    return Err(());
+                } else {
+                    println!("{} is already formatted.", input.name());
+                }
+            }
+            Output::Stdout => {
+                if let Input::File(path) = input {
+                    println!("=== {:?} ===", path);
+                }
+                stdout()
+                    .write_all(formatted.as_bytes())
+                    .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+            }
+            Output::File(output) => {
+                let mut file = File::options()
+                    .write(true)
+                    .truncate(true)
+                    .open(output.to_str().unwrap())
+                    .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
+
+                file.write_all(formatted.as_bytes())
+                    .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
+            }
+        }
+        Ok(())
+    }
+}
+
 fn main() -> Result<(), lexopt::Error> {
     let mut parser = lexopt::Parser::from_env();
-    let mut paths = vec![];
-    let mut use_stdin = true;
+    let mut inputs = vec![];
     let mut output = Output::None;
     while let Some(arg) = parser.next()? {
         match arg {
@@ -66,8 +144,11 @@ fn main() -> Result<(), lexopt::Error> {
                 return Ok(());
             }
             Value(v) => {
-                paths.push(v);
-                use_stdin = false;
+                inputs.push(if v == "-" {
+                    Input::Stdin
+                } else {
+                    Input::File(v)
+                });
             }
             Long("output") | Short('o') => {
                 let value = parser.value()?;
@@ -98,97 +179,27 @@ fn main() -> Result<(), lexopt::Error> {
         }
     };
 
-    if paths.is_empty() && !use_stdin {
-        println!("You specified no files to format. If you want to use stdin pass --stdin");
+    if inputs.is_empty() {
+        println!("You specified no files to format.");
         println!("{HELP}");
         return Ok(());
     }
 
     let mut exit_status = 0;
 
-    if use_stdin {
-        let mut input_buf = String::default();
-        stdin()
-            .read_to_string(&mut input_buf)
-            .expect("Couldn't read stdin.");
-        let formatted = format(&input_buf, config);
-        match output {
-            Output::None => {}
-            Output::Check =>
-            {
-                #[allow(unused_assignments)]
-                if input_buf != formatted {
-                    println!("input needs formatting.");
-                    exit_status = 1;
-                } else {
-                    println!("input is already formatted.")
-                }
-            }
-            Output::Stdout => {
-                write!(stdout(), "{}", formatted)
-                    .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
-            }
-            Output::File(output) => {
-                let mut file = File::options()
-                    .write(true)
-                    .truncate(true)
-                    .open(output.to_str().unwrap())
-                    .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
-
-                write!(file, "{}", formatted)
-                    .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
-            }
-        }
-        return Ok(());
-    }
-
     assert!(
-        !(matches!(output, Output::File(_)) && paths.len() > 1),
-        "You specified multiple input files and --output but one output file cannot receive the result of many files.\nAborting."
+        !(matches!(output, Output::File(_)) && inputs.len() > 1),
+        "You specified multiple inputs and --output but one output file cannot receive the result of many files.\nAborting."
     );
 
-    for path in &paths {
-        let mut input_buf = String::new();
-        let mut file = File::options().read(true).open(path).unwrap();
-        file.read_to_string(&mut input_buf)
-            .expect("Couldn't read stdin");
+    for input in &inputs {
+        let input_buf = input.read();
         let formatted = format(&input_buf, config);
-        drop(file);
 
-        match &output {
-            Output::None => {
-                let mut file = File::options()
-                    .create(true)
-                    .write(true)
-                    .truncate(true)
-                    .open(path.to_str().unwrap())
-                    .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
-                file.write_all(formatted.as_bytes()).unwrap();
-                println!("file: {path:?} overwritten.");
-            }
-            Output::Check => {
-                if input_buf != formatted {
-                    println!("{path:?} needs formatting.");
-                    exit_status = 1;
-                } else {
-                    println!("{path:?} is already formatted.")
-                }
-            }
-            Output::Stdout => {
-                println!("=== {:?} ===", path);
-                stdout()
-                    .write_all(formatted.as_bytes())
-                    .expect("Couldn't write to stdout");
-            }
-            Output::File(output) => {
-                let mut file = File::options()
-                    .create(true)
-                    .write(true)
-                    .truncate(true)
-                    .open(output)
-                    .unwrap();
-                file.write_all(formatted.as_bytes()).unwrap();
-                println!("file: {output:?} overwritten.");
+        match output.write(input, &input_buf, &formatted) {
+            Ok(()) => {}
+            Err(()) => {
+                exit_status = 1;
             }
         }
     }
