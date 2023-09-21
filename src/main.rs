@@ -81,6 +81,10 @@ impl Output {
                 // this is not stdout by the check after parsing the arguments that sets the output
                 // to stdout rather than none for stdin.
                 let path = &input.name;
+                if formatted == input.content {
+                    println!("file: {path:?} up to date.");
+                    return Ok(());
+                }
                 let mut file = File::options()
                     .create(true)
                     .write(true)
