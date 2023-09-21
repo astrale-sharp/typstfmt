@@ -19,9 +19,7 @@ If no file is specified, stdin will be used.
 Files will be overwritten except in -o or --stdout is passed.
 
 Options:
-        -o, --output    If not specified, files will be overwritten.
-        --stdout        If specified, the formatted version of the files will
-                        be printed to stdout.
+        -o, --output    If not specified, files will be overwritten. '-' for stdout.
         --check         Run in 'check' mode. Exits with 0 if input is
                         formatted correctly. Exits with 1 if formatting is required.
         -v, --version   Prints the current version.
@@ -72,10 +70,12 @@ fn main() -> Result<(), lexopt::Error> {
                 use_stdin = false;
             }
             Long("output") | Short('o') => {
-                output = Output::File(parser.value()?);
-            }
-            Long("stdout") => {
-                output = Output::Stdout;
+                let value = parser.value()?;
+                output = if value == "-" {
+                    Output::Stdout
+                } else {
+                    Output::File(value)
+                };
             }
             Long("check") => {
                 output = Output::Check;
@@ -103,11 +103,6 @@ fn main() -> Result<(), lexopt::Error> {
         println!("{HELP}");
         return Ok(());
     }
-
-    assert!(
-        !(matches!(output, Output::File(_))),
-        "Both output and stdout are set. You must choose only one.\nAborting."
-    );
 
     let mut exit_status = 0;
 
