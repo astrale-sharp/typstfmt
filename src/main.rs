@@ -52,9 +52,12 @@ impl Inputs {
             }
             Inputs::Files(paths) => Box::new(paths.iter().map(|path| {
                 let mut input_buf = String::new();
-                let mut file = File::options().read(true).open(path).unwrap();
+                let mut file = File::options()
+                    .read(true)
+                    .open(path)
+                    .unwrap_or_else(|err| panic!("Failed to open file {path:?}: {err}"));
                 file.read_to_string(&mut input_buf)
-                    .expect("Couldn't read stdin");
+                    .unwrap_or_else(|err| panic!("Couldn't read file {path:?}: {err}"));
                 Input {
                     name: path.to_string_lossy().into_owned(),
                     content: input_buf,
@@ -83,8 +86,9 @@ impl Output {
                     .write(true)
                     .truncate(true)
                     .open(path)
-                    .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
-                file.write_all(formatted.as_bytes()).unwrap();
+                    .unwrap_or_else(|err| panic!("Couldn't open file: {path:?}: {err}"));
+                file.write_all(formatted.as_bytes())
+                    .unwrap_or_else(|err| panic!("Failed to write to file {path:?}: {err}"));
                 println!("file: {path:?} overwritten.");
             }
             Output::Check => {
@@ -138,12 +142,11 @@ fn main() -> Result<(), lexopt::Error> {
                     .write(true)
                     .open(CONFIG_PATH)
                     .unwrap_or_else(|e| {
-                        panic!(
-                            "Couldn't create a new config file at {}.\nCaused by {}",
-                            CONFIG_PATH, e
-                        )
+                        panic!("Couldn't create a new config file at {CONFIG_PATH}.\nCaused by {e}")
                     });
-                f.write_all(s.as_bytes()).unwrap();
+                f.write_all(s.as_bytes()).unwrap_or_else(|err| {
+                    panic!("Failed to write to file {CONFIG_PATH:?}: {err}")
+                });
                 println!("Created config file at: {CONFIG_PATH}");
                 return Ok(());
             }
@@ -182,7 +185,9 @@ fn main() -> Result<(), lexopt::Error> {
     let config = {
         if let Ok(mut f) = File::options().read(true).open(CONFIG_PATH) {
             let mut buf = String::default();
-            f.read_to_string(&mut buf).unwrap();
+            f.read_to_string(&mut buf).unwrap_or_else(|err| {
+                panic!("Failed to read config file {CONFIG_PATH:?}: {err}")
+            });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
             Config::default()
