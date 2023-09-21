@@ -107,7 +107,7 @@ impl Output {
                     .write(true)
                     .truncate(true)
                     .open(output.to_str().unwrap())
-                    .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
+                    .unwrap_or_else(|err| panic!("Couldn't create output file: {output:?}: {err}"));
 
                 file.write_all(formatted.as_bytes())
                     .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
