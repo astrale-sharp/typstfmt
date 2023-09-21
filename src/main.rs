@@ -15,8 +15,8 @@ const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] <file>...
 
-If no file is specified, stdin will be used.
-Files will be overwritten except in -o or --stdout is passed.
+'-' can be used for stdin.
+Files will be overwritten unless --output is passed.
 
 Options:
         -o, --output    If not specified, files will be overwritten. '-' for stdout.
