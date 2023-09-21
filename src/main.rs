@@ -103,6 +103,7 @@ impl Output {
             }
             Output::File(output) => {
                 let mut file = File::options()
+                    .create(true)
                     .write(true)
                     .truncate(true)
                     .open(output.to_str().unwrap())
