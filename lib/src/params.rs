@@ -105,13 +105,25 @@ pub(crate) fn format_args_tight(
     res
 }
 
+#[derive(Debug, Default)]
+struct TrailingBlockDetect {
+    pub left_par: bool,
+    pub right_par: bool,
+}
+
+impl TrailingBlockDetect {
+    fn is_trailing_block(&self) -> bool {
+        (!self.left_par && !self.right_par) || (self.left_par && self.right_par)
+    }
+}
+
 pub(crate) fn format_args_breaking(
     parent: &LinkedNode<'_>,
     children: &[String],
     ctx: &mut Ctx,
 ) -> String {
     let mut res = String::new();
-
+    let mut is_trailing_block = TrailingBlockDetect::default();
     let mut missing_trailing_comma = !(parent.kind() == Parenthesized);
     // only used with experimental flag in config for now
     let mut consecutive_items = 0;
@@ -122,11 +134,13 @@ pub(crate) fn format_args_breaking(
         match node.kind() {
             _ if ctx.off => res.push_str(node.text()),
             LeftParen => {
+                is_trailing_block.left_par = true;
                 ctx.push_raw_in(s, &mut res);
                 ctx.push_raw_in("\n", &mut res);
                 ctx.push_raw_in(&ctx.get_indent(), &mut res);
             }
             RightParen => {
+                is_trailing_block.right_par = true;
                 if parent.kind() == Parenthesized {
                     // no trailing comma we don't have a newline!
                     ctx.push_in("\n", &mut res);
@@ -198,6 +212,7 @@ pub(crate) fn format_args_breaking(
                     ctx.push_raw_in(" ", &mut res);
                 }
             }
+            ContentBlock if is_trailing_block.is_trailing_block() => ctx.push_raw_in(s, &mut res),
             _ => {
                 ctx.push_raw_indent(s, &mut res);
                 if is_last && missing_trailing_comma {

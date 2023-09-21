@@ -87,3 +87,8 @@ make_test!(
   adipiscing elit, sed do eiusmod tempor]
 )"
 );
+test_eq!(
+    trailing_one_indent,
+    "f[ this loooooooooooooooooooooooooooong text is not supposed to not be indented
+at all ]"
+);
