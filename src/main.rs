@@ -1,6 +1,7 @@
 #![doc = include_str!("../README.md")]
 
 use std::{
+    ffi::OsString,
     fs::File,
     io::{stdin, stdout, Read, Write},
 };
@@ -20,18 +21,26 @@ Files will be overwritten except in -o or --stdout is passed.
 Options:
         -o, --output    If not specified, files will be overwritten.
         --stdout        If specified, the formatted version of the files will
-                        be printed to stdout. 
+                        be printed to stdout.
+        --check         Run in 'check' mode. Exits with 0 if input is
+                        formatted correctly. Exits with 1 if formatting is required.
         -v, --version   Prints the current version.
         -h, --help      Prints this help.
         -C, --make-default-config   Create a default config file at typstfmt-config.toml
 "#;
 
+enum Output {
+    None,
+    Check,
+    Stdout,
+    File(OsString),
+}
+
 fn main() -> Result<(), lexopt::Error> {
     let mut parser = lexopt::Parser::from_env();
     let mut paths = vec![];
     let mut use_stdin = true;
-    let mut use_stdout = false;
-    let mut output = None;
+    let mut output = Output::None;
     while let Some(arg) = parser.next()? {
         match arg {
             Long("version") | Short('v') => {
@@ -63,10 +72,13 @@ fn main() -> Result<(), lexopt::Error> {
                 use_stdin = false;
             }
             Long("output") | Short('o') => {
-                output = Some(parser.value()?);
+                output = Output::File(parser.value()?);
             }
             Long("stdout") => {
-                use_stdout = true;
+                output = Output::Stdout;
+            }
+            Long("check") => {
+                output = Output::Check;
             }
             _ => {
                 println!("{}", arg.unexpected());
@@ -93,68 +105,101 @@ fn main() -> Result<(), lexopt::Error> {
     }
 
     assert!(
-        !(output.is_some() && use_stdout),
+        !(matches!(output, Output::File(_))),
         "Both output and stdout are set. You must choose only one.\nAborting."
     );
 
-    if use_stdin {
-        let mut res = String::default();
-        stdin()
-            .read_to_string(&mut res)
-            .expect("Couldn't read stdin.");
-        let formatted = &format(&res, config);
-        if let Some(output) = output {
-            let mut file = File::options()
-                .write(true)
-                .truncate(true)
-                .open(output.to_str().unwrap())
-                .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
+    let mut exit_status = 0;
 
-            write!(file, "{}", formatted)
-                .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
-        } else {
-            write!(stdout(), "{}", formatted)
-                .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+    if use_stdin {
+        let mut input_buf = String::default();
+        stdin()
+            .read_to_string(&mut input_buf)
+            .expect("Couldn't read stdin.");
+        let formatted = format(&input_buf, config);
+        match output {
+            Output::None => {}
+            Output::Check =>
+            {
+                #[allow(unused_assignments)]
+                if input_buf != formatted {
+                    println!("input needs formatting.");
+                    exit_status = 1;
+                } else {
+                    println!("input is already formatted.")
+                }
+            }
+            Output::Stdout => {
+                write!(stdout(), "{}", formatted)
+                    .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+            }
+            Output::File(output) => {
+                let mut file = File::options()
+                    .write(true)
+                    .truncate(true)
+                    .open(output.to_str().unwrap())
+                    .unwrap_or_else(|err| panic!("Couldn't write to output: {output:?}: {err}"));
+
+                write!(file, "{}", formatted)
+                    .unwrap_or_else(|err| panic!("Couldn't write to file: {output:?}: {err}"));
+            }
         }
         return Ok(());
     }
 
     assert!(
-        !(output.is_some() && paths.len() > 1),
+        !(matches!(output, Output::File(_)) && paths.len() > 1),
         "You specified multiple input files and --output but one output file cannot receive the result of many files.\nAborting."
     );
 
     for path in &paths {
-        let mut res = String::new();
+        let mut input_buf = String::new();
         let mut file = File::options().read(true).open(path).unwrap();
-        file.read_to_string(&mut res).expect("Couldn't read stdin");
-        let res = format(&res, config);
+        file.read_to_string(&mut input_buf)
+            .expect("Couldn't read stdin");
+        let formatted = format(&input_buf, config);
         drop(file);
 
-        if use_stdout {
-            println!("=== {:?} ===", path);
-            stdout()
-                .write_all(res.as_bytes())
-                .expect("Couldn't write to stdout");
-        } else if let Some(output) = &output {
-            let mut file = File::options()
-                .create(true)
-                .write(true)
-                .truncate(true)
-                .open(output)
-                .unwrap();
-            file.write_all(res.as_bytes()).unwrap();
-            println!("file: {output:?} overwritten.");
-        } else {
-            let mut file = File::options()
-                .create(true)
-                .write(true)
-                .truncate(true)
-                .open(path.to_str().unwrap())
-                .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
-            file.write_all(res.as_bytes()).unwrap();
-            println!("file: {path:?} overwritten.");
+        match &output {
+            Output::None => {
+                let mut file = File::options()
+                    .create(true)
+                    .write(true)
+                    .truncate(true)
+                    .open(path.to_str().unwrap())
+                    .unwrap_or_else(|err| panic!("Couldn't write to file: {path:?}: {err}"));
+                file.write_all(formatted.as_bytes()).unwrap();
+                println!("file: {path:?} overwritten.");
+            }
+            Output::Check => {
+                if input_buf != formatted {
+                    println!("{path:?} needs formatting.");
+                    exit_status = 1;
+                } else {
+                    println!("{path:?} is already formatted.")
+                }
+            }
+            Output::Stdout => {
+                println!("=== {:?} ===", path);
+                stdout()
+                    .write_all(formatted.as_bytes())
+                    .expect("Couldn't write to stdout");
+            }
+            Output::File(output) => {
+                let mut file = File::options()
+                    .create(true)
+                    .write(true)
+                    .truncate(true)
+                    .open(output)
+                    .unwrap();
+                file.write_all(formatted.as_bytes()).unwrap();
+                println!("file: {output:?} overwritten.");
+            }
         }
     }
-    Ok(())
+    if exit_status == 0 {
+        Ok(())
+    } else {
+        std::process::exit(exit_status);
+    }
 }
