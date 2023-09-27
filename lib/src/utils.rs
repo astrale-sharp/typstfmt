@@ -38,6 +38,29 @@ pub(crate) fn find_child<'a>(
     None
 }
 
+#[derive(Debug, Default, PartialEq)]
+pub(crate) enum Btype {
+    #[default]
+    Markup,
+    Math,
+    Code,
+}
+
+#[instrument(ret, skip_all)]
+pub(crate) fn block_type(node: &LinkedNode) -> Btype {
+    let mut node = node;
+    loop {
+        return match node.kind() {
+            Markup | ContentBlock => Btype::Markup,
+            Math => Btype::Math,
+            _ => {
+                node = node.parent().unwrap();
+                continue;
+            }
+        };
+    }
+}
+
 /// find all children recursively that fits predicate
 // pub(crate) fn find_children<'a>(
 //     res: &mut Vec<LinkedNode<'a>>,

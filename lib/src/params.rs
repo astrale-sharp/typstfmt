@@ -1,7 +1,7 @@
 use typst_syntax::ast::AstNode;
 
 use super::*;
-use crate::utils::{get_next_ignoring, next_is_ignoring};
+use crate::utils::{get_next_ignoring, next_is_ignoring, Btype};
 
 #[instrument(skip_all)]
 /// format args using [format_args_tight] or [format_args_breaking] depending on the context.
@@ -124,7 +124,9 @@ pub(crate) fn format_args_breaking(
 ) -> String {
     let mut res = String::new();
     let mut is_trailing_block = TrailingBlockDetect::default();
-    let mut missing_trailing_comma = !(parent.kind() == Parenthesized);
+    let is_block_math = utils::block_type(parent) == Btype::Math;
+    let is_parenthesized = parent.kind() == Parenthesized;
+    let mut missing_trailing_comma = !(is_parenthesized || is_block_math);
     // only used with experimental flag in config for now
     let mut consecutive_items = 0;
 
@@ -141,7 +143,7 @@ pub(crate) fn format_args_breaking(
             }
             RightParen => {
                 is_trailing_block.right_par = true;
-                if parent.kind() == Parenthesized {
+                if is_parenthesized || is_block_math {
                     // no trailing comma we don't have a newline!
                     ctx.push_in("\n", &mut res);
                 }
@@ -193,7 +195,7 @@ pub(crate) fn format_args_breaking(
                     // no indent
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in("\n", &mut res);
-                } else if !ctx.config.experimental_args_breaking_consecutive
+                } else if !(ctx.config.experimental_args_breaking_consecutive || is_block_math)
                     || consecutive_items >= 3
                     || s.contains('\n')
                     || res

@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/snippets.rs
+description: "INPUT\n===\n\"$mat(\\n  1111111111111111;,\\n)$\"\n===\n$mat(\n  1111111111111111;,\n)$\n===\nFORMATTED\n===\n$mat(\n  1111111111111111;,\n)$"
+expression: formatted
+---
+"$mat(\n  1111111111111111;,\n)$"

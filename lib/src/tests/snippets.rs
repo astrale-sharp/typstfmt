@@ -44,6 +44,20 @@ test_eq!(
         ..Default::default()
     }
 );
+make_test!(
+    trailing_com_math_bug0,
+    "$mat(
+  1111111111111111;,
+)$",
+    Config {
+        max_line_length: 9,
+        ..Default::default()
+    }
+);
+make_test!(
+    trailing_com_math_bug2,
+    "$mat(11111111111111111111111111111111111111111111111111111111111111111111111111;)$"
+);
 
 // TODO: wait for parser fix
 //    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$
