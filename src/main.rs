@@ -20,6 +20,7 @@ Files will be overwritten unless --output is passed.
 
 Options:
         -o, --output    If not specified, files will be overwritten. '-' for stdout.
+        --stdout        Same as `--output -` (Deprecated, here for compatibility).
         --check         Run in 'check' mode. Exits with 0 if input is
                         formatted correctly. Exits with 1 if formatting is required.
         -v, --version   Prints the current version.
@@ -161,6 +162,9 @@ fn main() -> Result<(), lexopt::Error> {
                         Inputs::Files(files)
                     }
                 };
+            }
+            Long("stdout") => {
+                output = Output::Stdout;
             }
             Long("output") | Short('o') => {
                 let value = parser.value()?;
