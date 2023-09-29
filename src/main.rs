@@ -10,7 +10,7 @@ use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
-const CONFIG_PATH: &str = "typstfmt-config.toml";
+const CONFIG_FILE_NAME: &str = "typstfmt.toml";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] [file...]
@@ -25,7 +25,7 @@ Options:
                         formatted correctly. Exits with 1 if formatting is required.
         -v, --version   Prints the current version.
         -h, --help      Prints this help.
-        -C, --make-default-config   Create a default config file at typstfmt-config.toml
+        -C, --make-default-config   Create a default config file at typstfmt.toml
 "#;
 
 enum Inputs {
@@ -145,13 +145,14 @@ fn main() -> Result<(), lexopt::Error> {
                 let mut f = File::options()
                     .create_new(true)
                     .write(true)
-                    .open(CONFIG_PATH)
+                    .open(CONFIG_FILE_NAME)
                     .unwrap_or_else(|e| {
-                        panic!("Couldn't create a new config file at {CONFIG_PATH}.\nCaused by {e}")
+                        panic!("Couldn't create a new config file at {CONFIG_FILE_NAME}.\nCaused by {e}")
                     });
-                f.write_all(s.as_bytes())
-                    .unwrap_or_else(|err| panic!("Failed to write to file {CONFIG_PATH:?}: {err}"));
-                println!("Created config file at: {CONFIG_PATH}");
+                f.write_all(s.as_bytes()).unwrap_or_else(|err| {
+                    panic!("Failed to write to file {CONFIG_FILE_NAME:?}: {err}")
+                });
+                println!("Created config file at: {CONFIG_FILE_NAME}");
                 return Ok(());
             }
             Value(v) => {
@@ -190,10 +191,11 @@ fn main() -> Result<(), lexopt::Error> {
     }
 
     let config = {
-        if let Ok(mut f) = File::options().read(true).open(CONFIG_PATH) {
+        if let Ok(mut f) = File::options().read(true).open(CONFIG_FILE_NAME) {
             let mut buf = String::default();
-            f.read_to_string(&mut buf)
-                .unwrap_or_else(|err| panic!("Failed to read config file {CONFIG_PATH:?}: {err}"));
+            f.read_to_string(&mut buf).unwrap_or_else(|err| {
+                panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
+            });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
             Config::default()
