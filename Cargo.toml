@@ -28,3 +28,4 @@ categories.workspace = true
 [dependencies]
 typstfmt_lib = { path = "./lib" }
 lexopt = "0.3.0"
+confy = "0.5.1"
