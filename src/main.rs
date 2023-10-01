@@ -198,7 +198,14 @@ fn main() -> Result<(), lexopt::Error> {
             });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
-            Config::default()
+            let config_path = confy::get_configuration_file_path("typstfmt", None)
+                .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+            confy::load("typstfmt", None).unwrap_or_else(|e| {
+                panic!(
+                    "Error loading global configuration file at {}: {e}",
+                    config_path.display()
+                )
+            })
         }
     };
 
