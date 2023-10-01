@@ -19,12 +19,13 @@ If no file is specified, stdin will be used.
 Files will be overwritten unless --output is passed.
 
 Options:
-        -o, --output    If not specified, files will be overwritten. '-' for stdout.
-        --stdout        Same as `--output -` (Deprecated, here for compatibility).
-        --check         Run in 'check' mode. Exits with 0 if input is
-                        formatted correctly. Exits with 1 if formatting is required.
-        -v, --version   Prints the current version.
-        -h, --help      Prints this help.
+        -o, --output                If not specified, files will be overwritten. '-' for stdout.
+        --stdout                    Same as `--output -` (Deprecated, here for compatibility).
+        --check                     Run in 'check' mode. Exits with 0 if input is
+                                    formatted correctly. Exits with 1 if formatting is required.
+        -v, --version               Prints the current version.
+        -h, --help                  Prints this help.
+        --get-global-config-path    Prints the path of the global configuration file.
         -C, --make-default-config   Create a default config file at typstfmt.toml
 "#;
 
@@ -138,6 +139,12 @@ fn main() -> Result<(), lexopt::Error> {
             }
             Long("help") | Short('h') => {
                 println!("{HELP}");
+                return Ok(());
+            }
+            Long("get-global-config-path") => {
+                let config_path = confy::get_configuration_file_path("typstfmt", None)
+                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+                println!("{}", config_path.display());
                 return Ok(());
             }
             Long("make-default-config") | Short('C') => {
