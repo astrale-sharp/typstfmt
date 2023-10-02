@@ -11,6 +11,7 @@ use typstfmt_lib::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
 const CONFIG_FILE_NAME: &str = "typstfmt.toml";
+const DOT_CONFIG_FILE_NAME: &str = ".typstfmt.toml";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] [file...]
@@ -191,7 +192,8 @@ fn main() -> Result<(), lexopt::Error> {
     }
 
     let config = {
-        if let Ok(mut f) = File::options().read(true).open(CONFIG_FILE_NAME) {
+        let open_config = |file_name| File::options().read(true).open(file_name);
+        if let Ok(mut f) = open_config(CONFIG_FILE_NAME).or(open_config(DOT_CONFIG_FILE_NAME)) {
             let mut buf = String::default();
             f.read_to_string(&mut buf).unwrap_or_else(|err| {
                 panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
