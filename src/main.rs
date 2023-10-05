@@ -105,10 +105,14 @@ impl Output {
                 }
             }
             Output::Stdout => {
-                println!("=== {:?} ===", input.name);
                 stdout()
                     .write_all(formatted.as_bytes())
-                    .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+                    .unwrap_or_else(|err| {
+                        panic!(
+                            "=== {:?} === \n Couldn't write to stdout: {}",
+                            input.name, err
+                        )
+                    });
             }
             Output::File(output) => {
                 let mut file = File::options()
