@@ -23,6 +23,8 @@ Options:
         --stdout        Same as `--output -` (Deprecated, here for compatibility).
         --check         Run in 'check' mode. Exits with 0 if input is
                         formatted correctly. Exits with 1 if formatting is required.
+        --verbose       increase verbosity to non errors
+        -c, --config    specify path to typstfmt.toml, default to current folder
         -v, --version   Prints the current version.
         -h, --help      Prints this help.
         -C, --make-default-config   Create a default config file at typstfmt.toml
@@ -76,7 +78,7 @@ enum Output {
 }
 
 impl Output {
-    fn write(&self, input: &Input, formatted: &str) -> Result<(), ()> {
+    fn write(&self, input: &Input, formatted: &str, verbose: bool) -> Result<(), ()> {
         match self {
             Output::None => {
                 // this is not stdout by the check after parsing the arguments that sets the output
@@ -94,24 +96,30 @@ impl Output {
                     .unwrap_or_else(|err| panic!("Couldn't open file: {path:?}: {err}"));
                 file.write_all(formatted.as_bytes())
                     .unwrap_or_else(|err| panic!("Failed to write to file {path:?}: {err}"));
-                println!("file: {path:?} overwritten.");
+                if verbose {
+                    println!("file: {path:?} overwritten.");
+                };
             }
             Output::Check => {
                 if input.content != formatted {
-                    println!("{} needs formatting.", input.name);
+                    if verbose {
+                        println!("{} needs formatting.", input.name);
+                    }
                     return Err(());
                 } else {
-                    println!("{} is already formatted.", input.name);
+                    if verbose {
+                        println!("{} is already formatted.", input.name);
+                    }
                 }
             }
             Output::Stdout => {
+                if verbose {
+                    println!("=== {:?} ===", input.name);
+                };
                 stdout()
                     .write_all(formatted.as_bytes())
                     .unwrap_or_else(|err| {
-                        panic!(
-                            "=== {:?} === \n Couldn't write to stdout: {}",
-                            input.name, err
-                        )
+                        panic!("Couldn't write to stdout: {}", err);
                     });
             }
             Output::File(output) => {
@@ -134,6 +142,8 @@ fn main() -> Result<(), lexopt::Error> {
     let mut parser = lexopt::Parser::from_env();
     let mut inputs = Inputs::Stdin;
     let mut output = Output::None;
+    let mut verbose = false;
+    let mut config_file: OsString = CONFIG_FILE_NAME.into();
     while let Some(arg) = parser.next()? {
         match arg {
             Long("version") | Short('v') => {
@@ -179,6 +189,12 @@ fn main() -> Result<(), lexopt::Error> {
                     Output::File(value)
                 };
             }
+            Long("verbose") => {
+                verbose = true;
+            }
+            Long("config") | Short('c') => {
+                config_file = parser.value()?;
+            }
             Long("check") => {
                 output = Output::Check;
             }
@@ -195,7 +211,7 @@ fn main() -> Result<(), lexopt::Error> {
     }
 
     let config = {
-        if let Ok(mut f) = File::options().read(true).open(CONFIG_FILE_NAME) {
+        if let Ok(mut f) = File::options().read(true).open(config_file) {
             let mut buf = String::default();
             f.read_to_string(&mut buf).unwrap_or_else(|err| {
                 panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
@@ -221,7 +237,7 @@ fn main() -> Result<(), lexopt::Error> {
     for input in inputs.read() {
         let formatted = format(&input.content, config);
 
-        match output.write(&input, &formatted) {
+        match output.write(&input, &formatted, verbose) {
             Ok(()) => {}
             Err(()) => {
                 exit_status = 1;
