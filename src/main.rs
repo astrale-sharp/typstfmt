@@ -23,7 +23,7 @@ Options:
         --stdout                    Same as `--output -` (Deprecated, here for compatibility).
         --check                     Run in 'check' mode. Exits with 0 if input is
                                     formatted correctly. Exits with 1 if formatting is required.
-        --verbose                   increase verbosity of non errors
+        --verbose                   increase verbosity for non errors
         -v, --version               Prints the current version.
         -h, --help                  Prints this help.
         --get-global-config-path    Prints the path of the global configuration file.
