@@ -19,14 +19,14 @@ If no file is specified, stdin will be used.
 Files will be overwritten unless --output is passed.
 
 Options:
-        -o, --output    If not specified, files will be overwritten. '-' for stdout.
-        --stdout        Same as `--output -` (Deprecated, here for compatibility).
-        --check         Run in 'check' mode. Exits with 0 if input is
-                        formatted correctly. Exits with 1 if formatting is required.
-        --verbose       increase verbosity to non errors
-        -c, --config    specify path to typstfmt.toml, default to current folder
-        -v, --version   Prints the current version.
-        -h, --help      Prints this help.
+        -o, --output                If not specified, files will be overwritten. '-' for stdout.
+        --stdout                    Same as `--output -` (Deprecated, here for compatibility).
+        --check                     Run in 'check' mode. Exits with 0 if input is
+                                    formatted correctly. Exits with 1 if formatting is required.
+        --verbose                   increase verbosity to non errors
+        -v, --version               Prints the current version.
+        -h, --help                  Prints this help.
+        --get-global-config-path    Prints the path of the global configuration file.
         -C, --make-default-config   Create a default config file at typstfmt.toml
 "#;
 
@@ -154,6 +154,12 @@ fn main() -> Result<(), lexopt::Error> {
                 println!("{HELP}");
                 return Ok(());
             }
+            Long("get-global-config-path") => {
+                let config_path = confy::get_configuration_file_path("typstfmt", None)
+                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+                println!("{}", config_path.display());
+                return Ok(());
+            }
             Long("make-default-config") | Short('C') => {
                 let s = Config::default_toml();
                 let mut f = File::options()
@@ -218,7 +224,14 @@ fn main() -> Result<(), lexopt::Error> {
             });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
-            Config::default()
+            let config_path = confy::get_configuration_file_path("typstfmt", None)
+                .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+            confy::load("typstfmt", None).unwrap_or_else(|e| {
+                panic!(
+                    "Error loading global configuration file at {}: {e}",
+                    config_path.display()
+                )
+            })
         }
     };
 
