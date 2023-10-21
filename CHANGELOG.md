@@ -1,5 +1,22 @@
 # Latest
 
+# Release 0.2.6
+
+- remove header in stdout unless there is a panic
+- Add a flag to print the path of the global config file
+- If no config file exists, read a global configuration file
+- Optimized show_all.sh and made it POSIX-compliant
+- Removed "-config" from config file name
+- remove trailing comma logic in math fmt
+- compat add --stdout
+
+# Release 0.2.5
+
+- one less indent for trailing blocks
+- prints "up to date" if the file wasn't changed
+...
+
+
 # Release 0.2.1#1817538
 - adds conditional formatting, nested if else etc
 - fix a bug where push_raw_indent was trimming lines 
