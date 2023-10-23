@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/math.rs
+description: "INPUT\n===\n\"$x$\"\n===\n$x$\n===\nFORMATTED\n===\n$x$"
+expression: formatted
+---
+"$x$"
