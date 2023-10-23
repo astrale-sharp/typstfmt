@@ -1,20 +1,18 @@
-use std::cmp::max;
-use tracing::info;
 use super::*;
-use typst_syntax::ast::*;
 use crate::context::Ctx;
 use crate::format_comment_handling_disable;
+use std::cmp::max;
+use tracing::info;
+use typst_syntax::ast::*;
 
 #[instrument(skip_all)]
-pub(crate) fn format_equation(
-    parent: &LinkedNode,
-    children: &[String],
-    ctx: &mut Ctx,
-) -> String {
+pub(crate) fn format_equation(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
-    let first_space = parent
-        .children().nth(1);
-    let space_type = if first_space.as_ref().is_some_and(|s| s.text().contains('\n')) {
+    let first_space = parent.children().nth(1);
+    let space_type = if first_space
+        .as_ref()
+        .is_some_and(|s| s.text().contains('\n'))
+    {
         "\n"
     } else {
         " "
@@ -46,21 +44,14 @@ pub(crate) fn format_equation(
             Space => {
                 ctx.push_raw_in(space_type, &mut res);
             }
-            _ => {
-                ctx.push_raw_indent(s, &mut res)
-            }
+            _ => ctx.push_raw_indent(s, &mut res),
         }
     }
     res
 }
 
-
 #[instrument(skip_all)]
-pub(crate) fn format_math(
-    parent: &LinkedNode,
-    children: &[String],
-    ctx: &mut Ctx,
-) -> String {
+pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
 
     let mut align_points: Vec<usize> = retrieve_align_point(parent, children);
@@ -74,9 +65,12 @@ pub(crate) fn format_math(
         match node.kind() {
             _ if ctx.off => res.push_str(node.text()),
             MathAlignPoint => {
-                if align_points[index] < position {
-                    panic!("align point {} is smaller than position {}", align_points[index], position);
-                }
+                debug_assert!(
+                    align_points[index] >= position,
+                    "align point {} is smaller than position {}",
+                    align_points[index],
+                    position
+                );
 
                 if position == 0 && first_align {
                     should_indent = true;
@@ -86,7 +80,10 @@ pub(crate) fn format_math(
                     ctx.push_raw_in(ctx.get_indent().as_str(), &mut res);
                 }
 
-                ctx.push_raw_in(" ".repeat(align_points[index] - position).as_str(), &mut res);
+                ctx.push_raw_in(
+                    " ".repeat(align_points[index] - position).as_str(),
+                    &mut res,
+                );
                 ctx.push_raw_in(s, &mut res);
                 position = align_points[index] + s.len();
                 index += 1;
@@ -111,7 +108,6 @@ pub(crate) fn format_math(
 
     res
 }
-
 
 fn retrieve_align_point(parent: &LinkedNode, children: &[String]) -> Vec<usize> {
     let mut align_points: Vec<usize> = vec![];
