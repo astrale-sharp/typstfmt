@@ -22,9 +22,6 @@ pub(crate) fn format_equation(
 
     let mut first_dollar = true;
 
-
-    info!("equation children: {:?}", children);
-
     let newline = space_type == "\n";
 
     for (s, node) in children.iter().zip(parent.children()) {
@@ -69,8 +66,6 @@ pub(crate) fn format_math(
     let mut align_points: Vec<usize> = retrieve_align_point(parent, children);
     let mut index = 0;
     let mut position = 0usize;
-
-    info!("math children: {:?}", children);
 
     let mut first_align = true;
     let mut should_indent = false;
