@@ -56,3 +56,6 @@ mat(
 5,2,2,3
 )
 $"#);
+
+make_test!(mathblock8,
+r#"$#xx(a,b) &= 1 \ #xx(a,b) &= 1 \ &= 2 \ $"#);
