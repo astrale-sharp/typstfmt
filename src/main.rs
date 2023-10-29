@@ -10,8 +10,12 @@ use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
+// Dot file is only used once when reading existing config file, therefore there
+// is no need in creating a `const DOT_CONFIG_FILE_NAME`. And even if this
+// constant was created, we would have to duplicate the whole string slice,
+// because `format!(".{CONFIG_FILE_NAME}")` (non-const function) cannot be
+// applied to `const` (or `static`) values in Rust (1.72.1).
 const CONFIG_FILE_NAME: &str = "typstfmt.toml";
-const DOT_CONFIG_FILE_NAME: &str = ".typstfmt.toml";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] [file...]
@@ -193,7 +197,9 @@ fn main() -> Result<(), lexopt::Error> {
 
     let config = {
         let open_config = |file_name| File::options().read(true).open(file_name);
-        if let Ok(mut f) = open_config(CONFIG_FILE_NAME).or(open_config(DOT_CONFIG_FILE_NAME)) {
+        if let Ok(mut f) =
+            open_config(CONFIG_FILE_NAME).or(open_config(&format!(".{CONFIG_FILE_NAME}")))
+        {
             let mut buf = String::default();
             f.read_to_string(&mut buf).unwrap_or_else(|err| {
                 panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
