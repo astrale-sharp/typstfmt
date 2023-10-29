@@ -170,3 +170,4 @@ mod lists;
 mod markup;
 mod params;
 mod snippets;
+mod math;

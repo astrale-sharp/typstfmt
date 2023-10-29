@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/math.rs
+description: "INPUT\n===\n\"$#xx(a,b) &= 1 \\\\ #xx(a,b) &= 1 \\\\ &= 2 \\\\ $\"\n===\n$#xx(a,b) &= 1 \\ #xx(a,b) &= 1 \\ &= 2 \\ $\n===\nFORMATTED\n===\n$#xx(a, b) &= 1 \\ #xx(a, b) &= 1 \\ &= 2 \\ $"
+expression: formatted
+---
+"$#xx(a, b) &= 1 \\ #xx(a, b) &= 1 \\ &= 2 \\ $"
