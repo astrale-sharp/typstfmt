@@ -43,3 +43,8 @@ test_eq!(
 test_eq!(equation_spaced, "aaa $ a b c $ bbb");
 test_eq!(last_space_conserved, "#[. ]");
 make_test!(last_space_conserved_as_space, "#[.\n]");
+// TODO: first line doesn't respect last line length
+make_test!(
+    children_respect_max_line_length,
+    r#"#[ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et #[ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris ] dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla ]"#
+);
