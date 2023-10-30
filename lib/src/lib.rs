@@ -24,8 +24,8 @@ mod utils;
 mod binary;
 mod code_blocks;
 mod markup;
-mod params;
 mod math;
+mod params;
 
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
@@ -72,9 +72,7 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
             ctx.lost_context();
             node.text().to_string()
         }
-        Equation => {
-            math::format_equation(node, &res, ctx)
-        }
+        Equation => math::format_equation(node, &res, ctx),
         Math => math::format_math(node, &res, ctx),
         _ => format_default(node, &res, ctx),
     };

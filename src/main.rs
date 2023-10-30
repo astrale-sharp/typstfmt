@@ -106,10 +106,9 @@ impl Output {
                         println!("{} needs formatting.", input.name);
                     }
                     return Err(());
-                } else {
-                    if verbose {
-                        println!("{} is already formatted.", input.name);
-                    }
+                }
+                if verbose {
+                    println!("{} is already formatted.", input.name);
                 }
             }
             Output::Stdout => {

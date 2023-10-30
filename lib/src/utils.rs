@@ -43,6 +43,7 @@ pub(crate) enum Btype {
     #[default]
     Markup,
     Math,
+    #[allow(dead_code)]
     Code,
 }
 

@@ -2,8 +2,6 @@ use super::*;
 use crate::context::Ctx;
 use crate::format_comment_handling_disable;
 use std::cmp::max;
-use tracing::info;
-use typst_syntax::ast::*;
 
 #[instrument(skip_all)]
 pub(crate) fn format_equation(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
@@ -54,7 +52,7 @@ pub(crate) fn format_equation(parent: &LinkedNode, children: &[String], ctx: &mu
 pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
 
-    let mut align_points: Vec<usize> = retrieve_align_point(parent, children);
+    let align_points: Vec<usize> = retrieve_align_point(parent, children);
     let mut index = 0;
     let mut position = 0usize;
 
@@ -114,8 +112,6 @@ fn retrieve_align_point(parent: &LinkedNode, children: &[String]) -> Vec<usize> 
     let mut index = 0;
     let mut position = 0usize;
 
-    let mut space = false;
-
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
             MathAlignPoint => {
@@ -133,11 +129,9 @@ fn retrieve_align_point(parent: &LinkedNode, children: &[String]) -> Vec<usize> 
                 index = 0;
             }
             Space => {
-                space = true;
                 position += 1;
             }
             _ => {
-                space = false;
                 position += s.len();
             }
         }
