@@ -156,9 +156,8 @@ fn main() -> Result<(), lexopt::Error> {
                 return Ok(());
             }
             Long("get-global-config-path") => {
-                let config_path =
-                    confy::get_configuration_file_path(APP_NAME, APP_NAME)
-                        .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+                let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
+                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
                 println!("{}", config_path.display());
                 return Ok(());
             }
@@ -223,9 +222,8 @@ fn main() -> Result<(), lexopt::Error> {
             });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
-            let config_path =
-                confy::get_configuration_file_path(APP_NAME, APP_NAME)
-                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+            let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
+                .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
             confy::load(APP_NAME, APP_NAME).unwrap_or_else(|e| {
                 panic!(
                     "Error loading global configuration file at {}: {e}",
