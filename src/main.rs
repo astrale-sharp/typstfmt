@@ -11,6 +11,8 @@ use typstfmt_lib::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
 const CONFIG_FILE_NAME: &str = "typstfmt.toml";
+const CONFY_APP_NAME: &str = "typstfmt";
+const GLOBAL_CONFIG_BASE_NAME: &str = "typstfmt";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] [file...]
@@ -154,8 +156,9 @@ fn main() -> Result<(), lexopt::Error> {
                 return Ok(());
             }
             Long("get-global-config-path") => {
-                let config_path = confy::get_configuration_file_path("typstfmt", None)
-                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+                let config_path =
+                    confy::get_configuration_file_path(CONFY_APP_NAME, GLOBAL_CONFIG_BASE_NAME)
+                        .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
                 println!("{}", config_path.display());
                 return Ok(());
             }
@@ -220,9 +223,10 @@ fn main() -> Result<(), lexopt::Error> {
             });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
-            let config_path = confy::get_configuration_file_path("typstfmt", None)
-                .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
-            confy::load("typstfmt", None).unwrap_or_else(|e| {
+            let config_path =
+                confy::get_configuration_file_path(CONFY_APP_NAME, GLOBAL_CONFIG_BASE_NAME)
+                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+            confy::load(CONFY_APP_NAME, GLOBAL_CONFIG_BASE_NAME).unwrap_or_else(|e| {
                 panic!(
                     "Error loading global configuration file at {}: {e}",
                     config_path.display()
