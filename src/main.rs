@@ -222,19 +222,30 @@ fn main() -> Result<(), lexopt::Error> {
         let config = open_config(CONFIG_FILE_NAME);
         let dot_config_file_name = format!(".{CONFIG_FILE_NAME}");
         let dot_config = open_config(&dot_config_file_name);
-        if config.is_ok() && dot_config.is_ok() {
+        let is_config_ok = config.is_ok();
+        if is_config_ok && dot_config.is_ok() {
             eprintln!(
-                "Warning! Both \"{first}\" and \"{second}\" are present. Using \"{first}\".",
+                "Warning! Both {first:?} and {second:?} are present. Using {first:?}.",
                 first = CONFIG_FILE_NAME,
                 second = dot_config_file_name
             );
         }
         if let Ok(mut f) = config.or(dot_config) {
             let mut buf = String::default();
+            let used_config_file_name = if is_config_ok {
+                CONFIG_FILE_NAME
+            } else {
+                &dot_config_file_name
+            };
             f.read_to_string(&mut buf).unwrap_or_else(|err| {
-                panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
+                panic!("Failed to read config file {used_config_file_name:?}: {err}");
             });
-            Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
+            Config::from_toml(&buf).unwrap_or_else(|err| {
+                panic!(
+                    "Config file {used_config_file_name:?} is invalid: {err}.\n{}",
+                    "You'll maybe have to delete it and use -C to create a default config file."
+                )
+            })
         } else {
             let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
                 .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
