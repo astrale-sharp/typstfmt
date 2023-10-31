@@ -97,6 +97,16 @@ macro_rules! test_eq {
                 let format_once = format($input, $config);
                 similar_asserts::assert_eq!($input, format_once);
             }
+
+            #[test]
+            fn double_format() {
+                init();
+                println!("AST: {:?}", parse($input));
+                let input = $input;
+                let format_once = format(input, $config);
+                let format_twice = format(&format_once, $config);
+                similar_asserts::assert_eq!(format_once, format_twice);
+            }
         }
     };
 }
