@@ -15,8 +15,8 @@ Basic formatter for the Typst language with a future!
     - [Can I see it in action?](#can-i-see-it-in-action)
     - [Is that all I have to help me test?](#is-that-all-i-have-to-help-me-test)
       - [Tracing](#tracing)
-      - [Fmttest (COMING SOON)](#fmttest-coming-soon)
-- [Thanks](#thanks)
+      - [Fmttest (TO BE IMPLEMENTED)](#fmttest-to-be-implemented)
+- [Thanks (chronological)](#thanks-chronological)
 
 # Goals
 
@@ -31,7 +31,7 @@ Basic formatter for the Typst language with a future!
 - Config file: run `typstfmt --make-default-config` to create a typstfmt.toml
   file that you can customize!
 - Disable the formatting by surrounding code with `// typstfmt::off` and `//
-  typstfmt::on`.
+  typstfmt::on`. (Experimental and broken)
 
 # State
 
@@ -99,7 +99,7 @@ parents, who are their siblings etc).
 Once the test suite is large enough and the formatting is satisfying, create an
 abstraction to make the codebase easier to work with.
 
-One person cannot come with good default. This will first be configurable and
+One person cannot come up with good formatting default. This will first be configurable and
 then with experience and opinions from the community, default will be tuned.
 
 # Testing and visualizing
@@ -107,11 +107,9 @@ then with experience and opinions from the community, default will be tuned.
 ## Installing Insta
 
 We use insta! If you don't have it installed take a look
-[here](https://insta.rs/docs/cli/) (I advise installing with [`cargo
-binstall`](https://github.com/cargo-bins/cargo-binstall) since I have a small
-computer and don't like waiting for things to compile)
+[here](https://insta.rs/docs/cli/) (hint: use  [`cargo
+binstall`](https://github.com/cargo-bins/cargo-binstall))
 
-then `cargo binstall cargo-insta`
 
 ## Using insta here
 
@@ -138,14 +136,17 @@ If the info log isn't enough, run `DEBUG=true cargo test`. If you wish to pipe
 to a file run `NO_COLOR=true cargo test` you may also set the `NOLOG` env
 variable if you wish to disable logging entirely.
 
-#### Fmttest (COMING SOON)
+#### Fmttest (TO BE IMPLEMENTED)
 
 On the fmttest branch, you can see the skeleton of a program that will automate
-finding which range broke my typst file when formatting.
+finding which range, when formatted, was not valid anymore (broke the semantic of the code).
 
-# Thanks
+# Thanks (chronological)
 
 - @arnaudgolfouse, for the discussion, designs and the precious friendship.
 - @laurmaedje, @reknih and the typst community for the good vibes, the
   interesting talks, the support and ofc, Typst.
+- @jeffa5 for contributing ideas on the initial design
 - @Andrew15-5, for the many suggestions, issues and feedback.
+- @aghriss for a bug fix
+- @taooceros for the alignement of math block
