@@ -43,6 +43,7 @@ pub(crate) enum Btype {
     #[default]
     Markup,
     Math,
+    #[allow(dead_code)]
     Code,
 }
 
@@ -141,25 +142,23 @@ pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[Sy
 
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()
-        .map(|l| l.trim_start().graphemes(true).count())
+        .map(|l| l.graphemes(true).count())
         .max()
         .unwrap_or(0)
 }
 
 pub(crate) fn last_line_length(s: &str) -> usize {
-    s.split('\n')
-        .last()
+    println!("last-line");
+    dbg!(s.split('\n').last())
         .unwrap_or("")
-        .trim_start()
         .graphemes(true)
         .count()
 }
 
 pub(crate) fn first_line_length(s: &str) -> usize {
-    s.split('\n')
-        .next()
+    println!("first-line");
+    dbg!(s.split('\n').next())
         .unwrap_or("")
-        .trim_start()
         .graphemes(true)
         .count()
 }

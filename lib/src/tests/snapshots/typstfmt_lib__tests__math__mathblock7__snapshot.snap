@@ -1,0 +1,6 @@
+---
+source: lib/src/tests/math.rs
+description: "INPUT\n===\n\"$\\nmat(\\n    1,2,3,4;\\n5,2,2,3\\n)\\n$\"\n===\n$\nmat(\n    1,2,3,4;\n5,2,2,3\n)\n$\n===\nFORMATTED\n===\n$\n  mat(1, 2, 3, 4;5, 2, 2, 3)\n$"
+expression: formatted
+---
+"$\n  mat(1, 2, 3, 4;5, 2, 2, 3)\n$"

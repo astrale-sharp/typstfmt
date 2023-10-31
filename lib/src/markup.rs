@@ -136,7 +136,6 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                             ctx.push_raw_in("\n", &mut res);
                         }
                     }
-                    // ctx.push_raw_in("SsS", &mut res);
                 }
             }
             _ => {

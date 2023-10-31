@@ -168,5 +168,6 @@ mod comments;
 mod conditionals;
 mod lists;
 mod markup;
+mod math;
 mod params;
 mod snippets;

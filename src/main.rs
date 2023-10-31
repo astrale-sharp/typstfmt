@@ -15,6 +15,8 @@ const VERSION: &str = env!("TYPSTFMT_VERSION");
 // `format!(".{CONFIG_FILE_NAME}")` (non-const function) cannot be applied to
 // `const` (or `static`) values in Rust (1.72.1).
 const CONFIG_FILE_NAME: &str = "typstfmt.toml";
+/// Note: used in [`confy`](https://crates.io/crates/confy) functions.
+const APP_NAME: &str = "typstfmt";
 const HELP: &str = r#"Format Typst code
 
 usage: typstfmt [options] [file...]
@@ -23,12 +25,14 @@ If no file is specified, stdin will be used.
 Files will be overwritten unless --output is passed.
 
 Options:
-        -o, --output    If not specified, files will be overwritten. '-' for stdout.
-        --stdout        Same as `--output -` (Deprecated, here for compatibility).
-        --check         Run in 'check' mode. Exits with 0 if input is
-                        formatted correctly. Exits with 1 if formatting is required.
-        -v, --version   Prints the current version.
-        -h, --help      Prints this help.
+        -o, --output                If not specified, files will be overwritten. '-' for stdout.
+        --stdout                    Same as `--output -` (Deprecated, here for compatibility).
+        --check                     Run in 'check' mode. Exits with 0 if input is
+                                    formatted correctly. Exits with 1 if formatting is required.
+        --verbose                   increase verbosity for non errors
+        -v, --version               Prints the current version.
+        -h, --help                  Prints this help.
+        --get-global-config-path    Prints the path of the global configuration file.
         -C, --make-default-config   Create a default config file at typstfmt.toml
 "#;
 
@@ -80,7 +84,7 @@ enum Output {
 }
 
 impl Output {
-    fn write(&self, input: &Input, formatted: &str) -> Result<(), ()> {
+    fn write(&self, input: &Input, formatted: &str, verbose: bool) -> Result<(), ()> {
         match self {
             Output::None => {
                 // this is not stdout by the check after parsing the arguments that sets the output
@@ -98,21 +102,30 @@ impl Output {
                     .unwrap_or_else(|err| panic!("Couldn't open file: {path:?}: {err}"));
                 file.write_all(formatted.as_bytes())
                     .unwrap_or_else(|err| panic!("Failed to write to file {path:?}: {err}"));
-                println!("file: {path:?} overwritten.");
+                if verbose {
+                    println!("file: {path:?} overwritten.");
+                };
             }
             Output::Check => {
                 if input.content != formatted {
-                    println!("{} needs formatting.", input.name);
+                    if verbose {
+                        println!("{} needs formatting.", input.name);
+                    }
                     return Err(());
-                } else {
+                }
+                if verbose {
                     println!("{} is already formatted.", input.name);
                 }
             }
             Output::Stdout => {
-                println!("=== {:?} ===", input.name);
+                if verbose {
+                    println!("=== {:?} ===", input.name);
+                };
                 stdout()
                     .write_all(formatted.as_bytes())
-                    .unwrap_or_else(|err| panic!("Couldn't write to stdout: {err}"));
+                    .unwrap_or_else(|err| {
+                        panic!("Couldn't write to stdout: {}", err);
+                    });
             }
             Output::File(output) => {
                 let mut file = File::options()
@@ -134,6 +147,7 @@ fn main() -> Result<(), lexopt::Error> {
     let mut parser = lexopt::Parser::from_env();
     let mut inputs = Inputs::Stdin;
     let mut output = Output::None;
+    let mut verbose = false;
     while let Some(arg) = parser.next()? {
         match arg {
             Long("version") | Short('v') => {
@@ -142,6 +156,12 @@ fn main() -> Result<(), lexopt::Error> {
             }
             Long("help") | Short('h') => {
                 println!("{HELP}");
+                return Ok(());
+            }
+            Long("get-global-config-path") => {
+                let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
+                    .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+                println!("{}", config_path.display());
                 return Ok(());
             }
             Long("make-default-config") | Short('C') => {
@@ -179,6 +199,9 @@ fn main() -> Result<(), lexopt::Error> {
                     Output::File(value)
                 };
             }
+            Long("verbose") => {
+                verbose = true;
+            }
             Long("check") => {
                 output = Output::Check;
             }
@@ -213,7 +236,14 @@ fn main() -> Result<(), lexopt::Error> {
             });
             Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
         } else {
-            Config::default()
+            let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
+                .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
+            confy::load(APP_NAME, APP_NAME).unwrap_or_else(|e| {
+                panic!(
+                    "Error loading global configuration file at {}: {e}",
+                    config_path.display()
+                )
+            })
         }
     };
 
@@ -232,7 +262,7 @@ fn main() -> Result<(), lexopt::Error> {
     for input in inputs.read() {
         let formatted = format(&input.content, config);
 
-        match output.write(&input, &formatted) {
+        match output.write(&input, &formatted, verbose) {
             Ok(()) => {}
             Err(()) => {
                 exit_status = 1;

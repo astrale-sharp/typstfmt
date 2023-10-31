@@ -12,8 +12,11 @@ use typst_syntax::{parse, LinkedNode};
 use Option::None;
 
 mod config;
+
 pub use config::Config;
+
 mod context;
+
 use context::Ctx;
 
 mod utils;
@@ -21,6 +24,7 @@ mod utils;
 mod binary;
 mod code_blocks;
 mod markup;
+mod math;
 mod params;
 
 #[must_use]
@@ -43,7 +47,7 @@ pub fn format(s: &str, config: Config) -> String {
 /// how they will be formatted.
 ///
 /// One assumed rule is that no kind should be formatting with surrounded space
-#[instrument(skip_all,name = "V", fields(kind = format!("{:?}",node.kind())))]
+#[instrument(skip_all, name = "V", fields(kind = format!("{:?}",node.kind())))]
 fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
     let mut res: Vec<String> = vec![];
     for child in node.children() {
@@ -68,6 +72,8 @@ fn visit(node: &LinkedNode, ctx: &mut Ctx) -> String {
             ctx.lost_context();
             node.text().to_string()
         }
+        Equation => math::format_equation(node, &res, ctx),
+        Math => math::format_math(node, &res, ctx),
         _ => format_default(node, &res, ctx),
     };
     if node.children().count() == 0 {
