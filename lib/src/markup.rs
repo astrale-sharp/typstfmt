@@ -13,6 +13,7 @@ pub(crate) fn format_content_blocks(
         .unwrap_or_default();
     let first_space = markup.as_untyped().children().next();
     let spaced = first_space.is_some_and(|x| x.kind() == Space);
+    let markup_has_raw = utils::find_child(parent, &|node| node.kind() == Raw).is_some();
 
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
@@ -35,6 +36,7 @@ pub(crate) fn format_content_blocks(
                 }
                 ctx.push_raw_in(s, &mut res)
             }
+            _ if markup_has_raw => ctx.push_raw_in(s, &mut res),
             _ => ctx.push_raw_indent(s, &mut res),
         }
     }

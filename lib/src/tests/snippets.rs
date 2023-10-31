@@ -59,6 +59,14 @@ make_test!(
     "$mat(11111111111111111111111111111111111111111111111111111111111111111111111111;)$"
 );
 
+test_eq!(stable_raw_indents,"#focus-slide[
+#fit-to-height(3em)[Introduction]
+
+#pdfpc.speaker-note(```
+    Let's start the introduction with a quote from Foo Bar
+  ```)
+]");
+
 // TODO: wait for parser fix
 //    $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt. )$
 // vs $step(&>= ceil(phi.alt (n+1)) / (n+1) >= phi.alt.)$
