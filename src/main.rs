@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![warn(clippy::dbg_macro)]
 
 use std::{
     ffi::OsString,

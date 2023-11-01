@@ -1,5 +1,10 @@
 #![doc = include_str!("../README.md")]
-#![warn(clippy::all)]
+#![warn(
+    clippy::all,
+    clippy::print_stdout,
+    clippy::print_stderr,
+    clippy::dbg_macro
+)]
 
 use itertools::Itertools;
 use tracing::debug;
