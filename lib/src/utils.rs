@@ -148,17 +148,9 @@ pub(crate) fn max_line_length(s: &str) -> usize {
 }
 
 pub(crate) fn last_line_length(s: &str) -> usize {
-    println!("last-line");
-    dbg!(s.split('\n').last())
-        .unwrap_or("")
-        .graphemes(true)
-        .count()
+    s.split('\n').last().unwrap_or("").graphemes(true).count()
 }
 
 pub(crate) fn first_line_length(s: &str) -> usize {
-    println!("first-line");
-    dbg!(s.split('\n').next())
-        .unwrap_or("")
-        .graphemes(true)
-        .count()
+    s.split('\n').next().unwrap_or("").graphemes(true).count()
 }
