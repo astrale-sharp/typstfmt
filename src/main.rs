@@ -11,6 +11,10 @@ use lexopt::prelude::*;
 use typstfmt_lib::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
+// `DOT_CONFIG_FILE_NAME` is not created as a const due to the fact that we
+// would have to duplicate the whole string slice, because
+// `format!(".{CONFIG_FILE_NAME}")` (non-const function) cannot be applied to
+// `const` (or `static`) values in Rust (1.72.1).
 const CONFIG_FILE_NAME: &str = "typstfmt.toml";
 /// Note: used in [`confy`](https://crates.io/crates/confy) functions.
 const APP_NAME: &str = "typstfmt";
@@ -215,12 +219,34 @@ fn main() -> Result<(), lexopt::Error> {
     }
 
     let config = {
-        if let Ok(mut f) = File::options().read(true).open(CONFIG_FILE_NAME) {
+        let open_config = |file_name| File::options().read(true).open(file_name);
+        let config = open_config(CONFIG_FILE_NAME);
+        let dot_config_file_name = format!(".{CONFIG_FILE_NAME}");
+        let dot_config = open_config(&dot_config_file_name);
+        let is_config_ok = config.is_ok();
+        if is_config_ok && dot_config.is_ok() {
+            eprintln!(
+                "Warning! Both {first:?} and {second:?} are present. Using {first:?}.",
+                first = CONFIG_FILE_NAME,
+                second = dot_config_file_name
+            );
+        }
+        if let Ok(mut f) = config.or(dot_config) {
             let mut buf = String::default();
+            let used_config_file_name = if is_config_ok {
+                CONFIG_FILE_NAME
+            } else {
+                &dot_config_file_name
+            };
             f.read_to_string(&mut buf).unwrap_or_else(|err| {
-                panic!("Failed to read config file {CONFIG_FILE_NAME:?}: {err}")
+                panic!("Failed to read config file {used_config_file_name:?}: {err}");
             });
-            Config::from_toml(&buf).unwrap_or_else(|e| panic!("Config file invalid: {e}.\nYou'll maybe have to delete it and use -C to create a default config file."))
+            Config::from_toml(&buf).unwrap_or_else(|err| {
+                panic!(
+                    "Config file {used_config_file_name:?} is invalid: {err}.\n{}",
+                    "You'll maybe have to delete it and use -C to create a default config file."
+                )
+            })
         } else {
             let config_path = confy::get_configuration_file_path(APP_NAME, APP_NAME)
                 .unwrap_or_else(|e| panic!("Error loading global configuration file: {e}"));
