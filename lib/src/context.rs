@@ -113,7 +113,7 @@ impl Ctx {
         if self.config.hard_tabs {
             "\t".to_owned()
         } else {
-            " ".repeat(self.config.indent_space)
+            " ".repeat(self.config.tab_width)
         }
     }
 }

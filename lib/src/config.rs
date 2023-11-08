@@ -9,7 +9,8 @@ pub struct Config {
     /// Indent width used for computing line length; when
     /// [`hard_tabs`](Self#structfield.hard_tabs) is set to [`false`], this is
     /// the amount of spaces used for indentation
-    pub indent_space: usize,
+    #[serde(alias = "indent_space")]
+    pub tab_width: usize,
     pub max_line_length: usize,
     /// If enabled, when breaking arguments, it will try to keep more on one line.
     pub experimental_args_breaking_consecutive: bool,
@@ -20,8 +21,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             hard_tabs: false,
-            // this being strictly > to 1 is assumed.
-            indent_space: 2,
+            tab_width: 2,
             max_line_length: 80,
             line_wrap: true,
             experimental_args_breaking_consecutive: false,
