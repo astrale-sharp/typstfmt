@@ -4,6 +4,11 @@ use serde::Serialize;
 #[serde(default)]
 #[serde(deny_unknown_fields)]
 pub struct Config {
+    /// Use tab characters for indent
+    pub hard_tabs: bool,
+    /// Indent width used for computing line length; when
+    /// [`hard_tabs`](Self#structfield.hard_tabs) is set to [`false`], this is
+    /// the amount of spaces used for indentation
     pub indent_space: usize,
     pub max_line_length: usize,
     /// If enabled, when breaking arguments, it will try to keep more on one line.
@@ -14,6 +19,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
+            hard_tabs: false,
             // this being strictly > to 1 is assumed.
             indent_space: 2,
             max_line_length: 80,
