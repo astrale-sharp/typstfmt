@@ -35,6 +35,8 @@ make_test!(official, OFFICIAL);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
 make_test!(on_off, ON_OFF);
+test_eq!(string_literal_in_math_mode, r#"$ a "        x" $"#);
+test_eq!(string_literal_in_code_mode, r#"#raw("   foo   ");"#);
 test_eq!(
     line_wrap_off,
     "a very very very very very very very very very very very very very long line",
