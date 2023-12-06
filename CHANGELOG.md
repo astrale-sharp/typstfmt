@@ -1,5 +1,13 @@
 # Latest
 
+# Release 0.2.7
+
+- String literal preserved in math mode @monaqa
+- fix indent problems with raw code (hacky)
+- global config: renamed `default-config` to `typstfmt` @Andrew Voynov
+- improves max_len checking (first line of node still doesn't respect it)
+- Implement Math Block Align @taooceros
+
 # Release 0.2.6
 
 - remove header in stdout unless there is a panic
