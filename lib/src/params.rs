@@ -198,13 +198,14 @@ pub(crate) fn format_args_breaking(
                 } else if !ctx.config.experimental_args_breaking_consecutive {
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in(" ", &mut res);
-                } else { // experimental_args_breaking_consecutive
+                } else {
+                    // experimental_args_breaking_consecutive
                     if consecutive_items >= 3
                         || s.contains('\n')
-                        || res
-                            .lines()
-                            .last()
-                            .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= ctx.config.max_line_length)
+                        || res.lines().last().is_some_and(|line| {
+                            utils::max_line_length(&format!("{line}, "))
+                                >= ctx.config.max_line_length
+                        })
                     {
                         ctx.push_raw_in(s, &mut res);
                         ctx.push_raw_in("\n", &mut res);

@@ -84,8 +84,8 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                     match next.as_ref() {
                         Some(next) => {
                             if ![
-                                Space, Text, Emph, Strong, Math, Raw, Escape, Shorthand,
-                                SmartQuote, Strong, Emph, Link, Label, Ref,
+                                Space, Text, Emph, Strong, Math, Escape, Shorthand, SmartQuote,
+                                Link, Label, Ref,
                             ]
                             .contains(&next.kind())
                             {
@@ -101,6 +101,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                     Conditional,
                                     Equation,
                                     Emph,
+                                    Raw,
                                 ]
                                 .map(Some)
                                 .contains(&next.next_sibling_kind())
