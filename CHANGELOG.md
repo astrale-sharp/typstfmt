@@ -1,5 +1,5 @@
 # Latest
-
+- added config option `prevent_breaking_params` to disable params like breaking
 # Release 0.2.7
 
 - String literal preserved in math mode @monaqa

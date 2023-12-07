@@ -19,6 +19,10 @@ pub(crate) fn format_args(parent: &LinkedNode, children: &[String], ctx: &mut Ct
     //     return format_args_breaking(parent, children, ctx);
     // }
 
+    if ctx.config.prevent_breaking_params {
+        return format_args_tight(parent, children, ctx);
+    }
+
     if parent.children().any(|c| c.kind() == LineComment) {
         return format_args_breaking(parent, children, ctx);
     }
