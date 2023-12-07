@@ -199,23 +199,26 @@ pub(crate) fn format_args_breaking(
                     // no indent
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in("\n", &mut res);
-                } else if !(ctx.config.experimental_args_breaking_consecutive || is_block_math)
-                    || consecutive_items >= 3
-                    || s.contains('\n')
-                    || res
-                        .lines()
-                        .last()
-                        .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= 10)
-                {
-                    ctx.push_raw_in(s, &mut res);
-                    ctx.push_raw_in("\n", &mut res);
-                    ctx.push_raw_in(&ctx.get_indent(), &mut res);
-
-                    consecutive_items = 0;
-                } else {
-                    consecutive_items += 1;
+                } else if !ctx.config.experimental_args_breaking_consecutive {
                     ctx.push_raw_in(s, &mut res);
                     ctx.push_raw_in(" ", &mut res);
+                } else { // experimental_args_breaking_consecutive
+                    if consecutive_items >= 3
+                        || s.contains('\n')
+                        || res
+                            .lines()
+                            .last()
+                            .is_some_and(|line| utils::max_line_length(&format!("{line}, ")) >= ctx.config.max_line_length)
+                    {
+                        ctx.push_raw_in(s, &mut res);
+                        ctx.push_raw_in("\n", &mut res);
+                        ctx.push_raw_in(&ctx.get_indent(), &mut res);
+                        consecutive_items = 0;
+                    } else {
+                        consecutive_items += 1;
+                        ctx.push_raw_in(s, &mut res);
+                        ctx.push_raw_in(" ", &mut res);
+                    }
                 }
             }
             ContentBlock if is_trailing_block.is_trailing_block() => ctx.push_raw_in(s, &mut res),
