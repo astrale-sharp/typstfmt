@@ -16,7 +16,6 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            // this being strictly > to 1 is assumed.
             indent_space: 2,
             max_line_length: 80,
             line_wrap: true,
