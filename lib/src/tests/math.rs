@@ -69,3 +69,26 @@ $"#
 );
 
 make_test!(mathblock8, r#"$#xx(a,b) &= 1 \ #xx(a,b) &= 1 \ &= 2 \ $"#);
+
+make_test!(
+    mathblock9,
+    r#"
+$
+  a
+  &= b\
+  &= c & d\
+  &= &e & f\
+  &= && & g
+$"#
+);
+
+make_test!(
+    mathblock10,
+    r#"
+$
+  a&=b & c & d & e\
+  &= "a really long string" & pi \
+  &= a & #xx & d & e \
+  &= "an even longer string!!" & y
+$"#
+);

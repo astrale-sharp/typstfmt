@@ -1,7 +1,6 @@
 use super::*;
 use crate::context::Ctx;
 use crate::format_comment_handling_disable;
-use std::cmp::max;
 
 #[instrument(skip_all)]
 pub(crate) fn format_equation(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
@@ -52,7 +51,7 @@ pub(crate) fn format_equation(parent: &LinkedNode, children: &[String], ctx: &mu
 pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ctx) -> String {
     let mut res = String::new();
 
-    let align_points: Vec<usize> = retrieve_align_point(parent, children);
+    let align_columns = retrieve_align_columns(parent, children);
     let mut index = 0;
     let mut position = 0usize;
 
@@ -64,9 +63,9 @@ pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ct
             _ if ctx.off => res.push_str(node.text()),
             MathAlignPoint => {
                 debug_assert!(
-                    align_points[index] >= position,
-                    "align point {} is smaller than position {}",
-                    align_points[index],
+                    align_columns[index] >= position,
+                    "align column {} is smaller than position {}",
+                    align_columns[index],
                     position
                 );
 
@@ -79,11 +78,11 @@ pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ct
                 }
 
                 ctx.push_raw_in(
-                    " ".repeat(align_points[index] - position).as_str(),
+                    " ".repeat(align_columns[index] - position).as_str(),
                     &mut res,
                 );
                 ctx.push_raw_in(s, &mut res);
-                position = align_points[index] + s.len();
+                position = align_columns[index] + s.len();
                 index += 1;
 
                 first_align = false;
@@ -107,21 +106,32 @@ pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ct
     res
 }
 
-fn retrieve_align_point(parent: &LinkedNode, children: &[String]) -> Vec<usize> {
-    let mut align_points: Vec<usize> = vec![];
+/// Calculate the columns the alignment points in the math block should be placed at.
+/// The n-th alignment point on a line should be placed at `align_columns[n]`.
+fn retrieve_align_columns(parent: &LinkedNode, children: &[String]) -> Vec<usize> {
+    let mut align_columns: Vec<usize> = vec![];
     let mut index = 0;
     let mut position = 0usize;
 
     for (s, node) in children.iter().zip(parent.children()) {
         match node.kind() {
             MathAlignPoint => {
-                if align_points.len() <= index {
-                    align_points.push(position);
-
-                    position += s.len();
+                if align_columns.len() <= index {
+                    align_columns.push(position);
+                } else if align_columns[index] < position {
+                    // We found an alignment point that is further away.
+                    // We now need to shift this and all the columns after it.
+                    let shift = position - align_columns[index];
+                    align_columns
+                        .iter_mut()
+                        .skip(index)
+                        .for_each(|pos| *pos += shift);
                 } else {
-                    align_points[index] = max(align_points[index], position);
+                    // When formatting, this alignment point will be shifted.
+                    // Pretend that we inserted the whitespace to ensure correct positions.
+                    position = align_columns[index];
                 }
+                position += s.len();
                 index += 1
             }
             Space if s.contains('\n') => {
@@ -136,5 +146,5 @@ fn retrieve_align_point(parent: &LinkedNode, children: &[String]) -> Vec<usize> 
             }
         }
     }
-    align_points
+    align_columns
 }
