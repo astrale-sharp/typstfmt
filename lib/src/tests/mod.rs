@@ -1,5 +1,5 @@
 use super::*;
-use tracing::Level;
+use tracing::{debug, instrument, Level};
 use tracing_subscriber::FmtSubscriber;
 
 /// Enables logging.

@@ -1,4 +1,4 @@
-use super::*;
+use typst_syntax::{ast::*, LinkedNode, SyntaxKind};
 use unicode_segmentation::UnicodeSegmentation;
 
 /// like next sibling but doesn't skip trivia.
@@ -15,23 +15,14 @@ pub(crate) fn prev_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<Linked
 }
 
 /// find any child recursively that fits predicate
-#[instrument(ret, skip_all)]
 pub(crate) fn find_child<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
 ) -> Option<LinkedNode<'a>> {
-    debug!("::find_child of {:?}", node.kind());
-    debug!(
-        "on children: {:?}",
-        node.children().map(|x| x.kind()).collect_vec()
-    );
     for child in node.children() {
-        debug!("try for {:?}", child.kind());
         if predicate(&child) {
-            debug!("predicate accepted");
             return Some(child.clone());
         } else if let Some(f) = find_child(&child, predicate) {
-            debug!("predicate accepted for inner of {:?}", child.kind());
             return Some(f);
         }
     }
@@ -47,20 +38,19 @@ pub(crate) enum Btype {
     Code,
 }
 
-#[instrument(ret, skip_all)]
-pub(crate) fn block_type(node: &LinkedNode) -> Btype {
-    let mut node = node;
-    loop {
-        return match node.kind() {
-            Markup | ContentBlock => Btype::Markup,
-            Math => Btype::Math,
-            _ => {
-                node = node.parent().unwrap();
-                continue;
-            }
-        };
-    }
-}
+// pub(crate) fn block_type(node: &LinkedNode) -> Btype {
+//     let mut node = node;
+//     loop {
+//         return match node.kind() {
+//             Markup | ContentBlock => Btype::Markup,
+//             Math => Btype::Math,
+//             _ => {
+//                 node = node.parent().unwrap();
+//                 continue;
+//             }
+//         };
+//     }
+// }
 
 /// find all children recursively that fits predicate
 // pub(crate) fn find_children<'a>(
@@ -78,7 +68,6 @@ pub(crate) fn block_type(node: &LinkedNode) -> Btype {
 //     }
 // }
 
-#[instrument(ret, skip_all)]
 pub(crate) fn find_next<'a>(
     node: &LinkedNode<'a>,
     predicate: &impl Fn(&LinkedNode) -> bool,
@@ -93,7 +82,6 @@ pub(crate) fn find_next<'a>(
     None
 }
 
-#[instrument(ret, skip_all)]
 pub(crate) fn get_next_ignoring<'a>(
     node: &'a LinkedNode<'a>,
     ignoring: &[SyntaxKind],
@@ -126,19 +114,19 @@ pub(crate) fn get_prev_ignoring<'a>(
     None
 }
 
-#[instrument(ret, skip_all)]
-pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
-    let n = get_next_ignoring(node, ignoring);
-    debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
-    n.is_some_and(|n| is == n.kind())
-}
+// #[instrument(ret, skip_all)]
+// pub(crate) fn next_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
+//     let n = get_next_ignoring(node, ignoring);
+//     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
+//     n.is_some_and(|n| is == n.kind())
+// }
 
-#[instrument(ret, skip_all)]
-pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
-    let n = get_prev_ignoring(node, ignoring);
-    debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
-    n.is_some_and(|n| is == n.kind())
-}
+// #[instrument(ret, skip_all)]
+// pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[SyntaxKind]) -> bool {
+//     let n = get_prev_ignoring(node, ignoring);
+//     debug!("next is: {:?}", n.as_ref().map(|x| x.kind()));
+//     n.is_some_and(|n| is == n.kind())
+// }
 
 pub(crate) fn max_line_length(s: &str) -> usize {
     s.lines()
