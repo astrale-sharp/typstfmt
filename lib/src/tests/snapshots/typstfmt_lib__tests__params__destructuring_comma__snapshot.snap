@@ -1,6 +1,0 @@
----
-source: lib/src/tests/params.rs
-description: "INPUT\n===\n\"#let func((a,)) = {\\n}\"\n===\n#let func((a,)) = {\n}\n===\nFORMATTED\n===\n#let func((a,)) = {}"
-expression: formatted
----
-"#let func((a,)) = {}"

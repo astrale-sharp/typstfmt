@@ -1,6 +1,0 @@
----
-source: lib/src/tests/snippets.rs
-description: "INPUT\n===\n\"// typstfmt::off\\n#{{4}}\\n// typstfmt::on\\n#{{4}}\\n\"\n===\n// typstfmt::off\n#{{4}}\n// typstfmt::on\n#{{4}}\n\n===\nFORMATTED\n===\n// typstfmt::off\n#{{4}}\n// typstfmt::on\n#{{4}}\n"
-expression: formatted
----
-"// typstfmt::off\n#{{4}}\n// typstfmt::on\n#{{4}}\n"

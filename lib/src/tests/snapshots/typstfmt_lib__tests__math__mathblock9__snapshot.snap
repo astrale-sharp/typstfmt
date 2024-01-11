@@ -1,6 +1,0 @@
----
-source: lib/src/tests/math.rs
-description: "INPUT\n===\n\"\\n$\\n  a\\n  &= b\\\\\\n  &= c & d\\\\\\n  &= &e & f\\\\\\n  &= && & g\\n$\"\n===\n\n$\n  a\n  &= b\\\n  &= c & d\\\n  &= &e & f\\\n  &= && & g\n$\n===\nFORMATTED\n===\n\n$\n  a\n    &= b\\\n    &= c & d\\\n    &=   &e & f\\\n    &=   &  & & g\n$"
-expression: formatted
----
-"\n$\n  a\n    &= b\\\n    &= c & d\\\n    &=   &e & f\\\n    &=   &  & & g\n$"

@@ -1,6 +1,0 @@
----
-source: lib/src/tests/math.rs
-description: "INPUT\n===\n\"\\n$\\n  a&=b & c & d & e\\\\\\n  &= \\\"a really long string\\\" & pi \\\\\\n  &= a & #xx & d & e \\\\\\n  &= \\\"an even longer string!!\\\" & y\\n$\"\n===\n\n$\n  a&=b & c & d & e\\\n  &= \"a really long string\" & pi \\\n  &= a & #xx & d & e \\\n  &= \"an even longer string!!\" & y\n$\n===\nFORMATTED\n===\n\n$\n  a&=b                          & c   & d & e\\\n   &= \"a really long string\"    & pi \\\n   &= a                         & #xx & d & e \\\n   &= \"an even longer string!!\" & y\n$"
-expression: formatted
----
-"\n$\n  a&=b                          & c   & d & e\\\n   &= \"a really long string\"    & pi \\\n   &= a                         & #xx & d & e \\\n   &= \"an even longer string!!\" & y\n$"
