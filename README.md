@@ -149,4 +149,4 @@ finding which range, when formatted, was not valid anymore (broke the semantic o
 - @jeffa5 for contributing ideas on the initial design
 - @Andrew15-5, for the many suggestions, issues and feedback.
 - @aghriss for a bug fix
-- @taooceros for the alignement of math block
+- @taooceros for the alignment of math block
