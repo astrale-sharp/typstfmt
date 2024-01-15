@@ -33,7 +33,7 @@ mod utils;
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
     //replace tabs
-    let s = &s.replace('\t', &" ".repeat(config.indent_space));
+    let s = &s.replace('\t', &config.indent.get(1));
 
     let init = parse(s);
     let mut s = String::new();
