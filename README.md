@@ -30,6 +30,14 @@ Basic formatter for the Typst language with a future!
 - Good defaults.
 - Config file: run `typstfmt --make-default-config` to create a typstfmt.toml
   file that you can customize!
+  
+  The following lines show the contents of a simple `typstfmt.toml` file:
+  ```toml
+  indent_space = 2
+  max_line_length = 80
+  experimental_args_breaking_consecutive = false
+  line_wrap = true
+  ```
 - Disable the formatting by surrounding code with `// typstfmt::off` and `//
   typstfmt::on`. (Experimental and broken)
 
