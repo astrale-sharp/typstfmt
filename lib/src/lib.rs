@@ -18,8 +18,10 @@ use typst_syntax::{parse, LinkedNode};
 mod config;
 pub use config::Config;
 
-mod context;
-use context::Writer;
+mod writer;
+use writer::Writer;
+
+use crate::writer::MarkKind;
 
 mod utils;
 // mod tests;
@@ -342,4 +344,83 @@ fn visit_raw(parent: &LinkedNode<'_>, w: &mut Writer<'_>) {
     let m = w.mark_preserve();
     w.push_node(&parent)
     // w no indent close
+}
+
+#[test]
+fn test_indent() {
+    let mut snippet = r#"
+#[
+text #[
+text
+]
+]"#
+    .to_string();
+
+    let expected = r#"
+#[
+  text #[
+    text
+  ]
+]"#;
+
+    let mi1 = "\n#[".len();
+    let mi2 = "\n#[\ntext #[".len();
+    let md2 = "\n#[\ntext #[\ntext\n".len();
+    let md1 = "\n#[\ntext #[\ntext\n]\n".len();
+
+    let mut w = Writer::new(Config::default(), &mut snippet);
+    w.marks = vec![
+        MarkKind::Indent.to_mark(mi1),
+        MarkKind::Indent.to_mark(mi2),
+        MarkKind::Dedent.to_mark(md2),
+        MarkKind::Dedent.to_mark(md1),
+    ];
+    w.post_process_indents();
+    println!("snippet:");
+    println!("{snippet}");
+    println!("snippet:?");
+    println!("{snippet:?}");
+
+    assert!(snippet == expected);
+}
+
+#[test]
+fn test_preserve() {
+    let mut snippet = r#"
+#[
+text #[
+text
+]
+]"#
+    .to_string();
+    println!("init: {snippet}");
+
+    let expected = r#"
+#[
+  text #[
+text
+  ]
+]"#;
+
+    let mi1 = "\n#[".len();
+    let mi2 = "\n#[\ntext #[".len();
+    let md2 = "\n#[\ntext #[\ntext\n".len();
+    let md1 = "\n#[\ntext #[\ntext\n]\n".len();
+    let preserve = "\n#[\ntext #[\n".len();
+    let stop_preserve = "\n#[\ntext #[\ntext\n".len();
+
+    let mut w = Writer::new(Config::default(), &mut snippet);
+    w.marks = vec![
+        MarkKind::Indent.to_mark(mi1),
+        MarkKind::Indent.to_mark(mi2),
+        MarkKind::Dedent.to_mark(md2),
+        MarkKind::Dedent.to_mark(md1),
+        MarkKind::Preserve.to_mark(preserve),
+        MarkKind::StopPreserve.to_mark(stop_preserve),
+    ];
+    w.post_process_indents();
+    println!("fmt : {snippet}");
+    println!("expe: {expected}");
+
+    assert!(snippet == expected);
 }
