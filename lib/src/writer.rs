@@ -1,13 +1,10 @@
+use super::utils;
+use crate::{Config, Content, FmtNode};
+use itertools::Itertools;
 use std::{
     collections::{HashMap, HashSet},
     mem,
 };
-
-use itertools::Itertools;
-use typst_syntax::LinkedNode;
-
-use super::utils;
-use crate::Config;
 
 /// Writer is used to write your formatted output.
 ///
@@ -65,6 +62,10 @@ impl<'a> Writer<'a> {
             marks: vec![],
         }
     }
+
+    pub fn get_mark(&self) -> usize {
+        self.buffer.len()
+    }
     // needed when post process adds indentation level.
     pub fn mark_indent(&mut self) {
         self.marks.push(MarkKind::Indent.to_mark(self.buffer.len()))
@@ -78,7 +79,7 @@ impl<'a> Writer<'a> {
             .push(MarkKind::Preserve.to_mark(self.buffer.len()))
     }
 
-    pub fn mark_stop_preserve(&mut self, mark: Mark) {
+    pub fn mark_stop_preserve(&mut self) {
         self.marks
             .push(MarkKind::StopPreserve.to_mark(self.buffer.len()))
     }
@@ -117,8 +118,7 @@ impl<'a> Writer<'a> {
         for pair in preserve_pairs {
             let start = line_at_pos(pair.0).unwrap();
             // it's okay if `//typstfmt::off`` is not closed.
-            let end = line_at_pos(pair.1).unwrap();//_or(lines_len);
-            dbg!(start,end);
+            let end = line_at_pos(pair.1).unwrap(); //_or(lines_len);
             for k in start..end {
                 dbg!(k);
                 preserved_lines.insert(k);
@@ -152,12 +152,16 @@ impl<'a> Writer<'a> {
         *self.buffer = res;
     }
 
-    pub(crate) fn push_node(&mut self, node: &LinkedNode) {
-        self.buffer.push_str(node.text())
+    pub(crate) fn push_node(&mut self, node: &FmtNode) {
+        if let Content::Text(t) = &node.content {
+            self.push_str(t)
+        }
     }
 
-    pub(crate) fn push_node_spaced(&mut self, n: &LinkedNode) {
-        self.push_spaced(n.text())
+    pub(crate) fn push_node_spaced(&mut self, node: &FmtNode) {
+        if let Content::Text(t) = &node.content {
+            self.push_spaced(t)
+        }
     }
 
     pub(crate) fn push_str(&mut self, s: &str) {
