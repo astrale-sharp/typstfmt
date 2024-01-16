@@ -1,5 +1,6 @@
+use super::node::*;
 use super::utils;
-use crate::{Config, Content, FmtNode};
+use crate::Config;
 use itertools::Itertools;
 use std::{
     collections::{HashMap, HashSet},
