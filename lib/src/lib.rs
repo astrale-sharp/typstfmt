@@ -55,65 +55,109 @@ pub fn format(s: &str, config: Config) -> String {
 /// - Preserve: Raw blocks and area delimited by `// fmt::off` and `// fmt::on` shouldn't be formatted.
 /// - Condition: We collapse all nested conditional nodes into one in
 /// order to be able to format consistently across long if else chains.
-/// - Binops: like conditional for for binary operation.
+/// - Binary: like conditional for for binary operation.
+#[derive(Clone)]
 struct FmtNode<'a> {
-    inner: Inner<'a>,
+    parent: Option<Rc<FmtNode<'a>>>,
+    content: Content<'a>,
     kind: FmtKind,
 }
 
+impl<'a> FmtNode<'a> {
+    pub fn text(&self) -> Option<&'a str> {
+        match self.content {
+            Content::Text(s) => Some(s),
+            Content::Children(_) => None,
+        }
+    }
+}
+
+impl Debug for FmtNode<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}: {:?}", self.kind, self.content)
+    }
+}
+
+// todo a LetBinding, ForLoop, WhileLoop node forcing a linebreak in code mode or a ; in markup?
+#[derive(Debug, Clone, PartialEq)]
 enum FmtKind {
     // used only for when in preserve Node, ignored otherwise.
+    FuncCall,
+    ParamsLike,
+    ParamsLikeParenthesized,
+    Binary,
+    Unary,
+    /// We must preserve the content as is
+    ///
+    /// We smartly only tag the text nodes in the preserve_pass, so we can rely on it when
+    /// `evaluating Preserve`
+    /// TODO: panic if the node has children
+    Preserve(i32),
+    /// if else chain that we must format all at the same time for maximum style
     Space,
     Parbreak,
-    /// Must not be followed by a space, i.e : `#`
-    NoSpaceAfter,
-    /// Must be followed by a space, i.e : `let`
-    SpaceAfter,
-    /// Must be followed by a line_break, i.e : `let`
-    BrkLineAfter,
-    MaySpaceAfter,
+
+    WithSpacing(Spacing),
+
     Markup,
-    MarkupBlock,
-    OnLineMarkup,
+    ContentBlock,
+    OneLineMarkup,
+    Conditional,
+
+    // todo: force line break after loops
     Code,
     CodeBlock,
+
+    Math,
     Equation,
-    ListLike,
-    ParamsLike,
-    // We must preserve the content as is
-    Preserve,
-    /// if else chain that we must format all at the same time for maximum style
-    Condition,
-    Binops,
+
+    Comment,
 }
 
-struct Inner<'a> {
-    parent: Option<Rc<FmtNode<'a>>>,
-    content: Content<'a>,
-}
-
+#[derive(Clone)]
 enum Content<'a> {
     Text(&'a str),
     Children(Vec<FmtNode<'a>>),
 }
 
-impl FmtKind {
-    pub fn with_children<'a>(self, node: LinkedNode<'a>) -> FmtNode<'a> {
-        FmtNode {
-            inner: Inner {
-                parent: node.parent().cloned().map(convert).map(Rc::new),
-                content: Content::Children(node.children().map(|c| convert(c)).collect()),
-            },
-            kind: self,
+impl Debug for Content<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Text(arg0) => f.debug_tuple("Text").field(arg0).finish(),
+            Self::Children(arg0) => arg0.fmt(f),
         }
     }
+}
 
-    pub fn with_text<'a>(self, node: LinkedNode<'a>) -> FmtNode<'a> {
+impl FmtKind {
+    pub fn with_children<'a>(
+        self,
+        node: LinkedNode<'a>,
+        parent: Option<Rc<FmtNode<'a>>>,
+    ) -> FmtNode<'a> {
+        let mut fnode = FmtNode {
+            parent,
+            content: Content::Children(vec![]),
+            kind: self,
+        };
+        fnode.content = Content::Children(
+            node.children()
+                .map(|c| convert(c, Some(Rc::new(fnode.clone()))))
+                .collect(),
+        );
+
+        fnode
+    }
+
+    pub fn with_text<'a>(
+        self,
+        node: LinkedNode<'a>,
+        parent: Option<Rc<FmtNode<'a>>>,
+    ) -> FmtNode<'a> {
         FmtNode {
-            inner: Inner {
-                parent: node.parent().cloned().map(convert).map(Rc::new),
-                content: Content::Text(node.get().text()),
-            },
+            parent,
+            content: Content::Text(node.get().text()),
+
             kind: self,
         }
     }
