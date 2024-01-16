@@ -1,0 +1,5 @@
+---
+source: lib/src/lib.rs
+expression: root
+---
+Markup: [NoSpaceAfter: Text("#"), FuncCall: [SpaceAfter: Text("f"), ParamsLike: [MaySpaceAfter: Text("("), ContentBlock: [MaySpaceAfter: Text("["), Markup: [MaySpaceAfter: Text("notp")], MaySpaceAfter: Text("]")], SpaceAfter: Text(","), Space: Text(" "), Preserve(1): Text("// typstfmt::off"), Preserve(1): Text("\n"), Preserve(1): Text(")")]], Preserve(1): Text("\n"), Preserve(2): Text("// typstfmt::off"), Preserve(2): Text("\n"), Preserve(1): Text("// typstfmt::on"), Preserve(1): Text("\n"), Preserve(1): Text("p"), Preserve(1): Text("\n"), Comment: Text("// typstfmt::on"), Space: Text("\n"), MaySpaceAfter: Text("notp")]

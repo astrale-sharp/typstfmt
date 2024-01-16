@@ -1,0 +1,5 @@
+---
+source: lib/src/lib.rs
+expression: root
+---
+Markup: [MaySpaceAfter: Text("notp"), Space: Text(" "), Preserve(1): Text("// typstfmt::off"), Preserve(1): Text("\n"), Preserve(1): Text("#"), Preserve(1): [SpaceAfter: Text("f"), ParamsLike: [MaySpaceAfter: Text("("), MaySpaceAfter: [SpaceAfter: Text("x"), Space: Text(" "), SpaceAfter: Text(":"), Space: Text(" "), ContentBlock: [MaySpaceAfter: Text("["), Markup: [MaySpaceAfter: Text("p")], MaySpaceAfter: Text("]")]], MaySpaceAfter: Text(")")]], Preserve(1): Text(" \n"), Comment: Text("// typstfmt::on"), Space: Text("\n"), MaySpaceAfter: Text("notp"), Space: Text(" ")]
