@@ -163,23 +163,114 @@ impl FmtKind {
     }
 }
 
-pub fn convert<'a>(node: LinkedNode<'a>) -> FmtNode<'a> {
+fn convert<'a>(node: LinkedNode<'a>, parent: Option<Rc<FmtNode<'a>>>) -> FmtNode<'a> {
+    use typst_syntax::SyntaxKind::{self, *};
+
     match node.kind() {
-        Markup => FmtKind::Markup.with_children(node),
-
-        Space => FmtKind::Space.with_text(node),
-        Linebreak => FmtKind::BrkLineAfter.with_text(node),
-        Parbreak => FmtKind::Parbreak.with_text(node),
-
-        RefMarker | SmartQuote => FmtKind::NoSpaceAfter.with_text(node),
-
-        Text | Shorthand | Escape => FmtKind::MaySpaceAfter.with_text(node),
-        Link | Label | Strong | Emph => FmtKind::MaySpaceAfter.with_children(node),
-        Raw => FmtKind::Preserve.with_text(node),
-
-        ListMarker | EnumMarker | TermMarker | HeadingMarker | Ref => {
-            FmtKind::SpaceAfter.with_children(node)
+        Raw => FmtKind::Preserve(1).with_text(node, parent),
+        Space => FmtKind::Space.with_text(node, parent),
+        Linebreak => FmtKind::WithSpacing(Spacing::StrongBrkLine).with_text(node, parent),
+        Parbreak => FmtKind::Parbreak.with_text(node, parent),
+        Markup => FmtKind::Markup.with_children(node, parent),
+        Code => FmtKind::Code.with_children(node, parent),
+        CodeBlock => FmtKind::CodeBlock.with_children(node, parent),
+        ContentBlock => FmtKind::ContentBlock.with_children(node, parent),
+        Math => FmtKind::Math.with_children(node, parent),
+        Equation => FmtKind::Equation.with_children(node, parent),
+        FuncCall => FmtKind::FuncCall.with_children(node, parent),
+        Array | Dict | Args | ListItem | EnumItem | TermItem | Params | Destructuring => {
+            FmtKind::ParamsLike.with_children(node, parent)
         }
+        Parenthesized => FmtKind::ParamsLikeParenthesized.with_children(node, parent),
+        Heading => FmtKind::OneLineMarkup.with_children(node, parent),
+        Unary => FmtKind::Unary.with_children(node, parent),
+        Binary => FmtKind::Binary.with_children(node, parent),
+
+        LetBinding | ModuleImport | ImportItems | ModuleInclude | SetRule | ShowRule => {
+            FmtKind::WithSpacing(Spacing::StrongBrkLine).with_children(node, parent)
+        }
+
+        Eof | Spread | Root | Dots | Dot | Star | Underscore | Hashtag | RefMarker | SmartQuote => {
+            FmtKind::WithSpacing(Spacing::Destruct).with_text(node, parent)
+        }
+
+        LoopBreak
+        | LoopContinue
+        | FuncReturn
+        | Bool
+        | Int
+        | Float
+        | Numeric
+        | Str
+        | Arrow
+        | Not
+        | And
+        | Or
+        | SyntaxKind::None
+        | Auto
+        | Let
+        | Set
+        | Show
+        | If
+        | Else
+        | For
+        | In
+        | While
+        | Break
+        | Continue
+        | Return
+        | Import
+        | Include
+        | As
+        | Eq
+        | EqEq
+        | ExclEq
+        | Lt
+        | LtEq
+        | Gt
+        | GtEq
+        | PlusEq
+        | HyphEq
+        | StarEq
+        | SlashEq
+        | Plus
+        | Minus
+        | Hat
+        | Prime
+        | Slash
+        | Semicolon
+        | Dollar
+        | LeftParen
+        | RightParen
+        | LeftBrace
+        | RightBrace
+        | LeftBracket
+        | RightBracket
+        | MathAlignPoint
+        | Error
+        | Text
+        | Shorthand
+        | Escape
+        | MathIdent => FmtKind::WithSpacing(Spacing::WeakSpace).with_text(node, parent),
+
+        DestructAssignment | WhileLoop | ForLoop | Closure | FieldAccess | Named | Keyed
+        | MathFrac | MathRoot | MathAttach | Link | Label | Strong | Emph => {
+            FmtKind::WithSpacing(Spacing::WeakSpace).with_children(node, parent)
+        }
+
+        MathDelimited | ListMarker | EnumMarker | TermMarker | HeadingMarker | Ref => {
+            FmtKind::WithSpacing(Spacing::WeakSpace).with_children(node, parent)
+        }
+
+        Ident | Colon | Comma | MathPrimes => {
+            FmtKind::WithSpacing(Spacing::StrongSpace).with_text(node, parent)
+        }
+
+        Conditional => FmtKind::Conditional.with_children(node, parent),
+
+        BlockComment | LineComment => FmtKind::Comment.with_text(node, parent),
+    }
+}
 
 /// preserve index and parent must handle me flags
 #[derive(Default)]
