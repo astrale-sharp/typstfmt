@@ -67,6 +67,16 @@ impl<'a> Writer<'a> {
     pub fn get_mark(&self) -> usize {
         self.buffer.len()
     }
+
+    pub fn rewind(&mut self, mark: usize) {
+        *self.buffer = self.buffer[..mark].to_string();
+        while let Some(x) = self.marks.last() {
+            if x.pos < mark {
+                self.marks.pop();
+            }
+        }
+    }
+
     // needed when post process adds indentation level.
     pub fn mark_indent(&mut self) {
         self.marks.push(MarkKind::Indent.to_mark(self.buffer.len()))
@@ -177,6 +187,17 @@ impl<'a> Writer<'a> {
 
     pub(crate) fn space(&mut self) {
         self.buffer.push(' ')
+    }
+
+    pub(crate) fn last_line_length(&self) -> usize {
+        use unicode_segmentation::UnicodeSegmentation;
+        self.buffer
+            .split('\n')
+            .last()
+            .unwrap_or("")
+            .trim()
+            .graphemes(true)
+            .count()
     }
 }
 

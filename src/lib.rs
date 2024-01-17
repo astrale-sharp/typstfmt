@@ -42,7 +42,7 @@ pub fn format(s: &str, config: Config) -> String {
     let root = LinkedNode::new(&init);
     let mut root = map_tree(root, None);
     let _ = preserve_pass(&mut root);
-    visit_markup(&root, &mut writer);
+    visit_markup(&root, &mut writer, false);
     writer.post_process_indents();
     regex::Regex::new("( )+\n")
         .unwrap()
