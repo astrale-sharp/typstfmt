@@ -13,12 +13,12 @@ mod config;
 /// Our format tree, that we will visit in order to format the code.
 mod node;
 /// Special operation applied to our tree to take care of giving commands via
-/// Typst's comments. 
+/// Typst's comments.
 mod preserve_pass;
 mod utils;
 /// Here lies the formatting logic
 mod visits;
-/// Handles writing to an output, indentation as a post_process, 
+/// Handles writing to an output, indentation as a post_process,
 /// rewinding if things some condition was not respected.
 mod writer;
 

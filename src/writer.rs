@@ -12,7 +12,7 @@ use std::{
 /// - Markers: you place a mark by calling [Writer::mark], you can use this mark
 /// to jump back and redo your formatting should you see it didn't respect some rules.
 /// - Todo: rewinding, go back to a position, removing all markers that were introduced after
-/// as well as resetting the result to it's past state. 
+/// as well as resetting the result to it's past state.
 /// Example :
 /// ```ignore
 /// fn visit_params(/* */) {
@@ -152,7 +152,6 @@ impl<'a> Writer<'a> {
         }
         *self.buffer = res;
     }
-
 
     pub(crate) fn push_str(&mut self, s: &str) {
         self.buffer.push_str(s)
