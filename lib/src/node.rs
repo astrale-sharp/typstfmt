@@ -1,6 +1,13 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
+/// This function will give us the root node of our format tree.
+///
+/// We get rid of unneeded information in LinkedNode and store whatever fundamental information
+/// we might need later here.
+///
+/// The pro of working on a tree is that we can apply transformations to it
+///  (see (preserve_pass)[super::preserve_pass]) that will add formatting context.
 pub(crate) fn map_tree<'a>(
     node: typst_syntax::LinkedNode<'a>,
     parent: Option<Rc<FmtNode<'a>>>,
@@ -113,27 +120,24 @@ pub(crate) fn map_tree<'a>(
     }
 }
 
-/// We translate the syntax tree, simplifying it for the
-/// purpose of formatting only, then we apply rules to it to simplify
-/// the formatting part.
-///
-/// Rules :
-/// - Preserve: Raw blocks and area delimited by `// fmt::off` and `// fmt::on` shouldn't be formatted.
-/// - Condition: We collapse all nested conditional nodes into one in
-/// order to be able to format consistently across long if else chains.
-/// - Binary: like conditional for for binary operation.
 #[derive(Clone)]
 pub(crate) struct FmtNode<'a> {
-    parent: Option<Rc<FmtNode<'a>>>,
+    pub(crate) parent: Option<Rc<FmtNode<'a>>>,
+    pub(crate) node: typst_syntax::LinkedNode<'a>,
     pub(crate) content: Content<'a>,
     pub(crate) kind: FmtKind,
 }
 
 impl<'a> FmtNode<'a> {
-    pub fn text(&self) -> Option<&'a str> {
-        match self.content {
-            Content::Text(s) => Some(s),
-            Content::Children(_) => None,
+    // Todo, we could trust that it's a text and return "" otherwise
+    // it should be considered a bug it it doesn't matches Text anyway.
+    pub fn text(&self) -> String {
+        match &self.content {
+            Content::Text(s) => s.to_string(),
+            Content::Children(c) => c
+                .iter()
+                .map(|c| c.text())
+                .fold(String::new(), |a, b| format!("{a}{b}")),
         }
     }
 }
@@ -159,6 +163,8 @@ impl Debug for Content<'_> {
     }
 }
 
+/// All the kinds that need to be handled differently while formatting
+
 // todo a LetBinding, ForLoop, WhileLoop node forcing a linebreak in code mode or a ; in markup?
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) enum FmtKind {
@@ -168,21 +174,21 @@ pub(crate) enum FmtKind {
     ParamsLikeParenthesized,
     Binary,
     Unary,
-    /// We must preserve the content as is
+    /// The content must be preserved as is.
     ///
-    /// We smartly only tag the text nodes in the preserve_pass, so we can rely on it when
-    /// `evaluating Preserve`
-    /// TODO: panic if the node has children
+    /// This can contain a Raw block or anything targeted in the
+    /// (preserve_pass)[super::preserve_pass]
     Preserve(i32),
-    /// if else chain that we must format all at the same time for maximum style
     Space,
     Parbreak,
-
+    /// Common case that doesn't need precise logic, might be ignored if it is the
+    /// child of a custom logic Node such as one with kind : Node.
     WithSpacing(Spacing),
 
     Markup,
     ContentBlock,
     OneLineMarkup,
+    /// if else chain that we must format all at the same time for maximum style.
     Conditional,
 
     // todo: force line break after loops
@@ -210,9 +216,10 @@ impl FmtKind {
         parent: Option<Rc<FmtNode<'a>>>,
     ) -> FmtNode<'a> {
         let mut fnode = FmtNode {
-            parent,
             content: Content::Children(vec![]),
             kind: self,
+            parent,
+            node: node.clone(),
         };
         fnode.content = Content::Children(
             node.children()
@@ -229,10 +236,10 @@ impl FmtKind {
         parent: Option<Rc<FmtNode<'a>>>,
     ) -> FmtNode<'a> {
         FmtNode {
-            parent,
             content: Content::Text(node.get().text()),
-
             kind: self,
+            parent,
+            node,
         }
     }
 }

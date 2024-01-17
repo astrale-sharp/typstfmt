@@ -1,29 +1,43 @@
 use super::node::{Content, FmtKind, FmtNode};
 
-/// Modifies the tree to isolate preserve nodes
-/// of `// typstfmt::off` matching `// typstfmt::on`
+/// Matches `// typstfmt::off` and `// typstfmt::on` Typst's comments
+/// and Mark as Preserved all the nodes that are englobed. They will be preserved from
+/// modifications during formatting.
 ///
-/// The boolean returned is a preserve flag, the level of preserved nesting.
-///
-/// Do we need to be able to say I handled my children
+/// Note that if one of your children has an off command, it doesn't ensure that the on
+/// command is in one of your other children or exists at all.
 ///
 /// Example:
-/// let our snippet correspond to
+/// In the next snippet, everything between the two commands is preserved.
 /// ```ignore
 /// f(
 ///     // t::off
-///     f([text  text  text]),2,
+///     g([text  text  text]),2,
 ///  
 /// )
+/// lorem ipsum
 /// // t::on
 /// ```
 ///
-/// Here, `f([text  text  text])` wouldn't be tag as Preserve cause it has children
-/// and it's parent is not preserved either so we need else
+/// Note however that starting a node preserved will not give you the option to change your mind halfway, as
+/// all the logic of handling a node happens in the beginning of it's formatting process.
+///
+/// Hence in the next snippet, the whole f function call will be preserved (but not the lorem ispum)
+/// ```ignore
+/// // t::off
+/// f(
+///     // t::on
+///     g([text  text  text]),2,
+/// )
+/// lorem ipsum
+/// ```
+///
+/// TODO: TEST lorem ispum is not preserved.
+///
 pub(crate) fn preserve_pass(node: &mut FmtNode) -> PreserveData {
     match node.kind {
         FmtKind::Comment => {
-            let text = node.text().unwrap();
+            let text = node.text();
             if text.contains("typstfmt::off") {
                 return PreserveData::new(1, false);
             } else if text.contains("typstfmt::on") {
