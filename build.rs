@@ -9,7 +9,7 @@ fn main() {
     println!("cargo:rerun-if-env-changed=GEN_ARTIFACTS");
 
     if option_env!("TYPSTFMT_VERSION").is_none() {
-        println!("cargo:rustc-env=TYPSTFMT_VERSION={}", typst_version());
+        println!("cargo:rustc-env=TYPSTFMT_VERSION={}", get_version());
     }
 
     if let Some(dir) = env::var_os("GEN_ARTIFACTS") {
@@ -18,7 +18,7 @@ fn main() {
     }
 }
 
-fn typst_version() -> String {
+fn get_version() -> String {
     let pkg = env!("CARGO_PKG_VERSION");
     let hash = Command::new("git")
         .args(["rev-parse", "HEAD"])
