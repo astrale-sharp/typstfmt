@@ -1,13 +1,13 @@
-// #![doc = include_str!("../README.md")]
-#![allow(unused)]
-#![allow(warnings)]
-// #![warn(
-//     clippy::all,
-//     clippy::pedantic,
-//     clippy::print_stdout,
-//     clippy::print_stderr,
-//     clippy::dbg_macro,
-// )]
+#![doc = include_str!("../README.md")]
+// #![allow(unused)]
+// #![allow(warnings)]
+#![warn(
+    clippy::all,
+    clippy::pedantic,
+    clippy::print_stdout,
+    clippy::print_stderr,
+    clippy::dbg_macro
+)]
 
 mod config;
 /// Our format tree, that we will visit in order to format the code.

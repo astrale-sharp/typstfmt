@@ -8,7 +8,7 @@ use std::{
 };
 
 use lexopt::prelude::*;
-use typstfmt_lib::{format, Config};
+use typstfmt::{format, Config};
 
 const VERSION: &str = env!("TYPSTFMT_VERSION");
 // `DOT_CONFIG_FILE_NAME` is not created as a const due to the fact that we
