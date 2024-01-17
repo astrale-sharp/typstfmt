@@ -167,18 +167,18 @@ impl<'a> Writer<'a> {
         self.buffer.push_str(s)
     }
 
-    pub(crate) fn push_spaced(&mut self, s: &str) {
+    /// pushes the thing checking for overflowing the line first and breaking if needed
+    ///
+    /// returns true if it broke the line
+    pub(crate) fn push_str_with_limit(&mut self, s: &str) {
         if s == "" {
             return;
         }
 
-        self.buffer.push_str(s);
-
-        if utils::last_line_length(self.buffer) >= self.config.max_line_length {
+        if self.last_line_length() + s.len() >= self.config.max_line_length {
             self.new_line()
-        } else {
-            self.space()
         }
+        self.buffer.push_str(s);
     }
 
     pub(crate) fn new_line(&mut self) {
