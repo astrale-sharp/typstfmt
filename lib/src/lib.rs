@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+// #![doc = include_str!("../README.md")]
 #![allow(unused)]
 #![allow(warnings)]
 // #![warn(
@@ -10,10 +10,16 @@
 // )]
 
 mod config;
+/// Our format tree, that we will visit in order to format the code.
 mod node;
+/// Special operation applied to our tree to take care of giving commands via
+/// Typst's comments. 
 mod preserve_pass;
 mod utils;
+/// Here lies the formatting logic
 mod visits;
+/// Handles writing to an output, indentation as a post_process, 
+/// rewinding if things some condition was not respected.
 mod writer;
 
 pub use config::Config;
@@ -24,29 +30,27 @@ use writer::Writer;
 
 use typst_syntax::{parse, LinkedNode};
 
-// mod tests;
-
 /// we visit our [FmtNode] tree, using the [Writer] to specify how we want
 /// our formatting to be done.
 ///
 /// Then we apply indentation as post processing.
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
-    //replace tabs
-    let s = &s.replace('\t', &config.indent.get(1));
-
     let init = parse(s);
     let mut s = String::new();
-    let mut context = Writer::new(config, &mut s);
+    let mut writer = Writer::new(config, &mut s);
     let root = LinkedNode::new(&init);
     let mut root = map_tree(root, None);
     let _ = preserve_pass(&mut root);
-    visit_markup(&root, &mut context);
+    visit_markup(&root, &mut writer);
+    writer.post_process_indents();
     regex::Regex::new("( )+\n")
         .unwrap()
         .replace_all(&s, "\n")
         .to_string()
 }
+
+/* very basic tests */
 
 #[test]
 fn test_indent() {
