@@ -1,6 +1,18 @@
 use typst_syntax::{ast::*, LinkedNode, SyntaxKind};
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::node::{Content, FmtNode};
+
+pub(crate) fn matches_text(c: Option<&FmtNode>, s: &str) -> bool {
+    matches!(c.map(|c| &c.content), Some(Content::Text(t)) if t == &s)
+}
+
+pub(crate) fn match_first_unwrapped<'a, T: AstNode>(
+    c: &mut impl Iterator<Item = &'a FmtNode<'a>>,
+) -> &FmtNode<'a> {
+    c.find(|c| c.node.is::<T>()).unwrap()
+}
+
 /// like next sibling but doesn't skip trivia.
 pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
     node.parent()?.children().nth(node.index() + 1)
