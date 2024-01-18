@@ -16,7 +16,7 @@ pub struct Config {
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 #[serde(rename_all = "kebab-case")]
-pub(crate) enum IdentSpace {
+pub enum IdentSpace {
     Tabs,
     Spaces(usize),
 }
