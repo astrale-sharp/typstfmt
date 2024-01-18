@@ -27,6 +27,7 @@ use node::map_tree;
 use preserve_pass::preserve_pass;
 use visits::*;
 use writer::Writer;
+// mod tests;
 
 use typst_syntax::{parse, LinkedNode};
 

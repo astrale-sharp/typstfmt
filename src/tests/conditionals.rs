@@ -1,5 +1,3 @@
-use super::*;
-
 make_test!(short_if_else, "#if true{}else {}");
 make_test!(
     long_if_else,

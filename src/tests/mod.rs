@@ -1,7 +1,8 @@
-use super::*;
+use crate::config::Config;
+use itertools::Itertools;
 use tracing::{debug, instrument, Level};
 use tracing_subscriber::FmtSubscriber;
-
+use typst_syntax::LinkedNode;
 /// Enables logging.
 ///
 /// Reads different environment variable.
@@ -42,18 +43,16 @@ fn init() {
 /// TODO : AST check when we had a trailing comma, find a way to allow it to be able to run test for these snippets too.
 macro_rules! make_test {
     ($test_name:ident, $input:expr $(,)?) => {
-        make_test!($test_name, $input, Config::default());
+        make_test!($test_name, $input, crate::config::Config::default());
     };
     ($test_name:ident, $input:expr, $config:expr $(,)?) => {
         mod $test_name {
-            use super::*;
-
             #[test]
             fn snapshot()  {
-                init();
+                // init();
                 let input = $input;
-                let formatted = format(input, $config);
-                println!("AST: {:?}",parse(input));
+                let formatted = crate::format(input, $config);
+                println!("AST: {:?}", typst_syntax::parse(input));
                 insta::with_settings!({description => format!("INPUT\n===\n{input:?}\n===\n{input}\n===\nFORMATTED\n===\n{formatted}")}, {
                     insta::assert_debug_snapshot!(formatted);
                 });
@@ -61,20 +60,20 @@ macro_rules! make_test {
 
             #[test]
             fn ast() {
-                init();
-                println!("AST: {:?}",parse($input));
+                // init();
+                // println!("AST: {:?}",parse($input));
                 let input = $input;
-                let formatted = format(input, $config);
-                assert!(tests::parses_the_same(&input, &formatted));
+                let formatted = crate::format(input, $config);
+                assert!(crate::tests::parses_the_same(&input, &formatted));
             }
 
             #[test]
             fn double_format()  {
-                init();
-                println!("AST: {:?}",parse($input));
+                // init();
+                println!("AST: {:?}", typst_syntax::parse($input));
                 let input = $input;
-                let format_once = format(input, $config);
-                let format_twice = format(&format_once, $config);
+                let format_once = crate::format(input, $config);
+                let format_twice = crate::format(&format_once, $config);
                 similar_asserts::assert_eq!(format_once, format_twice);
             }
         }
@@ -84,27 +83,25 @@ macro_rules! make_test {
 /// Tests formatting the snippets doesn't change it.
 macro_rules! test_eq {
     ($test_name:ident, $input:expr $(,)?) => {
-        test_eq!($test_name, $input, Config::default());
+        test_eq!($test_name, $input, crate::Config::default());
     };
     ($test_name:ident, $input:expr, $config:expr $(,)?) => {
         mod $test_name {
-            use super::*;
-
             #[test]
             fn test_eq() {
-                init();
-                println!("AST: {:?}", parse($input));
-                let format_once = format($input, $config);
+                // init();
+                println!("AST: {:?}", typst_syntax::parse($input));
+                let format_once = crate::format($input, $config);
                 similar_asserts::assert_eq!($input, format_once);
             }
 
             #[test]
             fn double_format() {
-                init();
-                println!("AST: {:?}", parse($input));
+                // init();
+                println!("AST: {:?}", typst_syntax::parse($input));
                 let input = $input;
-                let format_once = format(input, $config);
-                let format_twice = format(&format_once, $config);
+                let format_once = crate::format(input, $config);
+                let format_twice = crate::format(&format_once, $config);
                 similar_asserts::assert_eq!(format_once, format_twice);
             }
         }
@@ -114,6 +111,7 @@ macro_rules! test_eq {
 // allowing modifying trailing comma's, text in markup, space everywhere
 // todo, check adding all text from one tree and another equal the same text.
 fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
+    use typst_syntax::SyntaxKind::*;
     let should_ignore = |x: &LinkedNode| [Space, Parbreak, Comma, Text].contains(&x.kind());
 
     let node_kind = node.kind();
@@ -158,9 +156,9 @@ fn tree_are_equal(node: &LinkedNode, other_node: &LinkedNode) -> bool {
 
 #[instrument(skip_all)]
 fn parses_the_same(s: &str, oth: &str) -> bool {
-    let parse1 = parse(s);
+    let parse1 = typst_syntax::parse(s);
     let lkn = LinkedNode::new(&parse1);
-    let parse2 = parse(oth);
+    let parse2 = typst_syntax::parse(oth);
     let lkn_oth = LinkedNode::new(&parse2);
     debug!("{:?}", parse1);
     debug!("{:?}", parse2);

@@ -1,5 +1,3 @@
-use super::*;
-
 make_test!(list, LIST);
 make_test!(enumeration, &LIST.replace('-', "+"));
 make_test!(list2, &TERMS.replace('/', "-"));

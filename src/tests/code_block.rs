@@ -1,4 +1,3 @@
-use super::*;
 test_eq!(empty, "#{}");
 make_test!(empty_two, "#{ }");
 make_test!(empty_three, "#{  }");
