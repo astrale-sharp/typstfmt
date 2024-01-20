@@ -69,18 +69,17 @@ impl Ctx {
 
     /// adds an indentation for each line the input except the first to match the current level of indentation.
     pub(crate) fn push_raw_indent(&mut self, s: &str, result: &mut String) {
-        let mut is_first = true;
-        for s in s.split('\n') {
-            if is_first {
-                is_first = false;
+        for (i, s) in s.split_inclusive('\n').enumerate() {
+            if i == 0 {
                 self.push_raw_in(s, result);
                 continue;
             }
-            self.push_raw_in("\n", result);
-            self.push_raw_in(
-                format!("{}{}", self.get_indent(), s).trim_end_matches(' '),
-                result,
-            );
+            let s = if s.ends_with("\n") {
+                format!("{}\n", s.trim_end())
+            } else {
+                s.to_string()
+            };
+            self.push_raw_in(&format!("{}{}", self.get_indent(), s), result);
         }
     }
 
