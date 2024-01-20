@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 use std::rc::Rc;
 
+use typst_syntax::{parse, LinkedNode};
+
 /// This function will give us the root node of our format tree.
 ///
 /// We get rid of unneeded information in LinkedNode and store whatever fundamental information
@@ -144,7 +146,7 @@ impl<'a> FmtNode<'a> {
 
 impl Debug for FmtNode<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}: {:?}", self.kind, self.content)
+        write!(f, "{:?}: {:?}\n", self.kind, self.content)
     }
 }
 
@@ -221,6 +223,7 @@ impl FmtKind {
             parent,
             node: node.clone(),
         };
+
         fnode.content = Content::Children(
             node.children()
                 .map(|c| map_tree(c, Some(Rc::new(fnode.clone()))))
@@ -242,4 +245,18 @@ impl FmtKind {
             node,
         }
     }
+}
+
+#[test]
+fn feature() {
+    let s = "#[ text ]";
+    let node = parse(s);
+
+    let root = LinkedNode::new(&node);
+    let aft = map_tree(root.clone(), None);
+
+
+    dbg!(&node);
+    dbg!(&root);
+    dbg!(aft);
 }

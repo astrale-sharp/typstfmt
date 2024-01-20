@@ -13,7 +13,6 @@ use super::node::{Content, FmtKind, FmtNode};
 /// f(
 ///     // t::off
 ///     g([text  text  text]),2,
-///  
 /// )
 /// lorem ipsum
 /// // t::on
@@ -33,18 +32,19 @@ use super::node::{Content, FmtKind, FmtNode};
 /// ```
 ///
 /// TODO: TEST lorem ispum is not preserved.
-///
 pub(crate) fn preserve_pass(node: &mut FmtNode) -> PreserveData {
     match node.kind {
         FmtKind::Comment => {
             let text = node.text();
-            if text.contains("typstfmt::off") {
+            if text.starts_with("// typstfmt::off") {
                 return PreserveData::new(1, false);
-            } else if text.contains("typstfmt::on") {
+            } else if text.starts_with("// typstfmt::on") {
                 return PreserveData::new(-1, false);
+            } else if text.contains("typstfmt::") {
+                // TODO WARN HERE
             }
         }
-        _ => {}
+        _ => ()
     }
 
     match &mut node.content {
@@ -56,8 +56,7 @@ pub(crate) fn preserve_pass(node: &mut FmtNode) -> PreserveData {
                 // we ignore typstfmt::on if we weren't preserving already
                 node_data.preserve_idx = (node_data.preserve_idx + child_data.preserve_idx).max(0);
 
-                #[allow(unused_doc_comments)]
-                /// cases: one of my child starts the p process, my parent must not handle me
+                // if one of the children started the preservation, it handled itself already.
                 if node_data.preserve_idx > 0 {
                     // We had things to do so we might have already handles things correctly
                     node_data.parent_must_handle = false;
@@ -92,3 +91,77 @@ impl PreserveData {
         }
     }
 }
+
+
+
+macro_rules! tree_has_node_matching {
+    (
+        $test_name:ident,
+        $snippet:expr,
+        $kind_fn:expr,
+        $parent_fn:expr,
+        $($matching:tt)*
+    ) => {
+        #[test]
+        fn $test_name() {
+            let snippet = typst_syntax::parse($snippet);
+            let root = typst_syntax::LinkedNode::new(&snippet);
+            let tree = crate::map_tree(root, None);
+            dbg!(&tree);
+            let parent : &dyn Fn(Option<&FmtNode>) -> bool = $parent_fn;
+            let kind : &dyn Fn(&FmtKind) -> bool = &$kind_fn;
+            assert!(
+                contains_matching(&tree, &|node| {
+                    if !(parent(node.parent.as_deref()) && kind(&node.kind))  {
+                        return false
+                    }
+
+                    match &node.content {
+                        Content::Children(c) => match c.as_slice() {
+                            $($matching)* => true,
+                            _ => false,
+                        },
+                        _ => false,
+                    }})
+                );
+            }
+        };
+        (
+            $test_name:ident,
+            $snippet:expr,
+            $kind_fn:expr,
+            $($matching:tt)*
+        ) => {
+            tree_has_node_matching!(
+                $test_name,
+                $snippet,
+                $kind_fn,
+                &|_|true,
+                $($matching)*
+            );
+        };
+}
+
+pub fn contains_matching(r: &FmtNode, condition: &impl Fn(&FmtNode) -> bool) -> bool {
+    dbg!(r);
+    condition(r)
+        || if let Content::Children(c) = &r.content {
+            !c.is_empty() && c.iter().any(|x| contains_matching(x, condition))
+        } else {
+            false
+        }
+}
+
+tree_has_node_matching!(
+    basic_with_parent,
+    "#[ // typstfmt::off\ntext\n// typstfmt::on\n]text",
+    |kind| matches!(kind, FmtKind::Markup),
+    x if x.iter().find(|c|c.kind == FmtKind::Comment).is_some()
+);
+
+tree_has_node_matching!(
+    basic,
+    "#[ // typstfmt::off\ntext\n// typstfmt::on\n]text",
+    |_| true,
+    x if x.iter().find(|c|&c.kind == &FmtKind::FuncCall).is_some()
+);

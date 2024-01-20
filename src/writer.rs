@@ -95,7 +95,10 @@ impl<'a> Writer<'a> {
             .push(MarkKind::StopPreserve.to_mark(self.buffer.len()))
     }
 
+    /// SHAME
     pub fn post_process_indents(&mut self) {
+        let a = f(1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 7, 8, 11111111111);
+
         let lines = self.buffer.split_inclusive('\n');
         let lines_len = lines.clone().count();
         let sizes = lines.clone().map(|s| 0..str::len(s)).collect_vec();
