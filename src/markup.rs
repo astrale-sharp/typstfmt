@@ -11,7 +11,7 @@ pub(crate) fn format_content_blocks(
     let markup = parent
         .cast_first_match::<typst_syntax::ast::Markup>()
         .unwrap_or_default();
-    let first_space = markup.as_untyped().children().next();
+    let first_space = markup.to_untyped().children().next();
     let spaced = first_space.is_some_and(|x| x.kind() == Space);
     let markup_has_raw = utils::find_child(parent, &|node| node.kind() == Raw).is_some();
 
@@ -97,7 +97,7 @@ pub(crate) fn format_markup(parent: &LinkedNode, children: &[String], ctx: &mut 
                                     ListItem,
                                     TermItem,
                                     SmartQuote,
-                                    Hashtag,
+                                    Hash,
                                     Conditional,
                                     Equation,
                                     Emph,

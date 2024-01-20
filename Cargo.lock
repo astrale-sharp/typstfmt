@@ -117,9 +117,9 @@ dependencies = [
 
 [[package]]
 name = "ecow"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d1990d053cf6edf3f030682dba3b0eb65ef01fabb2686072765d8a17d6728e8"
+checksum = "e6ea5e3f9cda726431da9d1a8d5a29785d544b31e98e1ca7a210906244002e02"
 dependencies = [
  "serde",
 ]
@@ -585,8 +585,8 @@ dependencies = [
 
 [[package]]
 name = "typst-syntax"
-version = "0.7.0"
-source = "git+https://github.com/typst/typst.git?tag=v0.7.0#da8367e189b02918a8fe1a98fd3059fd11a82cd9"
+version = "0.10.0"
+source = "git+https://github.com/typst/typst.git?tag=v0.10.0#70ca0d257bb4ba927f63260e20443f244e0bb58c"
 dependencies = [
  "comemo",
  "ecow",
@@ -595,6 +595,7 @@ dependencies = [
  "tracing",
  "unicode-ident",
  "unicode-math-class",
+ "unicode-script",
  "unicode-segmentation",
  "unscanny",
 ]
@@ -629,6 +630,12 @@ name = "unicode-math-class"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d246cf599d5fae3c8d56e04b20eb519adb89a8af8d0b0fbcded369aa3647d65"
+
+[[package]]
+name = "unicode-script"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d817255e1bed6dfd4ca47258685d14d2bdcfbc64fdc9e3819bd5848057b8ecc"
 
 [[package]]
 name = "unicode-segmentation"
