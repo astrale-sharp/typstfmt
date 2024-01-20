@@ -35,16 +35,13 @@ impl Ctx {
             match c {
                 ' ' => {
                     if self.just_spaced || result.ends_with(' ') {
-                        debug!("IGNORED space");
                     } else {
-                        debug!("PUSHED SPACE");
                         self.just_spaced = true;
                         result.push(' ');
                     }
                 }
                 '\n' => {
                     if self.consec_new_line <= 1 {
-                        debug!("PUSHED NEWLINE");
                         self.consec_new_line += 1;
                         result.push('\n');
                     } else {
@@ -52,7 +49,6 @@ impl Ctx {
                     }
                 }
                 _ => {
-                    // debug!("PUSHED {c}");
                     result.push(c);
                     self.lost_context();
                 }
