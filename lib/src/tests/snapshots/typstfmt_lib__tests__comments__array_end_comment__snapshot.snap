@@ -1,6 +1,0 @@
----
-source: lib/src/tests/comments.rs
-description: "INPUT\n===\n\"#(\\n    true,\\n    false // some other comment\\n)\"\n===\n#(\n    true,\n    false // some other comment\n)\n===\nFORMATTED\n===\n#(\n  true, false, // some other comment\n)"
-expression: formatted
----
-"#(\n  true, false, // some other comment\n)"

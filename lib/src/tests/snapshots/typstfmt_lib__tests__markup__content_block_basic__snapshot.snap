@@ -1,6 +1,0 @@
----
-source: lib/src/tests/markup.rs
-description: "INPUT\n===\n\"#[\\n_Glaciers_ form an important part \\nof the earth's climate system.]\"\n===\n#[\n_Glaciers_ form an important part \nof the earth's climate system.]\n===\nFORMATTED\n===\n#[\n  _Glaciers_ form an important part of the earth's climate system.\n]"
-expression: formatted
----
-"#[\n  _Glaciers_ form an important part of the earth's climate system.\n]"

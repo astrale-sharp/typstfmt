@@ -1,0 +1,6 @@
+---
+source: src/tests/snippets.rs
+description: "INPUT\n===\n\"Glaciers as the one shown in\\n@glaciers will cease to exist if\\nwe don't take action soon!\\n\\n#figure(\\n  image(\\\"glacier.jpg\\\", width: 70%),\\n  caption: [\\n    _Glaciers_ form an important part\\n    of the earth's climate system.\\n  ],\\n) <glaciers>\"\n===\nGlaciers as the one shown in\n@glaciers will cease to exist if\nwe don't take action soon!\n\n#figure(\n  image(\"glacier.jpg\", width: 70%),\n  caption: [\n    _Glaciers_ form an important part\n    of the earth's climate system.\n  ],\n) <glaciers>\n===\nFORMATTED\n===\nGlaciers as the one shown in @glaciers will cease to exist if we don't take\naction soon!\n\n#figure(image(\"glacier.jpg\", width: 70%), caption: [\n  _Glaciers_ form an important part of the earth's climate system.\n]) <glaciers>"
+expression: formatted
+---
+"Glaciers as the one shown in @glaciers will cease to exist if we don't take\naction soon!\n\n#figure(image(\"glacier.jpg\", width: 70%), caption: [\n  _Glaciers_ form an important part of the earth's climate system.\n]) <glaciers>"

@@ -1,6 +1,0 @@
----
-source: lib/src/tests/params.rs
-description: "INPUT\n===\n\"#f(this_is_absurdly_loooooooooong)\"\n===\n#f(this_is_absurdly_loooooooooong)\n===\nFORMATTED\n===\n#f(\n  this_is_absurdly_loooooooooong,\n)"
-expression: formatted
----
-"#f(\n  this_is_absurdly_loooooooooong,\n)"

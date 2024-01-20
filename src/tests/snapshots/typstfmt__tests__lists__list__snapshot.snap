@@ -1,0 +1,6 @@
+---
+source: src/tests/lists.rs
+description: "INPUT\n===\n\"\\n- 000\\n some text \\n badly broken for no _reason_ which is a @very long line and should be broken up in at least three bits in my opinion.\\n// not broken by comments\\n - 010\\n  - 011\\n  - 012\\n   inner content\\n\\n- 003\\n-     10 not too spaced\\n  inner content\\nouter content\\n\"\n===\n\n- 000\n some text \n badly broken for no _reason_ which is a @very long line and should be broken up in at least three bits in my opinion.\n// not broken by comments\n - 010\n  - 011\n  - 012\n   inner content\n\n- 003\n-     10 not too spaced\n  inner content\nouter content\n\n===\nFORMATTED\n===\n\n- 000 some text badly broken for no _reason_ which is a @very long line and should\n  be broken up in at least three bits in my opinion.\n// not broken by comments\n- 010\n  - 011\n  - 012 inner content\n\n- 003\n- 10 not too spaced inner content\nouter content"
+expression: formatted
+---
+"\n- 000 some text badly broken for no _reason_ which is a @very long line and should\n  be broken up in at least three bits in my opinion.\n// not broken by comments\n- 010\n  - 011\n  - 012 inner content\n\n- 003\n- 10 not too spaced inner content\nouter content"
