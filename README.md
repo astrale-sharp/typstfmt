@@ -54,33 +54,23 @@ cargo install --git https://github.com/astrale-sharp/typstfmt.git
 
 ## Setting up a pre-commit hook
 
-You can set up a git [hook](https://pre-commit.com).
-
-Every `git commit`, will then format automatically every .typ file before
-committing.
-
-run:
+Optionally, you can setup a git hook to format your files at each commit:
 
 ```sh
-echo "\
-repos:
-  - repo: https://github.com/astrale-sharp/typstfmt
-    rev: 1c414de
-    hooks:
-      - id: typstfmt
-" > .pre-commit-config.yaml
+echo "set -e
+
+for f in \$(git ls-files --full-name -- '*.typ') ; do
+    typstfmt --check \$f --verbose
+done" > .git/hooks/pre-commit
+
+chmod +x .git/hooks/pre-commit
 ```
 
-to add a configured `.pre-commit-config.yaml` file.
+Now if you try to commit unformatted files, they will be caught and the commit will fail, telling you which file should be fixed.
 
-You should then run:
-
-```sh
-pre-commit install
-pre-commit autoupdate
-```
-
-And your set up is done!
+> Notes:
+> - You should probably avoid doing this at the moment, as typstfmt is not quite stable yet
+> - Be careful if you have another commit hook setup, as the command above will replace it entirely!
 
 # Contributing
 
