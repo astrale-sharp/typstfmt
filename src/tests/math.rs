@@ -92,3 +92,14 @@ $
   &= "an even longer string!!" & y
 $"#
 );
+
+make_test!(
+    unicode_math_alignment,
+    r#"
+$
+ α   & := β & ("text") \
+ α &    := b & ("text") \
+ a & ≠  β & ("text") \
+ a    & ≠  b &   ("text")
+$"#
+);

@@ -82,7 +82,7 @@ pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ct
                     &mut res,
                 );
                 ctx.push_raw_in(s, &mut res);
-                position = align_columns[index] + s.len();
+                position = align_columns[index] + s.chars().count();
                 index += 1;
 
                 first_align = false;
@@ -97,7 +97,7 @@ pub(crate) fn format_math(parent: &LinkedNode, children: &[String], ctx: &mut Ct
                 ctx.push_raw_in(" ", &mut res);
             }
             _ => {
-                position += s.len();
+                position += s.chars().count();
                 ctx.push_raw_in(s, &mut res)
             }
         }
@@ -142,7 +142,7 @@ fn retrieve_align_columns(parent: &LinkedNode, children: &[String]) -> Vec<usize
                 position += 1;
             }
             _ => {
-                position += s.len();
+                position += s.chars().count();
             }
         }
     }
