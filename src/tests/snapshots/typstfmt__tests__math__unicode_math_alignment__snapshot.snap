@@ -1,0 +1,6 @@
+---
+source: src/tests/math.rs
+description: "INPUT\n===\n\"\\n$\\n α   & := β & (\\\"text\\\") \\\\\\n α &    := b & (\\\"text\\\") \\\\\\n a & ≠  β & (\\\"text\\\") \\\\\\n a    & ≠  b &   (\\\"text\\\")\\n$\"\n===\n\n$\n α   & := β & (\"text\") \\\n α &    := b & (\"text\") \\\n a & ≠  β & (\"text\") \\\n a    & ≠  b &   (\"text\")\n$\n===\nFORMATTED\n===\n\n$\n  α & := β & (\"text\") \\\n  α & := b & (\"text\") \\\n  a & ≠ β  & (\"text\") \\\n  a & ≠ b  & (\"text\")\n$"
+expression: formatted
+---
+"\n$\n  α & := β & (\"text\") \\\n  α & := b & (\"text\") \\\n  a & ≠ β  & (\"text\") \\\n  a & ≠ b  & (\"text\")\n$"
