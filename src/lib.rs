@@ -27,6 +27,7 @@ use node::map_tree;
 use preserve_pass::preserve_pass;
 use visits::*;
 use writer::Writer;
+// TODO (not a priority, medium hard): reenable the test slowly
 // mod tests;
 
 use typst_syntax::{parse, LinkedNode};
@@ -186,4 +187,14 @@ text
         println!("===");
         insta::assert_debug_snapshot!(root)
     }
+}
+
+#[test]
+fn feature() {
+    let snippet = r#"text
+     text 
+     text
+     #[text]"#;
+    let x = format(snippet, Config::default());
+    println!("{x}");
 }

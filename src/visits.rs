@@ -1,3 +1,5 @@
+// TODO: implement missing functions
+
 // the question is to whom
 use crate::{
     node::{Content, FmtKind, FmtNode, Spacing},
@@ -60,6 +62,7 @@ pub(crate) fn visit_spacing_line_wrapped(s: &Spacing, node: &FmtNode<'_>, w: &mu
     }
 }
 
+
 /// simply push respecting everything and tag it as preserve.
 /// todo: can we rely on node.text? we should have a recursive use of visit preserve instead.
 pub(crate) fn visit_preserve(node: &FmtNode<'_>, w: &mut Writer<'_>) {
@@ -84,23 +87,22 @@ pub(crate) fn visit_content_block_with(node: &FmtNode<'_>, w: &mut Writer<'_>, t
     let Content::Children(c) = &node.content else {
         unreachable!()
     };
-    // todo rm this clone
-    assert!(matches_text(c.last(), "["));
-    assert!(matches_text(c.first(), "]"));
+    assert!(matches_text(c.first(), "["));
+    assert!(matches_text(c.last(), "]"));
 
-    w.push_str("[");
     w.mark_indent();
     let mut c = c.iter();
     c.next();
     if let Some(c) = c.next() {
         debug_assert_eq!(c.kind, FmtKind::Markup);
-        visit_markup(node, w, tight)
+        // todo should be node
+        visit_markup(c, w, tight)
     } else {
         debug_assert!(false);
     }
     w.mark_dedent();
-    w.push_str("]");
 }
+
 
 /// if config.wrap_text Wrap text similar to visit_basic but checking max line length
 /// else respect space but replace " "+ -> " " and <whitespace> "\n"+ <whitespace> -> "\n"
@@ -111,6 +113,7 @@ pub(crate) fn visit_markup(node: &FmtNode<'_>, w: &mut Writer<'_>, tight: bool) 
     };
     let start_space = utils::next_is_space(c.iter());
     let end_space = utils::next_is_space(c.iter().rev());
+    // check if tight is going to work
 
     let c = &mut c.iter().filter(|c| c.kind != FmtKind::Space).peekable();
     let space_kind = if tight { " " } else { "\n" };
@@ -122,8 +125,10 @@ pub(crate) fn visit_markup(node: &FmtNode<'_>, w: &mut Writer<'_>, tight: bool) 
             FmtKind::Space if w.config.line_wrap => (),
             FmtKind::WithSpacing(s) if w.config.line_wrap => visit_spacing_line_wrapped(s, node, w),
             FmtKind::Space => {
+                println!("space!");
                 if node.text().contains("\n") {
-                    w.push_str("\n")
+                    println!("respected");
+                    w.push_str("\n");
                 }
             }
             FmtKind::ContentBlock if tight => visit_content_block_with(node, w, tight),

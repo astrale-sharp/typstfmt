@@ -1,10 +1,14 @@
-use super::utils;
 use crate::Config;
 use itertools::Itertools;
 use std::{
     collections::{HashMap, HashSet},
     mem,
 };
+
+// TODO, not a priority 
+// remove post process indents, instead we want 2 functions on the writer,
+// one that respects indentation and one that doesn't for Preserve NodeFmts.
+// This should come with indent and dedent increasing an index in ctx, used to give indentation
 
 /// Writer is used to write your formatted output.
 ///
@@ -81,6 +85,7 @@ impl<'a> Writer<'a> {
     pub fn mark_indent(&mut self) {
         self.marks.push(MarkKind::Indent.to_mark(self.buffer.len()))
     }
+
     pub fn mark_dedent(&mut self) {
         self.marks.push(MarkKind::Dedent.to_mark(self.buffer.len()))
     }
@@ -95,10 +100,8 @@ impl<'a> Writer<'a> {
             .push(MarkKind::StopPreserve.to_mark(self.buffer.len()))
     }
 
-    /// SHAME
+    /// TODO, check the indexes with BASIC tests
     pub fn post_process_indents(&mut self) {
-        let a = f(1, 2, 3, 4, 5, 6, 7, 8, 9, 7, 8, 9, 7, 8, 11111111111);
-
         let lines = self.buffer.split_inclusive('\n');
         let lines_len = lines.clone().count();
         let sizes = lines.clone().map(|s| 0..str::len(s)).collect_vec();
@@ -167,6 +170,8 @@ impl<'a> Writer<'a> {
     }
 
     pub(crate) fn push_str(&mut self, s: &str) {
+        // TODO if we remove post process indent
+        // check if we added a line feed and add indentation accordingly
         self.buffer.push_str(s)
     }
 

@@ -36,7 +36,7 @@ impl Default for Config {
             // this being strictly > to 1 is assumed.
             indent: IdentSpace::Spaces(2),
             max_line_length: 80,
-            line_wrap: true,
+            line_wrap: false,
             experimental_args_breaking_consecutive: false,
         }
     }
