@@ -1,5 +1,5 @@
 use super::*;
-use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr as _;
 
 /// like next sibling but doesn't skip trivia.
 pub(crate) fn next_sibling_or_trivia<'a>(node: &LinkedNode<'a>) -> Option<LinkedNode<'a>> {
@@ -141,16 +141,13 @@ pub(crate) fn prev_is_ignoring(node: &LinkedNode, is: SyntaxKind, ignoring: &[Sy
 }
 
 pub(crate) fn max_line_length(s: &str) -> usize {
-    s.lines()
-        .map(|l| l.graphemes(true).count())
-        .max()
-        .unwrap_or(0)
+    s.lines().map(|l| l.width()).max().unwrap_or(0)
 }
 
 pub(crate) fn last_line_length(s: &str) -> usize {
-    s.split('\n').last().unwrap_or("").graphemes(true).count()
+    s.split('\n').last().unwrap_or("").width()
 }
 
 pub(crate) fn first_line_length(s: &str) -> usize {
-    s.split('\n').next().unwrap_or("").graphemes(true).count()
+    s.split('\n').next().unwrap_or("").width()
 }

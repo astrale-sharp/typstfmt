@@ -103,3 +103,14 @@ $
  a    & ≠  b &   ("text")
 $"#
 );
+
+make_test!(
+    unicode_math_alignment_fullwidth,
+    r#"
+$
+ Ａ   & := Ｂ & ("text") \
+ Ａ &    := b & ("text") \
+ a & ≠  Ｂ & ("text") \
+ a    & ≠  b &   ("text")
+$"#
+);
