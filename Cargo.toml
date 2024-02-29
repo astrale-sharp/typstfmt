@@ -1,6 +1,6 @@
 [package]
 name = "typstfmt"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2021"
 authors = ["Astrale <ash4567@outlook.fr>"]
 rust-version = "1.74"
