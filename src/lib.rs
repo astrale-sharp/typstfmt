@@ -35,7 +35,11 @@ mod params;
 #[must_use]
 pub fn format(s: &str, config: Config) -> String {
     //replace tabs
-    let s = &s.replace('\t', &" ".repeat(config.indent_space));
+    let s = &if config.use_tabs {
+        s.to_owned()
+    } else {
+        s.replace('\t', &" ".repeat(config.indent_space))
+    };
 
     let init = parse(s);
     let mut context = Ctx::from_config(config);
