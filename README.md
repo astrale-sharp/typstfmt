@@ -37,6 +37,7 @@ Basic formatter for the Typst language with a future!
   max_line_length = 80
   experimental_args_breaking_consecutive = false
   line_wrap = true
+  use_tabs = false
   ```
 - Disable the formatting by surrounding code with `// typstfmt::off` and `//
   typstfmt::on`. (Experimental and broken)
