@@ -67,7 +67,7 @@ pub(crate) fn format_args_tight(
 ) -> String {
     let mut res = String::new();
     let is_destruct_and_one_arg = typst_syntax::ast::Destructuring::from_untyped(parent)
-        .is_some_and(|x| x.bindings().count() == 1);
+        .is_some_and(|x| x.bindings().len() == 1);
     let mut missing_trailing = is_destruct_and_one_arg;
 
     for (s, node) in children.iter().zip(parent.children()) {
