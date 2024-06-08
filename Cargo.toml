@@ -1,10 +1,10 @@
 [package]
 name = "typstfmt"
-version = "0.2.9"
+version = "0.2.10"
 edition = "2021"
 authors = ["Astrale <ash4567@outlook.fr>"]
 rust-version = "1.74"
-description = "A formatter for Typst-lang with a future!"
+description = "A formatter for Typst-lang without a future!"
 readme = "README.md"
 repository = "https://github.com/astrale-sharp/typstfmt"
 license = "MIT OR Apache-2.0"

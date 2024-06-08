@@ -1,4 +1,10 @@
-Basic formatter for the Typst language with a future!
+Basic formatter for the Typst language ~~with a future~~ without a future 😄!
+
+It's been a fun ride everyone but that's where I stop, feel free to fork etc.
+
+last typst supported version is 0.10.
+
+If I get the formatter fever again I'll probably try contributing to https://github.com/Enter-tainer/typstyle/ and you should check it out ;).
 
 - [Goals](#goals)
 - [Features](#features)
