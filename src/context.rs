@@ -105,6 +105,10 @@ impl Ctx {
 
     /// returns an indent using config to get it's length.
     pub(crate) fn get_indent(&self) -> String {
-        " ".repeat(self.config.indent_space)
+        if self.config.use_tabs {
+            "\t".to_owned()
+        } else {
+            " ".repeat(self.config.indent_space)
+        }
     }
 }

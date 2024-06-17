@@ -9,6 +9,8 @@ pub struct Config {
     /// If enabled, when breaking arguments, it will try to keep more on one line.
     pub experimental_args_breaking_consecutive: bool,
     pub line_wrap: bool,
+    /// If enabled, `indent_space` will be ignored
+    pub use_tabs: bool,
 }
 
 impl Default for Config {
@@ -19,6 +21,7 @@ impl Default for Config {
             max_line_length: 80,
             line_wrap: true,
             experimental_args_breaking_consecutive: false,
+            use_tabs: false,
         }
     }
 }

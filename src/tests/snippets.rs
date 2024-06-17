@@ -31,6 +31,19 @@ make_test!(
   doc
 }"#
 );
+make_test!(
+    on_off_indent_bug_tab,
+    r#"#let template(doc) = {
+  //typstfmt::off
+  let         a      =    ""
+  //typstfmt::on
+  doc
+}"#,
+    Config {
+        use_tabs: true,
+        ..Default::default()
+    }
+);
 make_test!(official, OFFICIAL);
 make_test!(raw_text, RAW);
 make_test!(tabs, TABS);
@@ -70,6 +83,21 @@ test_eq!(
     Let's start the introduction with a quote from Foo Bar
   ```)
 ]"
+);
+
+test_eq!(
+    stable_raw_indents_tab,
+    "#focus-slide[
+#fit-to-height(3em)[Introduction]
+
+#pdfpc.speaker-note(```
+    Let's start the introduction with a quote from Foo Bar
+  ```)
+]",
+    Config {
+        use_tabs: true,
+        ..Default::default()
+    }
 );
 
 // TODO: wait for parser fix
